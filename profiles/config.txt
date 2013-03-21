@@ -1,0 +1,466 @@
+The following is a list of all the valid configuration options with description and valid parameters.
+
+=====================================================
+geometry - Set the disk geometry for the partitioning.
+           Use only if necessary; the kernel provides
+           good defaults.
+
+  Usage:
+    geometry <heads> <sectors> <cylinders>
+  
+  Parameters:
+    heads - the number of heads
+    sectors - the number of sectors
+    cylinders - the number of cylinders
+
+==========================
+part - Creates a partition
+
+  Usage:
+    part <drive> <minor> <type> [size] [boot]
+
+  Parameters:
+    drive - the drive to add this partition (such as hda, sdb, etc.)
+    minor - the partition number. these should be in order
+    type  - the partition type used in fdisk (such as 82 or 83) or 5 for extended
+    size  - the size of the partition (such as 32MB or 15GB, whole numbers
+            only), '+' for remaining space, or 'n%' for percentage of remaining
+            (these should only be used after all specific partition sizes are
+            specified), leave blank for "extended"
+    boot  - whether this partition is bootable; set to "boot" if the partition
+            should be bootable, leave blank for non-bootable
+
+=================================
+gptpart - Creates a GPT partition
+
+  Usage:
+    part <drive> <minor> <type> [size]
+
+  Parameters:
+    drive - the drive to add this partition (such as hda, sdb, etc.)
+    minor - the partition number. these should be in order
+    type  - the partition type used in sgdisk (such as 8200 or 8300)
+    size  - the size of the partition (such as 32MB or 15GB, whole numbers
+            only), '+' for remaining space, or 'n%' for percentage of remaining
+            (these should only be used after all specific partition sizes are
+            specified), leave blank for "extended"
+
+=================================
+mdraid - Creates an md raid array
+
+  Usage:
+    mdraid <array> <arrayopts>
+
+  Parameters:
+    array     - name of the array (such as md0, md1, etc.)
+    arrayopts - arguments to 'mdadm' after '--create /dev/mdX' (such as
+                '-l 1 -n 2 /dev/sda2 /dev/sdb2'
+
+==========================================
+lvm_volgroup - Creates an LVM volume group
+
+  Usage:
+    lvm_volgroup <name> <devices>
+
+  Parameters:
+    name    - name of the volume group to create
+    devices - list of block devices to include in the volume group
+
+========================================
+lvm_logvol - Create an LVM logical volume
+
+  Usage:
+    lvm_logvol <volgroup> <size> <name>
+
+  Parameters:
+    volgroup - name of a volume group created with 'lvm_volgroup'
+    size     - size of logical volume to pass to 'lvcreate'
+    name     - name of logical volume to pass to 'lvcreate'
+
+======================================================
+luks - Sets and creates /dev/mapper/ encrypted devices
+
+  Usage:
+    luks bootpw <passwd>
+    luks <device> <mapping> <cipher> <hash>
+
+  Parameters:
+    bootpw    - defines boot password
+    password  - actual password
+    mapping   - root, swap
+    cipher    - aes or serpent or blowfish
+    hash      - sha1 or sha256
+
+  Example:
+    luks bootpw PASS01
+    luks /dev/sda2 swap aes sha256
+    luks /dev/sda3 root aes sha256
+
+============================
+format - Formats a partition
+
+  Usage:
+    format <device> <fs> [options]
+
+  Parameters:
+    device  - the device to format (such as /dev/hda2 or /dev/sdb4)
+    fs      - the filesystem to use (such as ext2, ext3, or swap)
+    options - the options to use (such as "-O dir_index,huge_file") 
+
+=============================
+mountfs - Mounts a filesystem
+
+  Usage:
+    mountfs <device> <type> <mountpoint> [mountopts]
+
+  Parameters:
+    device     - the device to mount (such as /dev/hda2 or /dev/sdb4)
+    type       - filesystem of device (use auto if you're not sure)
+    mountpoint - the directory to mount the filesystem
+    mountopts  - additional options to use when mounting
+
+======================================
+netmount - Mounts a network filesystem
+
+  Usage:
+    netmount <export> <type> <mountpoint> [mountopts]
+
+  Parameters:
+    export     - path to the network filesystem (such as 1.2.3.4:/some/export)
+    type       - network filesystem type (such as nfs, smbfs, cifs, etc.)
+    mountpoint - the directory to mount the filesystem
+    mountopts  - additional options to use when mounting
+
+=============================================================
+bootloader - Specify the bootloader to use (defaults to grub)
+
+  Usage:
+    bootloader <bootloader>
+
+  Parameters:
+    bootloader - grub, lilo
+
+====================================================================
+rootpw - Sets the root password (required if not using rootpw_crypt)
+
+  Usage:
+    rootpw <password>
+
+  Parameters:
+    password - the plain-text password for the root user
+
+====================================================================
+rootpw_crypt - Sets the root password (required if not using rootpw)
+
+  Usage:
+    rootpw_crypt <password>
+
+  Parameters:
+    password - the pre-hashed password for the root user
+
+=============================================================
+stage_latest - Determines the latest stage3 uri. Setting this
+               overwrites stage_uri.
+
+  Usage:
+    stage_latest <arch>
+
+  Parameters:
+    arch - A valid stage3 architecture hosted on Gentoo distfiles,
+           for instance amd64, i686 or armv6j.
+
+===============================================================
+stage_uri - Specifies the URI to the stage tarball (required or 
+            use stage_latest)
+
+  Usage:
+    stage_uri <uri>
+
+  Parameters:
+    uri - URI to the location of the stage tarball. protocol can be http, https,
+          ftp, or file
+
+====================================================
+stage_path - Specifies the path to the stage tarball
+
+  Usage:
+    stage_path <path>
+
+  Parameters:
+    path - Path to the location of the stage tarball.
+
+========================================================================
+tree_type - Specifies the portage tree type, including package snapshots
+(defaults to sync)
+
+  Usage:
+    tree_type <type> [uri]
+
+  Parameters:
+    type - the method for fetching the portage tree (sync, webrsync, or
+           snapshot). you can also use 'none' to skip this step, additionally
+           only the packages type can be specified with a previous type and 
+           will fetch the portage packages directory
+    uri  - URI to the location of the portage snapshot if you specified
+           'snapshot' and/or 'packages' for the type
+
+=============================================================================
+bootloader_install_device - Specifies the device to install the bootloader to
+                            (defaults to MBR of device /boot is on)
+
+  Usage:
+    bootloader_install_device <device>
+
+  Parameters:
+    device - device to install bootloader to (such as /dev/hda, /dev/hda3, etc.)
+
+=======================================================================
+chroot_dir - Specifies the directory to use for the chroot (defaults to
+             /mnt/gentoo)
+
+  Usage:
+    chroot_dir <dir>
+
+  Parameters:
+    dir - directory to use for the chroot
+
+===================================================
+extra_packages - Specifies extra packages to emerge
+
+  Usage:
+    extra_packages <pkg>
+
+  Parameters:
+    pkg - package (or packages, space-separated) to emerge
+
+====================================================================
+genkernel_kernel_opts - Specifies extra options to pass to genkernel
+
+  Usage:
+    genkernel_kernel_opts <opts>
+
+  Parameters:
+    opts - the extra options to pass to 'genkernel kernel'
+
+=======================================================================
+genkernel_initramfs_opts - Specifies extra options to pass to genkernel
+
+  Usage:
+    genkernel_initramfs_opts <opts>
+
+  Parameters:
+    opts - the extra options to pass to 'genkernel initramfs'
+
+===================================================================
+kigen_kernel_opts - Specifies extra options to pass to KIGen kernel
+
+  Usage:
+    kigen_kernel_opts <opts>
+
+  Parameters:
+    opts - the extra options to pass to KIGen kernel
+
+=========================================================================
+kigen_initramfs_opts - Specifies extra options to pass to KIGen initramfs
+
+  Usage:
+    kigen_initramfs_opts <opts>
+
+  Parameters:
+    opts - the extra options to pass to KIGen initramfs
+
+===============================================================
+kernel_config_uri - Specifies the URI to a custom kernel config
+
+  Usage:
+    kernel_config_uri <uri>
+
+  Parameters:
+    uri - URI to the location of the custom kernel config
+
+=================================================================
+kernel_config_file - Specifies the file to a custom kernel config
+
+  Usage:
+    kernel_config_file <path>
+
+  Parameters:
+    path - path to the location of the custom kernel config
+
+=================================================================
+kernel_sources - Specifies the kernel sources to use (defaults to
+                 gentoo-sources)
+
+  Usage:
+    kernel_sources <source>
+
+  Parameters:
+    source - kernel sources to emerge
+    
+============================================================================
+kernel_builder - Specifies the program to build the kernel and the initramfs
+                 values can either be genkernel OR KIGen (my own genkernel 
+                 clone in python)
+
+  Usage:
+    kernel_builder <app>
+
+  Parameters:
+    genkernel - use genkernel to build the kernel and its initramfs
+    kigen     - use KIGen to build the kernel and its initramfs (this is
+                required for LUKS enabled systems and genkernel won't work)
+
+=========================================================================
+kernel_binary - Specifies the file to a custom kernel binary
+                If called you should disable all kernel compiling options
+                such as kernel_config_file, kernel_sources, 
+                genkernel_kernel_opts, genkernel_initramfs_opts
+
+  Usage:
+    kernel_binary <path>
+
+  Parameters:
+    path - path to the location of the custom kernel binary
+
+=====================================================
+initramfs_source - Specifies if an initramfs should be built
+
+  Usage:
+    initramfs_source <arg>
+
+  Parameters:
+    arg - can be trash args but must not be zero sized variable
+
+NOTE: makes no sense using this option with kbin  profiles
+      since a precompiled kernel has no modules the initramfs 
+      can feed from
+
+==================================================================
+initramfs_binary - Specifies the file to a custom initramfs binary
+
+  Usage:
+    initramfs_binary <path>
+
+  Parameters:
+    path - path to the location of the custom initramfs binary
+
+===================================================================
+systemmap_binary - Specifies the file to a custom System.map binary
+
+  Usage:
+    systemmap_binary <path>
+
+  Parameters:
+    path - path to the location of the custom System.map binary
+
+====================================================================================
+bootloader_kernel_args - Specifies extra commandline arguments to pass to the kernel
+
+  Usage:
+    bootloader_kernel_args <args>
+
+  Parameters:
+    args - extra commandline arguments to pass to the kernel
+
+=================================
+timezone - Specifies the timezone
+
+  Usage:
+    timezone <tz>
+
+  Parameters:
+    tz - timezone to use (relative to /usr/share/zoneinfo/)
+
+=================================
+hostname - Specifies the hostname
+
+  Usage:
+    hostname <host>
+
+  Parameters:
+    host - hostname of the system
+
+==================================
+domain - Specifies the domain name
+
+  Usage:
+    domain <domain.name.here>
+
+  Parameters:
+    domain-name - domain name of the system
+
+============================================================
+rcadd - Adds the specified service to the specified runlevel
+
+  Usage:
+    rcadd <service> <runlevel>
+
+  Parameters:
+    service  - name of service to add
+    runlevel - runlevel to add service to
+
+=================================================================
+rcdel - Removes the specified service from the specified runlevel
+
+  Usage:
+    rcdel <service> <runlevel>
+
+  Parameters:
+    service  - name of service to remove
+    runlevel - runlevel to remove service from (usually not required)
+
+========================
+net - Sets up networking
+
+  Usage:
+    net <device> <ip/dhcp> [gateway]
+
+  Parameters:
+    device  - network device (such as eth0)
+    ip/dhcp - static IP address or "dhcp"
+    gateway - gateway IP if using a static IP
+
+============================
+skip - Skips an install step
+
+  Usage:
+    skip <install step>
+
+  Parameters:
+    install step - name of step to skip
+
+=================================
+server - Specify a kicktoo daemon
+
+  Usage:
+    server <host>[:<port>]
+
+  Parameters:
+    host - hostname or IP address of the kicktoo daemon
+    port - port server is listening on (defaults to 8899)
+
+===============================================================================
+use_linux32 - Enable the use of linux32 for doing 32ul installs on 64-bit boxes
+
+  Usage:
+    use_linux32
+
+==============================================================
+makeconf_line - Append a config line to /etc/portage/make.conf
+
+  Usage: 
+    makeconf_line <KEY>="<values>"
+
+  Parameters:
+    makeconf_line USE="perl php"
+    makeconf_line VIDEO_CARDS="intel"
+
+====================================================================
+locale_set - Set locales for /etc/env.d/02locale and /etc/locale.gen
+
+  Usage:
+  	locale_set "<locales>"
+  
+  Parameters:
+  	locale_set "en_US.UTF-8"
+  	locale_set "en_US.UTF-8 nl_NL de"

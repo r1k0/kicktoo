@@ -1,0 +1,70 @@
+Kicktoo is meant to automate the manual steps required to build any Portage based distro.
+
+#################
+# Install kicktoo
+#################
+
+1) Download an official Gentoo livedvd (though you may use other livecds):
+   http://distfiles.gentoo.org/releases/
+   i.e.
+   http://distfiles.gentoo.org/releases/amd64/12.1/livedvd-x86-amd64-32ul-2012.1.iso
+
+2) Boot the livedvd
+
+3) Setup network connectivity
+
+4) Download Kicktoo from github.com
+   # git clone git://github.com/r1k0/kicktoo.git
+   or
+   # wget github.com/r1k0/kicktoo/archive/master.zip  
+
+#####################
+# Use kicktoo locally
+#####################
+
+1) Read the profile of your choice and customize it with care
+  # cd kicktoo
+  # vim profiles/gentoo/gentoo.profile
+
+2) Run Kicktoo
+
+  # ./kicktoo -h
+Usage:
+    $0 [options] <profile>
+
+Options:
+    -h, --help            This
+    -v, --verbose         Be verbose (show command output)
+    -d, --debug           Output debugging messages
+    -o, --chroot          Chroot into profile / mountfs 
+    --close               Close devices setup by --chroot
+    -c, --client <host>   Act as a client and fetch profiles from a kicktood daemon
+    -a, --autoresume      Turn on autoresume run stepping
+    -r, --removeresume    Clear any previously set resume points
+    --version             Print version
+
+Parameter:
+    profile               Path to an install profile
+
+Tip:
+    read profiles/config.txt for all profile features and options
+  #
+  # ./kicktoo profiles/gentoo/gentoo.profile
+
+3) Reboot
+
+######################
+# Use kicktoo remotely
+######################
+
+1) Run kicktood on the remote host serving remote profiles
+  # cd kicktoo/daemon
+  # vim kicktood.conf 
+  # emerge HTTP-Daemon
+  # ./kicktood --conf kicktood.conf
+
+2) Run kicktoo from the local host
+  # cd kicktoo
+  # ./kicktoo --client 192.168.1.69
+
+3) Reboot

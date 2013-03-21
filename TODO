@@ -1,0 +1,19 @@
+-------------
+= Wish list =
+-------------
+
+- add swap partition as extended by default instead of primary (this would allow gentoo-lvm.profile and another system to dual boot)
+- make profiles:
+    gentoo-luks-lvm.profile
+    gentoo-luks-lvm-kbin.profile
+    gentoo-noboot-noinitramfs.profile
+    gentoo-noboot-noinitramfs-kbin.profile
+    gentoo-mdraid-grub2.profile
+    gentoo-mdraid-grub2-kbin.profile
+- make chroot.sh more usable
+- see if I can adapt lilo too with novikane's commit for grub() and mdraid
+- port all working gentoo profiles to funtoo
+
+--------------------------
+= FIXME for next release =
+--------------------------
