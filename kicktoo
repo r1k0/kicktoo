@@ -64,7 +64,7 @@ Options:
     --close               Close devices setup by --chroot
     -c, --client <host>   Act as a client and fetch profiles from a kicktood daemon
     -r, --removeresume    Clear any previously set resume points
-    -n, --noautoresume    Turn on autoresume run stepping
+    -n, --noautoresume    Turn off autoresume run stepping
     --version             Print version
 
 Parameter:
