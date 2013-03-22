@@ -39,8 +39,8 @@ Options:
     -o, --chroot          Chroot into profile / mountfs 
     --close               Close devices setup by --chroot
     -c, --client <host>   Act as a client and fetch profiles from a kicktood daemon
-    -a, --autoresume      Turn on autoresume run stepping
     -r, --removeresume    Clear any previously set resume points
+    -n, --noautoresume    Turn off autoresume run stepping
     --version             Print version
 
 Parameter:
