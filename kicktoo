@@ -301,9 +301,9 @@ fi
 [ "${do_keymap}"        == "yes" ] && runstep setup_keymap              "Setting up keymap"
 [ "${do_host}"          == "yes" ] && runstep setup_host                "Setting up hostname"
 [ "${do_domain}"        == "yes" ] && runstep setup_domain              "Setting up domain name"
+[ "${do_xpkg}"          == "yes" ] && runstep install_extra_packages    "Compiling extra packages"
 [ "${do_bootloader}"    == "yes" ] && runstep install_bootloader        "Compiling bootloader"
 [ "${do_bootloader}"    == "yes" ] && runstep configure_bootloader      "Configuring bootloader"
-[ "${do_xpkg}"          == "yes" ] && runstep install_extra_packages    "Compiling extra packages"
 [ "${do_services}"      == "yes" ] && runstep add_and_remove_services   "Adding and removing services"
 
 runstep run_post_install_script                                         "Running post-install script if any"
