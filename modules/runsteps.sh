@@ -839,14 +839,14 @@ cleanup() {
             sleep 0.2
         done
     fi
-    # NOTE let lvm cleanup before luks 
-    for volgroup in $(set | grep '^lvm_volgroup_' | cut -d= -f1 | sed -e 's:^lvm_volgroup_::' | sort); do
-        spawn "vgchange -a n ${volgroup}"  || warn "Could not remove vg ${volgroup}"
-        sleep 0.2
-    done
+    # NOTE let luks cleanup before lvm 
     for luksdev in $(set | grep '^luks=' | cut -d= -f2); do
         luksdev=$(echo ${luksdev} | cut -d: -f2)
         spawn "cryptsetup remove ${luksdev}" || warn "Could not remove luks device /dev/mapper/${luksdev}"
+        sleep 0.2
+    done
+    for volgroup in $(set | grep '^lvm_volgroup_' | cut -d= -f1 | sed -e 's:^lvm_volgroup_::' | sort); do
+        spawn "vgchange -a n ${volgroup}"  || warn "Could not remove vg ${volgroup}"
         sleep 0.2
     done
     # NOTE: let mdadm clean up after lvm AND luks; if all were used, shutdown layers, top->bottom: lvm->luks->mdadm
