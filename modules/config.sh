@@ -178,7 +178,7 @@ stage_latest() {
 
     stage_arch="${arch}"
 
-    # setting mainarch for autobuild release dir
+    # setting mainarch for autobuilds release dir
     case "${arch}" in
         i486|i686)
             stage_mainarch="x86" ;;
