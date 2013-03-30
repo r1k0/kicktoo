@@ -1,3 +1,11 @@
+mode() {
+    mode=$1
+}
+
+key_on() {
+    key_on=$1
+}
+
 geometry() {
     local heads=$1
     local sectors=$2
@@ -47,6 +55,25 @@ gptpart() {
     debug part "${drive_temp} is now: $(eval echo \${${drive_temp}})"
 }
 
+gptspart() {
+    do_part=yes
+    local drive=$1
+    local minor=$2
+    local type=$3
+    local start=$4
+    local end=$5
+
+    drive=$(echo ${drive} | sed -e 's:^/dev/::' -e 's:/:_:g')
+    local drive_temp="gptspartitions_${drive}"
+    local tmppart="${minor}:${type}:${start}:${end}"
+    if [ -n "$(eval echo \${${drive_temp}})" ]; then
+        eval "${drive_temp}=\"$(eval echo \${${drive_temp}}) ${tmppart}\""
+    else
+        eval "${drive_temp}=\"${tmppart}\""
+    fi
+    debug part "${drive_temp} is now: $(eval echo \${${drive_temp}})"
+}
+
 mdraid() {
     do_raid=yes
     local array=$1
@@ -54,6 +81,13 @@ mdraid() {
     local arrayopts=$@
 
     eval "mdraid_${array}=\"${arrayopts}\""
+}
+
+mduuid() {
+    local array=$1
+    local uuid=$2
+
+    eval "mduuid_${array}=${uuid}"
 }
 
 lvm_volgroup() {
@@ -84,6 +118,9 @@ luks() {
     if [ "$1" == "bootpw" ] ; then
         boot_password="$2"
         debug luks "Password parsing: $boot_password"
+    elif [ "$1" == "key" ] ; then
+        luks_remdev="$2"
+        luks_key="$3"
     else
         local device luks_mapper cipher hash
         device=$1;luks_mapper=$2;cipher=$3;hash=$4
@@ -105,11 +142,20 @@ format() {
     local options=$(echo ${@} | sed s/\ /__/g)
    
     local tmpformat="${device}:${fs}:${options}"
-    if [ -n "${format}" ]; then
-        format="${format} ${tmpformat}"
+    if [ "${device:0:11}" = '/dev/mapper' ]; then
+        if [ -n "${format_luks}" ]; then
+            format_luks="${format_luks} ${tmpformat}"
+        else
+            format_luks="${tmpformat}"
+        fi
     else
-        format="${tmpformat}"
+        if [ -n "${format}" ]; then
+            format="${format} ${tmpformat}"
+        else
+            format="${tmpformat}"
+        fi
     fi
+
 }
 
 mountfs() {
@@ -202,6 +248,13 @@ stage_file() {
     stage_file="${file}"
 }
 
+kernel_uri() {
+    do_kernel_uri=yes
+    local uri=$1
+    
+    kernel_uri="${uri}"
+}
+
 makeconf_line() {
     do_makeconf=yes
     local key=$(echo "$@" | cut -d= -f1)
@@ -239,6 +292,13 @@ chroot_dir() {
     local dir=$1
     
     chroot_dir="${dir}"
+}
+
+eselect_profile() {
+    do_set_profile=yes
+    local eprofile=$1
+    
+    eselect_profile="${eprofile}"
 }
 
 extra_packages() {
@@ -339,6 +399,17 @@ initramfs_builder() {
     [ -z "${irfsb}" ] && irfsb="genkernel"
 
     initramfs_builder="${irfsb}"
+}
+
+grub2_install() {
+    do_bootloader=yes
+    local device=$1; shift
+    local opts=$@
+
+#   FIXME - only accepts a single option currently (--modules=)
+    local key=$(echo $opts | cut -d'=' -f1)
+    local value=$(echo $opts | cut -d'=' -f2)
+    grub2_install["$(basename ${device})"]="${key}=\"${value}\""  
 }
 
 timezone() {

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 VERSION=1
 
@@ -154,7 +154,8 @@ for a in bash       \
         whoami      \
         hostname    \
         partprobe   \
-        awk
+        awk         \
+        blkid
 do  
     has "${a}"
 done
@@ -204,6 +205,9 @@ fi
 
 # what arch am I running on?
 arch=$(get_arch) ; [ -z "${arch}" ] && die "Could not determine system architecture!"
+
+# arrays declarations
+declare -A grub2_install
 
 # load profile
 source "${profile}"
@@ -264,8 +268,9 @@ runstep run_pre_install_script                                          "Running
 [ "${do_part}"          == "yes" ] && runstep partition                 "Partitioning"
 [ "${do_raid}"          == "yes" ] && runstep setup_mdraid              "Setting up RAID arrays"
 [ "${do_lvm}"           == "yes" ] && runstep setup_lvm                 "Setting up LVM volumes"
-[ "${do_luks}"          == "yes" ] && runstep setup_luks                "Setting up encrypted devices"
 [ "${do_format}"        == "yes" ] && runstep format_devices            "Formatting devices"
+[ "${do_luks}"          == "yes" ] && runstep setup_luks                "Setting up encrypted devices"
+[ "${do_format}"        == "yes" ] && runstep format_devices_luks       "Formatting luks devices"
 [ "${do_localmounts}"   == "yes" ] && runstep mount_local_partitions    "Mounting local partitions"
 [ "${do_netmounts}"     == "yes" ] && runstep mount_network_shares      "Mounting network shares"
 [ "${do_stage_latest}"  == "yes" ] && runstep get_latest_stage_uri      "Getting latest stage uri"
@@ -275,15 +280,20 @@ if [ "${do_stage_uri}"  == "yes" ] || [ "${do_stage_path}" == "yes" ]; then
     runstep prepare_chroot                                              "Preparing chroot"
     runstep setup_fstab                                                 "Setting up /etc/fstab"
 fi
+[ "${do_raid}"          == "yes" ] && runstep create_mdadmconf          "Setting up /etc/mdadm.conf"
+[ "${do_luks}"          == "yes" ] && runstep create_dmcrypt            "Setting up /etc/conf.d/dmcrypt"
 [ "${do_makeconf}"      == "yes" ] && runstep create_makeconf           "Creating custom make.conf"
 [ "${do_locale}"        == "yes" ] && runstep set_locale                "Setting locale"
 [ "${do_tree}"          == "yes" ] && runstep fetch_repo_tree           "Fetching repository tree"
 [ "${do_tree}"          == "yes" ] && runstep unpack_repo_tree          "Unpacking repository tree"
+[ "${do_set_profile}"   == "yes" ] && runstep set_profile               "Setting up profile with eselect"
 [ "${do_kbin}"          == "yes" ] && runstep copy_kernel               "Copying pre compiled kernel"
 [ "${do_irfsbin}"       == "yes" ] && runstep copy_initramfs            "Copying pre packaged initramfs"
+[ "${do_kernel_uri}"    == "yes" ] && runstep fetch_kernel_tarball      "Fetching pre compiled kernel package"
 [ "${do_kernel}"        == "yes" ] && runstep install_kernel_builder    "Installing kernel builder"
-[ "${do_irfs}"          == "yes" ] && runstep install_initramfs_builder "Installing initramfs builder"
 [ "${do_kernel}"        == "yes" ] && runstep build_kernel              "Building kernel"
+[ "${do_kernel_uri}"    == "yes" ] && runstep unpack_kernel_tarball     "Unpacking kernel tarball"
+[ "${do_irfs}"          == "yes" ] && runstep install_initramfs_builder "Installing initramfs builder"
 [ "${do_irfs}"          == "yes" ] && runstep build_initramfs           "Building initramfs"
 [ "${do_postnet}"       == "yes" ] && runstep setup_network_post        "Setting up post-install networking"
 [ "${do_password}"      == "yes" ] && runstep setup_root_password       "Setting up root password"

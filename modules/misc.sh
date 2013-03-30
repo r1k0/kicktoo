@@ -20,6 +20,11 @@ get_mac_address() {
     ifconfig | grep HWaddr | head -n 1 | sed -e 's:^.*HWaddr ::' -e 's: .*$::'
 }
 
+get_uuid() {
+    local device=$1
+    blkid -o export ${device} | grep '^UUID' | cut -d '=' -f2
+}
+
 detect_baselayout2() {
     spawn_chroot "[ -e /lib/librc.so ]" 
 }
