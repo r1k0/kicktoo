@@ -58,7 +58,9 @@ check_emerge_installed_pkg() {
     # so, if CTRL-C is hit when merging post pkgs, this function will NOT see it, pfff
 
     local pkg=$1
-    if [ -z "$(spawn_chroot \"command -v qlist\")" ]; then
+    local is_qlist=$(spawn_chroot "command -v qlist")
+    #if [ -z "$(spawn_chroot \"command -v qlist\")" ]; then
+    if [ -z "${is_qlist}" ]; then
         spawn_chroot "emerge ${emerge_global_opts} portage-utils" 
     fi
     chroot ${chroot_dir} qlist -ICe ${pkg} > /tmp/.pkg.tmp
