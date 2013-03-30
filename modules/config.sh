@@ -172,22 +172,22 @@ rootpw_crypt() {
     root_password_hash="${pass}"
 }
 
-#stage_latest() {
-#    do_stage_latest=yes
-#    local arch=$1
-#
-#    stage_arch="${arch}"
-#
-#    # setting mainarch for autobuild release dir
-#    case "${arch}" in
-#        i486|i686)
-#            stage_mainarch="x86" ;;
-#        armv7a|armv7a_hardfp|armv6j|armv6j_hardfp)
-#            stage_mainarch="arm" ;;
-#        *)
-#            stage_mainarch="${arch}"
-#    esac
-#}
+stage_latest() {
+    do_stage_latest=yes
+    local arch=$1
+
+    stage_arch="${arch}"
+
+    # setting mainarch for autobuild release dir
+    case "${arch}" in
+        i486|i686)
+            stage_mainarch="x86" ;;
+        armv7a|armv7a_hardfp|armv6j|armv6j_hardfp)
+            stage_mainarch="arm" ;;
+        *)
+            stage_mainarch="${arch}"
+    esac
+}
 
 stage_uri() {
     do_stage_uri=yes
