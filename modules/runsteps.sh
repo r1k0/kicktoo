@@ -74,6 +74,31 @@ partition() {
 #        spawn "partprobe" || die "Could not partprobe"
         done
     done
+
+    # GPT partitioning using sectors
+    # http://www.rodsbooks.com/gdisk/sgdisk-walkthrough.html
+    for device in $(set | grep '^gptspartitions_' | cut -d= -f1 | sed -e 's:^gptspartitions_::'); do
+        debug partition "device is ${device}"
+        local device_temp="gptspartitions_${device}"
+        local device="/dev/$(echo "${device}" | sed  -e 's:_:/:g')"
+        local device_size="$(get_device_size_in_mb ${device})"
+        # clean part table and convert to GPT
+        spawn "sgdisk -og ${device}" || die "Cannot sgdisk -og ${device}"
+        for partition in $(eval echo \${${device_temp}}); do
+            debug partition "partition is ${partition}"
+            local minor=$(echo ${partition}    | cut -d: -f1)
+            local type=$(echo ${partition}     | cut -d: -f2)
+            local start=$(echo ${partition}    | cut -d: -f3)
+            local end=$(echo ${partition}      | cut -d: -f4)
+            local devnode=$(format_devnode "${device}" "${minor}")
+            debug partition "devnode is ${devnode}"
+
+        spawn "sgdisk -g -n ${minor}:${start}:${end} -t ${minor}:${type} ${device}" || die "Could not add GPT partition ${minor} to ${device}"
+#        spawn "partprobe" || die "Could not partprobe"
+        done
+    sleep 2 # this helps getting newly created partitions recognized by the system
+    done
+
 }
 
 setup_mdraid() {
@@ -86,8 +111,15 @@ setup_mdraid() {
             if [ ! -e "/dev/md${arraynum}" ]; then
                 spawn "mknod /dev/md${arraynum} b 9 ${arraynum}"    || die "Could not create device node for mdraid array ${array}"
             fi
-            spawn "mdadm --create --run /dev/${array} ${arrayopts}" || die "Could not create mdraid array ${array}"
+            spawn "mdadm --create /dev/${array} --run ${arrayopts}" || die "Could not create mdraid array ${array}"
+            if [ -n "mduuid_${array}" ]; then
+                local uuid=$(eval echo \${mduuid_${array}})
+                spawn "mdadm --stop /dev/${array}" || die "Could not stop mdraid array ${array}"
+                local devices="/dev$(echo ${arrayopts}|sed -e 's/\/dev/$/'|cut -d'$' -f2-)"
+                spawn "mdadm --assemble /dev/${array} --run --update=uuid --uuid=${uuid} ${devices}" || die "Could not assemble and update mdraid array ${array} with uuid=${uuid}"
+            fi 
         done
+        
     elif [ "${autoresume}" == "yes" ] && [ -f "${autoresume_profile_dir}/setup_mdraid" ]; then
         # we add raid device, don't create them
         for array in $(set | grep '^mdraid_' | cut -d= -f1 | sed -e 's:^mdraid_::' | sort); do
@@ -96,7 +128,9 @@ setup_mdraid() {
             local arrayopts=$(eval echo \${${array_temp}})
             local arraynum=$(echo ${array} | sed -e 's:^md::')
 	        # FIXME find a cleaner regexp to extract the first occurene of /dev/sd.? from ${arrayopts}
-            spawn "mdadm /dev/${array} -A /$(echo ${arrayopts}|sed -e 's/ //g'|cut -d'/' -f2)/$(echo ${arrayopts}|sed -e 's/ //g'|cut -d'/' -f3) --run" || die "Could not activate mdraid array ${array}"
+            #spawn "mdadm /dev/${array} -A /$(echo ${arrayopts}|sed -e 's/ //g'|cut -d'/' -f2)/$(echo ${arrayopts}|sed -e 's/ //g'|cut -d'/' -f3) --run" || die "Could not activate mdraid array ${array}"
+            local devices="/dev$(echo ${arrayopts}|sed -e 's/\/dev/$/'|cut -d'$' -f2-)"
+            spawn "mdadm --assemble /dev/${array} --run ${devices}" || die "Could not activate mdraid array ${array}"
         done
     fi
 }
@@ -129,8 +163,14 @@ setup_lvm() {
     fi
 }
 
-setup_luks(){
+setup_luks() {
     if ! [ -f "$autoresume_profile_dir/setup_luks" ]; then
+        if [ -n "${luks_key}" ]; then
+            debug setup_luks "generating encryption key ${luks_key} on ${luks_remdev}"
+            mkdir -p /mnt/$(basename ${luks_remdev})
+            spawn "mount ${luks_remdev} /mnt/$(basename ${luks_remdev})" || die "Could not mount ${luks_remdev} on /mnt/$(basename ${luks_remdev})"
+            spawn "cat /dev/urandom | tr -dc _A-Z-a-z-0-9 | head -c${1:-40} > /mnt/$(basename ${luks_remdev})${luks_key}"
+        fi
         for device in ${luks}; do
             debug setup_luks "LUKSifying ${device}"
             local devicetmp=$(echo ${device}   | cut -d: -f1)
@@ -142,8 +182,13 @@ setup_luks(){
                 swap)
                     lukscmd="cryptsetup -c ${cipher} -h ${hash} -d /dev/urandom create ${luks_mapper} ${devicetmp}"
                     ;;
-                root)
-                    lukscmd="echo ${boot_password} | cryptsetup -c ${cipher}-cbc-essiv:${hash} luksFormat ${devicetmp} && echo ${boot_password} | cryptsetup luksOpen ${devicetmp} ${luks_mapper}"
+                *)
+                    if [ -n "${luks_key}" ]; then
+                        lukscmd="cryptsetup -q -c ${cipher}-cbc-essiv:${hash} luksFormat ${devicetmp} /mnt/$(basename ${luks_remdev})${luks_key} && \
+                        cryptsetup --key-file /mnt/$(basename ${luks_remdev})${luks_key} luksOpen ${devicetmp} ${luks_mapper}"
+                    else
+                        lukscmd="echo ${boot_password} | cryptsetup -c ${cipher}-cbc-essiv:${hash} luksFormat ${devicetmp} && echo ${boot_password} | cryptsetup luksOpen ${devicetmp} ${luks_mapper}"
+                    fi
                     ;;
             esac
             if [ -n "${lukscmd}" ]; then
@@ -162,8 +207,12 @@ setup_luks(){
                 swap)
                     lukscmd="cryptsetup -c ${cipher} -h ${hash} -d /dev/urandom create ${luks_mapper} ${devicetmp}"
                     ;;
-                root)
-                    lukscmd="echo ${boot_password} | cryptsetup luksOpen ${devicetmp} ${luks_mapper}"
+                *)
+                    if [ -n "${luks_key}" ]; then
+                        lukscmd="cryptsetup --key-file /mnt/$(basename ${luks_remdev})${luks_key} luksOpen ${devicetmp} ${luks_mapper}"
+                    else
+                        lukscmd="echo ${boot_password} | cryptsetup luksOpen ${devicetmp} ${luks_mapper}"
+                    fi
                     ;;
             esac
             if [ -n "${lukscmd}" ]; then
@@ -172,10 +221,16 @@ setup_luks(){
         done
     fi
     unset boot_password # we don't need it anymore
+    if [ -n "$(cat /proc/mounts | grep ^${luks_remdev})" ]; then
+        spawn "umount ${luks_remdev}" || warn "Could not unmount ${luks_remdev}"
+        sleep 0.2
+    fi
 }
 
-format_devices() {
-    if ! [ -f "$autoresume_profile_dir/format_devices" ]; then
+format_devices_generic() {
+    local autoresume_filename=$1; shift
+    local format=$@
+    if ! [ -f "$autoresume_profile_dir/${autoresume_filename}" ]; then
         for device in ${format}; do
             debug format_devices "formatting ${device}"
             local devnode=$(echo ${device} | cut -d: -f1)
@@ -221,7 +276,7 @@ format_devices() {
                 spawn "${formatcmd}" || die "Could not format ${devnode} with command: ${formatcmd}"
             fi
         done
-    elif [ "${autoresume}" == "yes" ] && [ -f "$autoresume_profile_dir/format_devices" ]; then
+    elif [ "${autoresume}" == "yes" ] && [ -f "$autoresume_profile_dir/${autoresume_filename}" ]; then
         # NOTE re run mkswap nothing else
         for device in ${format}; do
             debug format_devices "formatting ${device}"
@@ -240,6 +295,14 @@ format_devices() {
             fi
         done
     fi
+}
+
+format_devices() {
+    format_devices_generic 'format_devices' ${format}
+}
+
+format_devices_luks() {
+    format_devices_generic 'format_devices_luks' ${format_luks}
 }
 
 mount_local_partitions() {
@@ -264,7 +327,11 @@ mount_local_partitions() {
                     ;;
             esac
         done
-        sort -k5 /tmp/install.mounts | while read mount; do
+#       FIXME - can't get this to put root volume first on the list
+        #sort -k5 /tmp/install.mounts | while read mount; do
+        #sed 's/$(basename ${chroot_dir})\/ /$(basename ${chroot_dir}) /' /tmp/install.mounts | sort -k5 | while read mount; do
+        #so fallbacking to:
+        cat /tmp/install.mounts | while read mount; do
             mkdir -p $(echo ${mount} | awk '{ print $5; }')
             spawn "${mount}" || die "Could not mount with: ${mount}"
         done
@@ -348,6 +415,55 @@ unpack_stage_tarball() {
             spawn "tar --lzma -xpf ${chroot_dir}/${stage_name} -C ${chroot_dir}" || die "Could not untar stage tarball"
         fi
     fi
+}
+
+set_profile() {
+    debug set_profile "setting profile with eselect to ${eselect_profile}"
+    if [ -n "${eselect_profile}" ]; then
+        spawn_chroot "eselect profile set ${eselect_profile}" || die "Could not set profile with eselect"
+    fi    
+}
+
+create_mdadmconf() {
+    debug create_mdadmconf "writing to /etc/mdadm.conf"
+    for array in $(set | grep '^mdraid_' | cut -d= -f1 | sed -e 's:^mdraid_::' | sort); do
+        if [ -n "mduuid_${array}" ]; then
+            local uuid=$(eval echo \${mduuid_${array}})
+            echo "ARRAY /dev/${array} uuid=${uuid}" >> ${chroot_dir}/etc/mdadm.conf || die "Could not add array ${array} entry in /etc/mdadm.conf"
+        fi
+   done
+}
+
+create_dmcrypt() {
+    debug create_dmcrypt "writing to /etc/conf.d/dmcrypt"    
+    for device in ${luks}; do
+        debug setup_luks "LUKSifying ${device}"
+        local devicetmp=$(echo ${device}   | cut -d: -f1)
+        local luks_mapper=$(echo ${device} | cut -d: -f2)
+        local cipher=$(echo ${device}      | cut -d: -f3)
+        local hash=$(echo ${device}        | cut -d: -f4)
+        local lukscmd=""
+        case ${luks_mapper} in
+            swap)
+                cat >> ${chroot_dir}/etc/conf.d/dmcrypt <<EOF
+swap=${luks_mapper}
+source=${devicetmp}
+
+EOF
+                ;;
+            root)
+                ;;
+            *)
+                cat >> ${chroot_dir}/etc/conf.d/dmcrypt <<EOF
+target=${luks_mapper}
+source=${devicetmp}
+remdev=/dev/disk/by-uuid/$(get_uuid ${luks_remdev})
+key='${luks_key}'
+
+EOF
+                ;;
+        esac
+    done
 }
 
 create_makeconf() {
@@ -497,6 +613,32 @@ copy_initramfs() {
     cp "${initramfs_binary}" "${chroot_dir}/boot" || die "Could not copy precompiled initramfs to ${chroot_dir}/boot"
 }
 
+fetch_kernel_tarball() {
+    debug fetch_kernel_tarball "fetching kernel tarball ${kernel_uri}"
+    if [ -n ${kernel_uri} ]; then
+        fetch "${kernel_uri}" "${chroot_dir}/$(get_filename_from_uri ${kernel_uri})" || die  "Could not fetch kernel tarball"
+    fi
+}
+
+unpack_kernel_tarball() {
+    debug unpack_kernel_tarball "unpacking kernel tarball $(get_filename_from_uri ${kernel_uri})"
+    local kernel_filename=$(get_filename_from_uri ${kernel_uri})
+    local extension=${kernel_filename##*.}
+
+    #check_chroot_fstab /boot && spawn_chroot "mount /boot"
+    check_chroot_fstab /boot && spawn_chroot "[ -z \"\$(mount | grep /boot)\" ] && mount /boot"            
+                                    
+    if [ "$extension" == "bz2" ] || [ "$extension" == "tbz2" ] ; then
+        spawn "tar xjpf ${chroot_dir}/${kernel_filename} -C ${chroot_dir}"        || die "Could not untar kernel tarball"
+    elif [ "$extension" == "gz" ] || [ "$extension" == "tgz" ] ; then
+        spawn "tar xzpf ${chroot_dir}/${kernel_filename} -C ${chroot_dir}"        || die "Could not untar kernel tarball"
+    elif [ "$extension" == "xz" ] ; then
+        spawn "tar Jxpf ${chroot_dir}/${kernel_filename} -C ${chroot_dir}"        || die "Could not untar kernel tarball"
+    elif [ "$extension" == "lzma" ] ; then
+        spawn "tar --lzma -xpf ${chroot_dir}/${kernel_filename} -C ${chroot_dir}" || die "Could not untar kernel tarball"
+    fi
+}
+
 install_kernel_builder() {
     debug install_kernel_builder "merging kernel builder: ${kernel_builder}"
     # pkg might already be installed if -a called
@@ -577,7 +719,14 @@ setup_network_post() {
 setup_root_password() {
     debug setup_root_password "writing root password"
     if [ -n "${root_password_hash}" ]; then
-        spawn_chroot "echo 'root:${root_password_hash}' | chpasswd -e"  || die "Could not set root password"
+        # chpasswd does not support anymore '-e' option - http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=528610
+        # use "usermod -p <encrypted_password> login" instead
+        # here is how to generate the encrypted password - http://effbot.org/librarybook/crypt.htm
+        # $ python
+        # >>> import crypt; print crypt.crypt("<password>","<salt>")
+        #
+        #spawn_chroot "echo 'root:${root_password_hash}' | chpasswd -e"  || die "Could not set root password"
+        spawn_chroot "usermod -p '${root_password_hash}' root" || die "Could not set root password"
     elif [ -n "${root_password}" ]; then
         spawn_chroot "echo 'root:${root_password}'      | chpasswd"     || die "Could not set root password"
     fi
@@ -613,9 +762,14 @@ EOF
 
 install_bootloader() {
     debug install_bootloader "merging bootloader: ${bootloader}"
+    local accept_keywords=""
+    local bootloader_ebuild=${bootloader}
+    # grub:2 is still considered unstable
+    [ "${bootloader}" == "grub2" ] && accept_keywords="~${arch}"; bootloader_ebuild="grub:2"
+    
     # NOTE pkg might already be installed if -a called
-    check_emerge_installed_pkg ${bootloader} || \
-    spawn_chroot "emerge ${emerge_global_opts} ${bootloader}" || die "Could not emerge bootloader"
+    check_emerge_installed_pkg ${bootloader_ebuild} || \
+    spawn_chroot "ACCEPT_KEYWORDS=${accept_keywords} emerge ${emerge_global_opts} ${bootloader_ebuild}" || die "Could not emerge bootloader"
 }
 
 configure_bootloader() {
@@ -686,14 +840,14 @@ cleanup() {
             sleep 0.2
         done
     fi
-    # NOTE let lvm cleanup before luks 
-    for volgroup in $(set | grep '^lvm_volgroup_' | cut -d= -f1 | sed -e 's:^lvm_volgroup_::' | sort); do
-        spawn "vgchange -a n ${volgroup}"  || warn "Could not remove vg ${volgroup}"
-        sleep 0.2
-    done
+    # NOTE let luks cleanup before lvm 
     for luksdev in $(set | grep '^luks=' | cut -d= -f2); do
         luksdev=$(echo ${luksdev} | cut -d: -f2)
         spawn "cryptsetup remove ${luksdev}" || warn "Could not remove luks device /dev/mapper/${luksdev}"
+        sleep 0.2
+    done
+    for volgroup in $(set | grep '^lvm_volgroup_' | cut -d= -f1 | sed -e 's:^lvm_volgroup_::' | sort); do
+        spawn "vgchange -a n ${volgroup}"  || warn "Could not remove vg ${volgroup}"
         sleep 0.2
     done
     # NOTE: let mdadm clean up after lvm AND luks; if all were used, shutdown layers, top->bottom: lvm->luks->mdadm
