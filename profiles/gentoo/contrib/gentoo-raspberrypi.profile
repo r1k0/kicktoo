@@ -1,4 +1,4 @@
-source /usr/share/kicktoo/profiles/gentoo/gentoo-sdmmc.profile
+source /usr/share/kicktoo/profiles/gentoo/contrib/gentoo-sdmmc.profile
 
 stage_latest armv6j_hardfp
 
