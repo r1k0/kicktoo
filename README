@@ -30,7 +30,7 @@ Kicktoo is meant to automate the manual steps required to build any Portage base
 
   # ./kicktoo -h
 Usage:
-    $0 [options] <profile>
+    ./kicktoo [options] <profile>
 
 Options:
     -h, --help            This
@@ -40,7 +40,7 @@ Options:
     --close               Close devices setup by --chroot
     -c, --client <host>   Act as a client and fetch profiles from a kicktood daemon
     -r, --removeresume    Clear any previously set resume points
-    -n, --noautoresume    Turn off autoresume run stepping
+    -n, --noautoresume    Turn off autoresume
     --version             Print version
 
 Parameter:
