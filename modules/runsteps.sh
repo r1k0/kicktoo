@@ -221,9 +221,11 @@ setup_luks() {
         done
     fi
     unset boot_password # we don't need it anymore
-    if [ -n "$(cat /proc/mounts | grep ^${luks_remdev})" ]; then
-        spawn "umount ${luks_remdev}" || warn "Could not unmount ${luks_remdev}"
-        sleep 0.2
+    if [ -n "${luks_key}" ]; then
+        if [ -n "$(cat /proc/mounts | grep ^${luks_remdev})" ]; then
+            spawn "umount ${luks_remdev}" || warn "Could not unmount ${luks_remdev}"
+            sleep 0.2
+        fi
     fi
 }
 
