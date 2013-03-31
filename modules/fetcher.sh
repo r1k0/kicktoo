@@ -45,7 +45,8 @@ fetch_http_https_ftp() {
 
     debug fetch_http_https_ftp "Fetching URL ${uri} to ${2}"
 #    spawn "wget -c -O ${localfile} ${uri}"
-    spawn "curl -S  ${uri} -o ${localfile} -C -"
+#    spawn "curl -S  ${uri} -o ${localfile} -C -"
+    spawn "curl -S \"${uri}\" -o ${localfile}"
     local wget_exitcode=$?
     debug fetch_http_https_ftp "exit code from curl was ${wget_exitcode}"
     return ${wget_exitcode}

@@ -1,5 +1,25 @@
 The following is a list of all the valid configuration options with description and valid parameters.
 
+===================================
+mode - Set the mode for the profile
+
+  Usage:
+    mode [luks]
+  
+  Parameters:
+    luks - whether this profile shall encrypt partitions
+           comment out if encrypted partitions are not required
+
+==========================================================
+key_on - If mode=luks, shall the key be stored on USB key?
+
+  Usage:
+    key_on [usb]
+  
+  Parameters:
+    usb - whether the key shall be stored on removable USB key
+          comment out if using EFI partition instead
+
 =====================================================
 geometry - Set the disk geometry for the partitioning.
            Use only if necessary; the kernel provides
@@ -34,7 +54,7 @@ part - Creates a partition
 gptpart - Creates a GPT partition
 
   Usage:
-    part <drive> <minor> <type> [size]
+    gptpart <drive> <minor> <type> [size]
 
   Parameters:
     drive - the drive to add this partition (such as hda, sdb, etc.)
@@ -44,6 +64,22 @@ gptpart - Creates a GPT partition
             only), '+' for remaining space, or 'n%' for percentage of remaining
             (these should only be used after all specific partition sizes are
             specified), leave blank for "extended"
+
+=========================================================
+gptspart - Creates a GPT partition, defined using sectors
+
+  Usage:
+    gptspart <drive> <minor> <type> <start> <end>
+
+  Parameters:
+    drive - the drive to add this partition (such as hda, sdb, etc.)
+    minor - the partition number. these should be in order
+    type  - the partition type used in sgdisk (such as 8200 or 8300)
+    start - the partition start sector
+    end   - the partition end sector, '+' for remaining space, 
+            or 'n%' for percentage of remaining (these should only
+            be used after all specific partition sizes are specified),
+            leave blank for "extended"
 
 =================================
 mdraid - Creates an md raid array
@@ -55,6 +91,16 @@ mdraid - Creates an md raid array
     array     - name of the array (such as md0, md1, etc.)
     arrayopts - arguments to 'mdadm' after '--create /dev/mdX' (such as
                 '-l 1 -n 2 /dev/sda2 /dev/sdb2'
+
+===========================================
+mduuid - Force the UUID on an md raid array
+
+  Usage:
+    mduuid <array> <uuid>
+
+  Parameters:
+    array     - name of the array (such as md0, md1, etc.)
+    uuid      - uuid to be forced on the array (this uses: mdadm -A <array> --update=uuid)
 
 ==========================================
 lvm_volgroup - Creates an LVM volume group
@@ -82,10 +128,12 @@ luks - Sets and creates /dev/mapper/ encrypted devices
 
   Usage:
     luks bootpw <passwd>
+    luks key <device> <path-to-key>
     luks <device> <mapping> <cipher> <hash>
 
   Parameters:
     bootpw    - defines boot password
+    key       - defines boot key
     password  - actual password
     mapping   - root, swap
     cipher    - aes or serpent or blowfish
@@ -93,6 +141,7 @@ luks - Sets and creates /dev/mapper/ encrypted devices
 
   Example:
     luks bootpw PASS01
+    luks key /dev/sda2 /key
     luks /dev/sda2 swap aes sha256
     luks /dev/sda3 root aes sha256
 
@@ -138,7 +187,7 @@ bootloader - Specify the bootloader to use (defaults to grub)
     bootloader <bootloader>
 
   Parameters:
-    bootloader - grub, lilo
+    bootloader - grub, grub2, lilo
 
 ====================================================================
 rootpw - Sets the root password (required if not using rootpw_crypt)
@@ -194,7 +243,7 @@ tree_type - Specifies the portage tree type, including package snapshots
 (defaults to sync)
 
   Usage:
-    tree_type <type> [uri]
+    tree_type <type> <uri>
 
   Parameters:
     type - the method for fetching the portage tree (sync, webrsync, or
@@ -213,6 +262,20 @@ bootloader_install_device - Specifies the device to install the bootloader to
 
   Parameters:
     device - device to install bootloader to (such as /dev/hda, /dev/hda3, etc.)
+
+================================================================================
+grub2_install - Specifies the device to install grub2 bootloader to, and options
+
+  Usage:
+    grub2_install <device> <options>
+
+  Parameters:
+    device  - device to install bootloader to (such as /dev/sda, etc.)
+    options - options to be passed to grub2-install
+              note: only --modules options is currently supported
+
+  Example:
+    grub2_install  /dev/sda   --modules="part_gpt mdraid1x lvm xfs"
 
 =======================================================================
 chroot_dir - Specifies the directory to use for the chroot (defaults to
@@ -321,6 +384,18 @@ kernel_binary - Specifies the file to a custom kernel binary
 
   Parameters:
     path - path to the location of the custom kernel binary
+
+========================================================================
+kernel_uri - Specifies the URI to download a pre-compiled kernel tarball
+             The kernel tarball shall have been built using for example:
+             version="3.7.10-gentoo"
+             tar cfj /usr/src/linux-${version}.tbz2 /boot/*-${version} /etc/kernels/*-${version} /lib/modules/${version}
+             
+  Usage:
+    kernel_uri <uri>
+
+  Parameters:
+    uri - URI to the location of the pre-compiled kernel tarball
 
 =====================================================
 initramfs_source - Specifies if an initramfs should be built
@@ -464,3 +539,13 @@ locale_set - Set locales for /etc/env.d/02locale and /etc/locale.gen
   Parameters:
   	locale_set "en_US.UTF-8"
   	locale_set "en_US.UTF-8 nl_NL de"
+
+============================================================
+eselect_profile - Select profile using "eselect profile set"
+
+  Usage:
+    eselect_profile <profile name>
+  
+  Parameters:
+  	eselect_profile default/linux/amd64/13.0
+  	
