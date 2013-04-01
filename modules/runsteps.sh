@@ -112,7 +112,7 @@ setup_mdraid() {
                 spawn "mknod /dev/md${arraynum} b 9 ${arraynum}"    || die "Could not create device node for mdraid array ${array}"
             fi
             spawn "mdadm --create /dev/${array} --run ${arrayopts}" || die "Could not create mdraid array ${array}"
-            if [ -n "mduuid_${array}" ]; then
+            if [ -n "$(eval echo \${mduuid_${array}})" ]; then
                 local uuid=$(eval echo \${mduuid_${array}})
                 spawn "mdadm --stop /dev/${array}" || die "Could not stop mdraid array ${array}"
                 local devices="/dev$(echo ${arrayopts}|sed -e 's/\/dev/$/'|cut -d'$' -f2-)"
