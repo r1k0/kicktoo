@@ -68,3 +68,15 @@ Tip:
   # ./kicktoo --client 192.168.1.69
 
 3) Reboot
+
+#################################
+# Contribute your custom profiles
+#################################
+
+1) Customize your specific profile to do what you need
+   You might need to change code inside modules/, you should not.
+   Instead, use pre_ post_ functions (take example on other profiles) and rewrite if you need the relevant runsteps.
+   
+2) Send it back as a single profile file and I'll merge it in profiles/${distro}/contrib/.
+   Make sure kicktoo can always run the default profiles. Don't break what already works.
+   If it supports the default profiles, I'll merge the rewrote functions into modules/.
