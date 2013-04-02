@@ -32,7 +32,9 @@ server_get_profile() {
         return 1
     else
         debug server_get_profile "profile URI is ${profile_uri}"
-        if ! fetch "${profile_uri}" "/tmp/kicktoo_profile"; then
+        fetch "${profile_uri}" "/tmp/kicktoo_profile"
+        local curl_exitcode=$?
+        if [ "${curl_exitcode}" -ne 0 -a "${curl_exitcode}" -ne 33 ]; then
             error "could not fetch profile"
             exit 1
         fi
