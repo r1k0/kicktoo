@@ -259,15 +259,9 @@ if [ "${closeme}" == "yes" ]; then
 fi
 
 # match emerge's verbosity to kicktoo's
-if [ "${verbose}" ==  "yes" ] &&  [ "${debug}" ==  "no" ]; then
-    emerge_global_opts+=" -qv"
-fi
-if [ "${debug}" ==  "yes" ] && [ "${verbose}" ==  "no" ]; then
-    emerge_global_opts+=" -v"
-fi
-if [ "${verbose}" ==  "yes" ] && [ "${debug}" ==  "yes" ]; then
-    emerge_global_opts+=" -v"
-fi
+[ "${verbose}" ==  "yes" ] &&  [ "${debug}" ==  "no" ]  && emerge_global_opts+=" -qv"
+[ "${debug}" ==  "yes" ]   && [ "${verbose}" ==  "no" ] && emerge_global_opts+=" -v"
+[ "${verbose}" ==  "yes" ] && [ "${debug}" ==  "yes" ]  && emerge_global_opts+=" -v"
 
 #########################################################################
 # runsteps
