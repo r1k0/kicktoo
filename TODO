@@ -23,3 +23,4 @@
   add check if /boot should be mounted if so do it (isnth there a check for that already?)
 - bootloader grub:2 is better
   have a func that can tell grub 1 or 2 based on an emerge pretend
+- --nocolor
