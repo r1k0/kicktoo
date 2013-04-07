@@ -6,6 +6,7 @@ debug="no"
 verbose="no"
 autoresume="yes"
 removeresume="no"
+nocolor="no"
 
 # SIGHUP   1 Term Hangup detected on controlling terminal
 #                 or death of controlling process
@@ -65,6 +66,7 @@ Options:
     -c, --client <host>   Act as a client and fetch profiles from a kicktood daemon
     -r, --removeresume    Clear any previously set resume points
     -n, --noautoresume    Turn off autoresume
+    --nocolor             No color
     --version             Print version
 
 Parameter:
@@ -110,6 +112,9 @@ while [ ${#} -gt 0 ]; do
             echo "Kicktoo version ${VERSION} based on Quickstart modules from agaffney"
             exit 0
             ;;
+        --nocolor)
+            nocolor="yes" 
+            ;;
         -*)
             usage "You have specified an invalid option: ${a}"
             exit 1
@@ -134,6 +139,16 @@ for i in output         \
 do
     import ${i}
 done
+
+# nocolor overwrites output module 
+if [ "${nocolor}" == "yes" ]; then
+    GOOD=
+    WARN=
+    BAD=
+    HILITE=
+    BRACKET=
+    NORMAL=
+fi
 
 # check for required programs on livecd
 for a in bash       \

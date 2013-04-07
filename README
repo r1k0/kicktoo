@@ -41,6 +41,7 @@ Options:
     -c, --client <host>   Act as a client and fetch profiles from a kicktood daemon
     -r, --removeresume    Clear any previously set resume points
     -n, --noautoresume    Turn off autoresume
+    --nocolor             No color
     --version             Print version
 
 Parameter:
