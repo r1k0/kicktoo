@@ -2,6 +2,7 @@
 = Wish list =
 -------------
 
+- have a dialog layer that would translate to a working profile
 - add swap partition as extended by default instead of primary (this would allow gentoo-lvm.profile and another system to dual boot)
 - make profiles:
     gentoo-luks-lvm.profile
