@@ -19,6 +19,7 @@
 = FIXME for next release =
 --------------------------
 
+- fork default gentoo profiles to GPT
 - why set timezone cats a file in verbose mode
 - configure_bootloader fails because /boot is not mounted
   add check if /boot should be mounted if so do it (isnth there a check for that already?)
