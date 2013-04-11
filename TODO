@@ -3,7 +3,6 @@
 -------------
 
 - have a dialog layer that would translate to a working profile
-- add swap partition as extended by default instead of primary (this would allow gentoo-lvm.profile and another system to dual boot)
 - make profiles:
     gentoo-luks-lvm.profile
     gentoo-luks-lvm-kbin.profile
@@ -21,7 +20,4 @@
 
 - fork default gentoo profiles to GPT
 - why set timezone cats a file in verbose mode
-- configure_bootloader fails because /boot is not mounted
-  add check if /boot should be mounted if so do it (isnth there a check for that already?)
-- bootloader grub:2 is better
-  have a func that can tell grub 1 or 2 based on an emerge pretend
+- double check bootloader stuff
