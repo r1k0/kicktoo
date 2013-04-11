@@ -1,6 +1,6 @@
 part sda 1 L 100M
 part sda 2 L 2048M
-part sda 3 L 4G
+part sda 3 L 2G
 part sda 4 E 
 part sda 5 L 1G
 part sda 6 L 1G
