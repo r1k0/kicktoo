@@ -167,6 +167,7 @@ for a in bash       \
         whoami      \
         hostname    \
         partprobe   \
+        hdparm      \
         awk         \
         blkid
 do  

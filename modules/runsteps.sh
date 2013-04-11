@@ -26,13 +26,13 @@ partition() {
             local bootable=$(echo ${partition} | cut -d: -f4)
             local devnode=$(format_devnode "${device}" "${minor}")
             debug partition "devnode is ${devnode}"
-            if [ "${type}" = "5" ] || [ "${type}" = "85" ]; then
+            if [ "${type}" == "E" ] || [ "${type}" == "85" ] || [ "${type}" == "5" ]; then
                 newsize="${device_size}"
                 inputsize=""
             else
                 size_devicesize="$(human_size_to_mb ${size} ${device_size})"
                 newsize="$(echo ${size_devicesize} | cut -d '|' -f1)"
-                [ "${newsize}" = "-1" ] && die "Could not translate size '${size}' to a usable value"
+                [ "${newsize}" == "-1" ] && die "Could not translate size '${size}' to a usable value"
                 device_size="$(echo ${size_devicesize} | cut -d '|' -f2)"
                 inputsize="${newsize}"
             fi

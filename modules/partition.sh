@@ -80,7 +80,8 @@ sfdisk_command() {
     [ -n "${cylinders}" ] && geometry_args="${geometry_args} -C ${cylinders}"
     
     debug sfdisk_command "running sfdisk partitions '${partitions}' on device ${device} with geometry ${geometry_args}"
-    spawn "echo -e '${partitions}' | sfdisk -uM ${geometry_args} ${device}" && spawn "partprobe ${device}"
+    # hdparm -z force really works partprobe not
+    spawn "echo -e '${partitions}' | sfdisk -uM ${geometry_args} ${device}" && spawn "hdparm -z ${device}"
     
     return $?
 }

@@ -42,7 +42,7 @@ part - Creates a partition
   Parameters:
     drive - the drive to add this partition (such as hda, sdb, etc.)
     minor - the partition number. these should be in order
-    type  - the partition type used in fdisk (such as 82 or 83) or 5 for extended
+    type  - the partition type used in fdisk (such as 82/S or 83/L) or 85/E/5 for extended
     size  - the size of the partition (such as 32MB or 15GB, whole numbers
             only), '+' for remaining space, or 'n%' for percentage of remaining
             (these should only be used after all specific partition sizes are
@@ -63,7 +63,7 @@ gptpart - Creates a GPT partition
     size  - the size of the partition (such as 32MB or 15GB, whole numbers
             only), '+' for remaining space, or 'n%' for percentage of remaining
             (these should only be used after all specific partition sizes are
-            specified), leave blank for "extended"
+            specified)
 
 =========================================================
 gptspart - Creates a GPT partition, defined using sectors
@@ -79,7 +79,6 @@ gptspart - Creates a GPT partition, defined using sectors
     end   - the partition end sector, '+' for remaining space, 
             or 'n%' for percentage of remaining (these should only
             be used after all specific partition sizes are specified),
-            leave blank for "extended"
 
 =================================
 mdraid - Creates an md raid array
