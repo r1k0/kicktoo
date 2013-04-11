@@ -5,7 +5,7 @@
 - have a dialog layer that would translate to a working profile
     kicktoo -g
       outputs a profile 
-      run a profile
+      runs a profile
 - make profiles:
     gentoo-luks-lvm.profile
     gentoo-luks-lvm-kbin.profile
