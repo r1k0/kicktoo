@@ -6,6 +6,9 @@
     kicktoo -g
       outputs a profile 
       runs a profile
+    kicktoo -g <profile>
+      loads dialogs sequence with profile variables
+      then same kicktoo -g
 - make profiles:
     gentoo-luks-lvm.profile
     gentoo-luks-lvm-kbin.profile
