@@ -3,6 +3,9 @@
 -------------
 
 - have a dialog layer that would translate to a working profile
+    kicktoo -g
+      outputs a profile 
+      run a profile
 - make profiles:
     gentoo-luks-lvm.profile
     gentoo-luks-lvm-kbin.profile
@@ -11,7 +14,6 @@
     gentoo-mdraid-grub2.profile
     gentoo-mdraid-grub2-kbin.profile
 - make chroot.sh more usable
-- see if I can adapt lilo too with novikane's commit for grub() and mdraid
 - port all working gentoo profiles to funtoo
 
 --------------------------
@@ -21,3 +23,4 @@
 - fork default gentoo profiles to GPT
 - why set timezone cats a file in verbose mode
 - double check bootloader stuff
+- see if I can adapt lilo too with novikane's commit for grub() and mdraid
