@@ -838,7 +838,7 @@ cleanup() {
     done
     if [ -f "/proc/mounts" ]; then
         for mnt in $(awk '{ print $2; }' /proc/mounts | grep ^${chroot_dir} | sort -ur); do
-            spawn "umount ${mnt}" || warn "Could not unmount ${mnt}"
+            spawn "umount ${mnt}" || warn "Could not unmount ${mnt}, will retry"
             sleep 0.2
         done
     fi
@@ -852,9 +852,18 @@ cleanup() {
         spawn "vgchange -a n ${volgroup}"  || warn "Could not remove vg ${volgroup}"
         sleep 0.2
     done
+    # NOTE possible leftovers like /mnt/gentoo/boot that get probably mounted twice
+    # FIXME find out why sometimes (ie mdraid profile) /mnt/gentoo/boot is mounted twice
+    if [ -f "/proc/mounts" ]; then
+        for mnt in $(awk '{ print $2; }' /proc/mounts | grep ^${chroot_dir} | sort -ur); do
+            spawn "umount ${mnt}" || warn "Could really not unmount ${mnt}"
+            sleep 0.2
+        done
+    fi
     # NOTE: let mdadm clean up after lvm AND luks; if all were used, shutdown layers, top->bottom: lvm->luks->mdadm
     for array in $(set | grep '^mdraid_' | cut -d= -f1 | sed -e 's:^mdraid_::' | sort); do
         spawn "mdadm --manage --stop /dev/${array}" || warn "Could not stop mdraid array ${array}"
+        sleep 0.2
     done
 
     # NOTE this is warn() as defined in modules/output.sh
