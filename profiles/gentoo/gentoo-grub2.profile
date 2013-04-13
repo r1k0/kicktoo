@@ -35,7 +35,7 @@ extra_packages          dhcpcd # syslog-ng vim openssh
 #rcadd                   sshd       default
 #rcadd                   syslog-ng  default
 
-pre_build_kernel() {
+pre_install_bootloader() {
     spawn_chroot "emerge grub:2 --autounmask-write" # FIXME check exit status
     spawn_chroot "etc-update --automode -5" || die "could not etc-update --automode -5"
 }
