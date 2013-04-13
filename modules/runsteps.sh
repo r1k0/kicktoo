@@ -26,7 +26,9 @@ partition() {
             local bootable=$(echo ${partition} | cut -d: -f4)
             local devnode=$(format_devnode "${device}" "${minor}")
             debug partition "devnode is ${devnode}"
-            if [ "${type}" == "E" ] || [ "${type}" == "85" ] || [ "${type}" == "5" ]; then
+            # [E|S|L|X], where L (LINUX_NATIVE (83)) is the default, S is LINUX_SWAP (82), E is EXTENDED_PARTITION (5), and X is LINUX_EXTENDED (85).
+            # FIXME so.. 5 and 85 is not the same?
+            if [ "${type}" == "E" ] || [ "${type}" == "5" ] || [ "${type}" == "85" ]; then
                 newsize="${device_size}"
                 inputsize=""
             else
