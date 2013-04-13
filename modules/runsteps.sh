@@ -855,7 +855,9 @@ cleanup() {
     done
 
     # NOTE this is warn() as defined in modules/output.sh
-    [ -n "$1" ] && function warn() { local msg=$1 ; [ ${verbose} == "yes" ] && echo -e " ${WARN}*${NORMAL} ${msg}" >&2 ; log "Warning: ${msg}" ; }
+    # FIXME find another way, dont overwrite here, it's not its place
+    # rather pass skip extra param to cleanup and let warn read skip, if yes then let warn cancel its verbosity
+    [ -n "$1" ] && function warn() { local msg=$1 ; [ ${verbose} == "yes" ] && echo -e " ${WARN}***${NORMAL} ${msg}" >&2 ; log "Warning: ${msg}" ; }
 }
 
 starting_cleanup() {

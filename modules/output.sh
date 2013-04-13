@@ -44,7 +44,7 @@ die() {
 warn() {
     local msg=$1
     
-    [ ${verbose} == "yes" ] && echo -e " ${WARN}*${NORMAL} ${msg}" >&2
+    [ ${verbose} == "yes" ] && echo -e " ${WARN}***${NORMAL} ${msg}" >&2
     log "Warning: ${msg}"
 }
 
