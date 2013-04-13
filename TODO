@@ -15,6 +15,7 @@
     gentoo-mdraid-grub2-kbin.profile
 - make chroot.sh more usable
 - port all working gentoo profiles to funtoo
+- find an elegant way to split kicktoo for readability and design
 
 --------------------------
 = FIXME for next release =

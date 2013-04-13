@@ -421,9 +421,7 @@ grub2_install() {
     local device=$1; shift
     local opts=$@
 
-    declare -A grub2_install
-
-#   FIXME - only accepts a single option currently (--modules=)
+    # FIXME only accepts a single option currently (--modules=)
     local key=$(echo $opts | cut -d'=' -f1)
     local value=$(echo $opts | cut -d'=' -f2)
     grub2_install["$(basename ${device})"]="${key}=\"${value}\""  
