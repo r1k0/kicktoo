@@ -103,7 +103,7 @@ while [ ${#} -gt 0 ]; do
         -i|--import)
             import_set="yes"
             import_file=${1}
-            [ -f "${import_file}" ] || error "\'${import_file}\' is not a file"
+            [ -f "${import_file}" ] || { echo "'${import_file}' is not a file"; exit 1; }
             ;;
         -c|--client)
             server=${1}
@@ -245,6 +245,11 @@ fi
 
 # export profile config to file and exit
 if [ "${export_set}" == "yes" ]; then
+    if [ -n "${export_file}" ]; then
+        true
+    else
+        error "specify a file"; exit 1
+    fi
     set -o posix; set              \
       | grep ^[a-z]                \
       | sed 's/^export_.*//g'      \
