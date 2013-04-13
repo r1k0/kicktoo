@@ -307,7 +307,7 @@ if [ -z "${profile}" ] && [ -z "${import_file}" ]; then
     exit 1
 fi
 # don't run if both are non null
-if [ -n "${profile}" ] && [ -n "${import_file}" ]; then
+if [ "${profile_set}" == "yes" ] && [ -n "${import_file}" ]; then
     error "Which one is it? Import config or profile? Why do you want to run both?"
     usage
     exit 1
