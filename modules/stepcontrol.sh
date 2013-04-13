@@ -68,13 +68,15 @@ runstep() {
     fi
 
     if $(isafunc pre_${func}); then
-        echo -e "  >>> pre_${func}()"
+        echo -e "  > pre_${func}()"
         debug runstep "executing pre-hook for ${func}"
         [ ${autoresume} = "yes" ] && autoresume_runstep pre_${func} || pre_${func}
     fi
 
     if [ "${skipfunc}" != "1" ]; then
-        notify "${descr}"
+#        notify "${descr}"
+        echo -e " ${GOOD}>>>${NORMAL} ${descr}"
+        log "${descr}"
 
         debug runstep "executing main for ${func}"
         [ ${autoresume} = "yes" ] && autoresume_runstep ${func} || ${func} # <<<
@@ -85,7 +87,7 @@ runstep() {
     fi
 
     if $(isafunc post_${func}); then
-        echo -e "  >>> post_${func}()"
+        echo -e "  > post_${func}()"
         debug runstep "executing post-hook for ${func}"
         [ ${autoresume} = "yes" ] && autoresume_runstep post_${func} || post_${func}
     fi
