@@ -30,27 +30,30 @@ Kicktoo is meant to automate the manual steps required to build any Portage base
 
   # ./kicktoo -h
 Usage:
-    ./kicktoo [options] <profile>
+    ./kicktoo [options]
 
 Options:
+    -p, --profile <file>  Run the profile
+    -u, --dump            Dump config to stdout
+    -e, --export  <file>  Export set config for import
+    -i, --import  <file>  Import and run config from export
+    -c, --client  <host>  Act as a client and fetch profiles from a kicktood daemon
+    -r, --removeresume    Clear any previously set resume points
+    -n, --noautoresume    Turn off autoresume
     -h, --help            This
     -v, --verbose         Be verbose (show command output)
     -d, --debug           Output debugging messages
-    -o, --chroot          Chroot into profile / mountfs 
-    --close               Close devices setup by --chroot
-    -c, --client <host>   Act as a client and fetch profiles from a kicktood daemon
-    -r, --removeresume    Clear any previously set resume points
-    -n, --noautoresume    Turn off autoresume
     --nocolor             No color
     --version             Print version
-
-Parameter:
-    profile               Path to an install profile
 
 Tip:
     read profiles/config.txt for all profile features and options
   #
-  # ./kicktoo profiles/gentoo/gentoo.profile
+  # ./kicktoo -p profiles/gentoo/gentoo.profile
+OR
+  # ./kicktoo -u -p profiles/gentoo/gentoo.profile
+  # ./kicktoo --export /tmp/myconf -p profiles/gentoo/gentoo.profile
+  # ./kicktoo --import /tmp/myconf 
 
 3) Reboot
 
