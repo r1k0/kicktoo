@@ -2,11 +2,10 @@
 = Wish list =
 -------------
 
-- have a dialog layer that would translate to a working profile
-   have dialogs/ don't polute modules/
+- have a dialog layer that would translate to a working kicktoo import
+   have dialogs/ feed from ./kicktoo -u
    ./kicktoo -g talks like ./kicktoo -u -p <profile>
    DO NOT try to interface w/ modules/config.sh, too much work/too fragile
-   use ./kicktoo -u
 - make profiles:
     gentoo-luks-lvm.profile
     gentoo-luks-lvm-kbin.profile
