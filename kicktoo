@@ -55,7 +55,7 @@ usage() {
     
     cat <<EOF
 Usage:
-    $0 [options] <profile>
+    $0 [options] [profile]
 
 Options:
     -h, --help            This
