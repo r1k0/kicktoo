@@ -188,13 +188,15 @@ done
 unset a
 
 # exit if not profile
-if [ -z "${profile}" ] && [ "${import_set}" == "yes" ]; then
-    usage "You must specify a profile or import a config"
+if [ -z "${profile}" ]; then
+    error "You must specify a profile or import a config"
+    usage
     exit 1
 fi
 # exit if profile is not a file
 if [ ! -f "${profile}" ]; then
     error "Specified profile does not exist!"
+    usage
     exit 1
 fi
 
@@ -236,6 +238,11 @@ arch=$(get_arch) ; [ -z "${arch}" ] && die "Could not determine system architect
 # arrays declarations
 declare -A grub2_install
 
+# load profile
+source "${profile}"
+# profile variables are now accessible
+# export  variables are now accessible (i.e. do_luks) from config.sh functions
+
 # export profile config to file and exit
 if [ "${export_set}" == "yes" ]; then
     set -o posix; set | grep ^[a-z] > ${export_file} && \
@@ -249,13 +256,6 @@ if [ "${import_set}" == "yes" ]; then
     notify "Importing \'set\' config variables"
     source ${import_file}
 fi
-
-# FIXME which one should be default? should imported config overwrite profile?
-
-# load profile
-source "${profile}"
-# profile variables are now accessible
-# export  variables are now accessible (i.e. do_luks) from config.sh functions
 
 ! touch ${logfile} 2>/dev/null && { error "Logfile is not writeable!" ; exit 1; }
 
