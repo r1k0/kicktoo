@@ -318,7 +318,7 @@ fi
 #########################################################################
 
 # make sure it's clean before
-runstep starting_cleanup                                                "Cleaning up"
+runstep starting_cleanup                                                "Cleaning up system environment"
 
 debug main                                                              "Pushing system for ${arch}"
 
@@ -365,4 +365,4 @@ fi
 [ "${do_services}"      == "yes" ] && runstep add_and_remove_services   "Adding and removing services"
 
 runstep run_post_install_script                                         "Running post-install script if any"
-runstep finishing_cleanup                                               "Cleaning up"
+runstep finishing_cleanup                                               "Cleaning up system environment"
