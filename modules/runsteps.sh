@@ -40,7 +40,6 @@ partition() {
             
             add_partition "${device}" "${minor}" "${inputsize}" "${type}" "${bootable}" || die "Could not add partition ${minor} to device ${device}"
         done
-        
         if [ "$(get_arch)" != "sparc64" ]; then
             # writing added partitions to device
             sfdisk_command "${device}" && sleep 1 || die "Could not write partitions ${partitions} to device ${device}"        

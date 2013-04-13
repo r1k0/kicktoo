@@ -14,7 +14,7 @@ autoresume_runstep() {
     local doskip="no"
     [ -n "${2}" ] && doskip="yes"
 
-    if ! [ -f "${autoresume_step_file}" ]; then
+    if ! [ -f "${autoresume_step_file}" ] && [ "$autoresume" == "yes" ] ; then
         [ ${doskip} == "yes" ] && \
         debug autoresume_runstep "SKIPPING ${func}"
 
