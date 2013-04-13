@@ -199,22 +199,6 @@ do
 done
 unset a
 
-## exit if not profile
-#if [ -z "${profile}" ]; then
-#    if [ "${import_set}" == "yes" ]; then
-#        error "You must specify a profile or import a config"
-#        usage
-#        exit 1
-#    fi
-#fi
-## exit if profile is not a file
-#if [ ! -f "${profile}" ]; then
-#    if [ "${import_set}" == "yes" ]; then
-#        error "Specified profile does not exist or import config"
-#        usage
-#        exit 1
-#    fi
-#fi
 # load default vars
 source ${sourcedir}/defaults
 
@@ -222,7 +206,7 @@ source ${sourcedir}/defaults
 
 # import config file
 if [ "${import_set}" == "yes" ]; then
-    notify "Importing 'set' config variables"
+    notify "Importing '${import_file}' config variables"
     source ${import_file}
 fi
 
@@ -238,7 +222,6 @@ profile_name="$(basename ${profile%.profile})"
 # set autoresume vars
 autoresume_profile_name="$(basename ${profile%.profile})"
 autoresume_profile_dir="${autoresume_root_dir}/${autoresume_profile_name}"
-
 
 # check if we need to clear autoresume points before current run
 if [ ${removeresume} == "yes" ]; then
@@ -260,17 +243,10 @@ fi
 arch=$(get_arch) ; [ -z "${arch}" ] && die "Could not determine system architecture!"
 
 # arrays declarations
-declare -A grub2_install
-
-## import config file
-#if [ "${import_set}" == "yes" ]; then
-#    notify "Importing 'set' config variables"
-#    source ${import_file}
-#fi
-
+#declare -A grub2_install
 
 # load profile
-[ "$profile_set" == "yes"  ] && source "${profile}"
+[ "${profile_set}" == "yes"  ] && source "${profile}"
 # profile variables are now accessible
 # export  variables are now accessible (i.e. do_luks) from config.sh functions
 
@@ -281,7 +257,16 @@ fi
 
 # export profile config to file and exit
 if [ "${export_set}" == "yes" ]; then
-    set -o posix; set | grep ^[a-z] | sed 's/^export_.*//g' | sed 's/^profile_set.*//g'| sed 's/^autoresume.*//g' | sed 's/^removeresume.*//g' | sed 's/^dump_conf.*//g' > ${export_file} && \
+    set -o posix; set \
+      | grep ^[a-z] \
+      | sed 's/^export_.*//g' \
+      | sed 's/^profile_set.*//g' \
+      | sed 's/^autoresume.*//g' \
+      | sed 's/^removeresume.*//g' \
+      | sed 's/^dump_conf.*//g' \
+      | sed 's/^verbose.*//g' \
+      | sed 's/^debug*//g' \
+      > ${export_file} && \
       notify "Exporting kicktoo config to '${export_file}' (stripping out export_set)"
       notify "  use '${0} --import <config>' to re import it"
     exit 0
