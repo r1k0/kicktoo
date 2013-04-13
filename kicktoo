@@ -190,7 +190,6 @@ for a in bash       \
         tar         \
         whoami      \
         hostname    \
-        partprobe   \
         hdparm      \
         awk         \
         blkid

@@ -70,7 +70,7 @@ partition() {
 
             [ "${size}" == "+" ] && size= # a single + is enough
 	    spawn "sgdisk -g -n ${minor}::+${size} -t ${minor}:${type} ${device}" || die "Could not add GPT partition ${minor} to ${device}"
-#        spawn "partprobe" || die "Could not partprobe"
+#        spawn "hdparm -z ${device}" || die "Could not update partition table to kernel"
         done
     done
 
@@ -93,7 +93,7 @@ partition() {
             debug partition "devnode is ${devnode}"
 
         spawn "sgdisk -g -n ${minor}:${start}:${end} -t ${minor}:${type} ${device}" || die "Could not add GPT partition ${minor} to ${device}"
-#        spawn "partprobe" || die "Could not partprobe"
+#        spawn "hdparm -z ${device}" || die "Could not update partition table to kernel"
         done
     sleep 2 # this helps getting newly created partitions recognized by the system
     done

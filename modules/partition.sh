@@ -62,7 +62,7 @@ fdisk_command() {
     local cmd=$2
 
     debug fdisk_command "running fdisk command '${cmd}' on device ${device}"
-    spawn "echo -en '${cmd}\nw\n' | fdisk ${device}" && spawn "partprobe ${device}"
+    spawn "echo -en '${cmd}\nw\n' | fdisk ${device}" && spawn "hdparm -z ${device}"
 
     return $?
 }
