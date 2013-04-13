@@ -55,22 +55,21 @@ usage() {
     
     cat <<EOF
 Usage:
-    $0 [options] [profile]
+    $0 [options]
 
 Options:
-    -h, --help            This
-    -v, --verbose         Be verbose (show command output)
-    -d, --debug           Output debugging messages
+    -p, --profile <file>  Run the profile
     -e, --export <file>   Export set config for import
-    -i, --import <file>   Import config from export set
+    -i, --import <file>   Import and run config from export
     -c, --client <host>   Act as a client and fetch profiles from a kicktood daemon
     -r, --removeresume    Clear any previously set resume points
     -n, --noautoresume    Turn off autoresume
+
+    -h, --help            This
+    -v, --verbose         Be verbose (show command output)
+    -d, --debug           Output debugging messages
     --nocolor             No color
     --version             Print version
-
-Parameter:
-    profile               Path to an install profile
 
 Tip:
     read profiles/config.txt for all profile features and options
@@ -124,14 +123,18 @@ while [ ${#} -gt 0 ]; do
         --nocolor)
             nocolor="yes" 
             ;;
+        -p|--profile)
+            profile=${1}
+            ;;
         -*)
             usage "You have specified an invalid option: ${a}"
             exit 1
             ;;
-        *)
-            profile=${a}
-            ;;
+#        *)
+#            profile=${a}
+#            ;;
     esac
+    unset a
 done
 
 # import modules
