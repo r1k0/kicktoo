@@ -238,6 +238,12 @@ arch=$(get_arch) ; [ -z "${arch}" ] && die "Could not determine system architect
 # arrays declarations
 declare -A grub2_install
 
+# import config file
+if [ "${import_set}" == "yes" ]; then
+    notify "Importing 'set' config variables"
+    source ${import_file}
+fi
+
 # load profile
 source "${profile}"
 # profile variables are now accessible
@@ -245,16 +251,10 @@ source "${profile}"
 
 # export profile config to file and exit
 if [ "${export_set}" == "yes" ]; then
-    set -o posix; set | grep ^[a-z] > ${export_file} && \
-      notify "Exporting kicktoo config to '${export_file}'"
+    set -o posix; set | grep ^[a-z] | sed 's/export_set=yes//g' > ${export_file} && \
+      notify "Exporting kicktoo config to '${export_file}' (stripping out export_set)"
       notify "  use '${0} --import <config>' to re import it"
     exit 0
-fi
-
-# import config file
-if [ "${import_set}" == "yes" ]; then
-    notify "Importing 'set' config variables"
-    source ${import_file}
 fi
 
 ! touch ${logfile} 2>/dev/null && { error "Logfile is not writeable!" ; exit 1; }
