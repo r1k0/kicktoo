@@ -587,7 +587,8 @@ unpack_repo_tree() {
 copy_kernel() {
     debug copy_kernel "copying kernel binary ${kernel_binary} -> ${chroot_dir}/boot"
     # since genkernel might mount /boot we should do the same when copying to ${chroot_dir}/boot
-    check_chroot_fstab /boot && spawn_chroot "mount /boot"
+#    check_chroot_fstab /boot && spawn_chroot "mount /boot"
+    check_chroot_fstab /boot && spawn_chroot "[ -z \"\$(mount | grep /boot)\" ] && mount /boot"            
     cp "${kernel_binary}"    "${chroot_dir}/boot" || die  "Could not copy precompiled kernel to ${chroot_dir}/boot"
     cp "${systemmap_binary}" "${chroot_dir}/boot" || warn "Could not copy precompiled System.map to ${chroot_dir}/boot"
 }
