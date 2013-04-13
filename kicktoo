@@ -261,8 +261,7 @@ if [ "${export_set}" == "yes" ]; then
       | sed 's/^verbose.*//g'      \
       | sed 's/^debug.*//g'        \
       > ${export_file} &&          \
-      notify "Exporting kicktoo config to '${export_file}' (stripping out export_set)"
-      notify "  use '${0} --import <config>' to re import it"
+      notify "Exporting kicktoo config to '${export_file}' (some are stripped out, which ones? diff it with ${0} -u -p ${profile})"
     exit 0
 fi
 
