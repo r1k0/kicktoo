@@ -29,7 +29,7 @@ notify() {
 error() {
     local msg=$1
     
-    echo -e " ${BAD}*${NORMAL} ${msg}" >&2
+    echo -e " ${BAD}***${NORMAL} ${msg}" >&2
     log "Error: ${msg}"
 }
 
