@@ -23,4 +23,6 @@
 - fork default gentoo profiles to GPT
 - why set timezone cats a file in verbose mode
 - double check bootloader stuff
+    grub1+autoresume is ok
+    look at grub2
 - see if I can adapt lilo too with novikane's commit for grub() and mdraid

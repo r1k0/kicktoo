@@ -1,5 +1,7 @@
 configure_bootloader_grub() {
     debug configure_bootloader_grub "configuring /boot/grub/grub.conf"
+
+    check_chroot_fstab /boot && spawn_chroot "[ -z \"\$(mount | grep /boot)\" ] && mount /boot"            
     echo -e "default 0\ntimeout 5\n" > ${chroot_dir}/boot/grub/grub.conf
     local boot_root="$(get_boot_and_root)"
     local boot="$(echo ${boot_root} | cut -d '|' -f1)"
