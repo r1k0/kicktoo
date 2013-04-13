@@ -189,15 +189,19 @@ unset a
 
 # exit if not profile
 if [ -z "${profile}" ]; then
-    error "You must specify a profile or import a config"
-    usage
-    exit 1
+    if [ "${import_set}" == "yes" ]; then
+        error "You must specify a profile or import a config"
+        usage
+        exit 1
+    fi
 fi
 # exit if profile is not a file
 if [ ! -f "${profile}" ]; then
-    error "Specified profile does not exist!"
-    usage
-    exit 1
+    if [ "${import_set}" == "yes" ]; then
+        error "Specified profile does not exist or import config"
+        usage
+        exit 1
+    fi
 fi
 
 # load default vars
@@ -215,14 +219,12 @@ autoresume_profile_name="$(basename ${profile%.profile})"
 autoresume_profile_dir="${autoresume_root_dir}/${autoresume_profile_name}"
 
 # check if we need to clear autoresume points before current run
-if [ ${removeresume} = "yes" ]; then
+if [ ${removeresume} == "yes" ]; then
     unset removeresume
     if [ -d "${autoresume_profile_dir}" ]; then
         notify "Removing ${autoresume_profile_name} autoresume points"
         [ ${verbose} == "yes" ] && rm_opts="-rfv" || rm_opts="-rf"
-        if ! rm ${rm_opts} ${autoresume_profile_dir}/; then
-            die "Unable to remove ${autoresume_profile_name} autoresume points"
-        fi
+        spawn "rm ${rm_opts} ${autoresume_profile_dir}" || die "Unable to remove ${autoresume_profile_name} autoresume points"
     fi
 fi
 
@@ -261,9 +263,7 @@ fi
 
 # if autoresume is set and the current profile's track  directory does not exist, create it
 if [ ${autoresume} == "yes" ] && ! [ -d ${autoresume_profile_dir} ]; then
-    if ! mkdir ${autoresume_profile_dir}; then
-        die "Unable to create autoresume tracking directory"
-    fi
+    spawn "mkdir -p ${autoresume_profile_dir}" || die "Unable to create autoresume tracking directory"
 fi
 
 # check for programs needed for custom setups
