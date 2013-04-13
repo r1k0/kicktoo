@@ -83,4 +83,3 @@ OR
    
 2) Send it back as a single profile file and I'll merge it in profiles/${distro}/contrib/.
    Make sure kicktoo can always run the default profiles. Don't break what already works.
-   If it supports the default profiles, I'll merge the rewrote functions into modules/.
