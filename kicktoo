@@ -161,12 +161,7 @@ unset i
 
 # nocolor overwrites output module 
 if [ "${nocolor}" == "yes" ]; then
-    GOOD=
-    WARN=
-    BAD=
-    HILITE=
-    BRACKET=
-    NORMAL=
+    GOOD=;WARN=;BAD=;HILITE=;BRACKET=;NORMAL=
 fi
 
 # check for required programs on livecd
