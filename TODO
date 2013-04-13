@@ -5,7 +5,7 @@
 - have a dialog layer that would translate to a working kicktoo import
    have dialogs/ feed from ./kicktoo -u
    ./kicktoo -g talks like ./kicktoo -u -p <profile>
-   DO NOT try to interface w/ modules/config.sh, too much work/too fragile
+   DO NOT try to interface w/ modules/config.sh, too much work
 - make profiles:
     gentoo-luks-lvm.profile
     gentoo-luks-lvm-kbin.profile
