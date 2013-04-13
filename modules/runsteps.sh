@@ -750,6 +750,10 @@ install_bootloader() {
     debug install_bootloader "merging bootloader: ${bootloader}"
     local accept_keywords=""
     local bootloader_ebuild=${bootloader}
+    
+    # make sure /boot is mounted if it should be
+    check_chroot_fstab /boot && spawn_chroot "[ -z \"\$(mount | grep /boot)\" ] && mount /boot"            
+
     # grub:2 is still considered unstable
     [ "${bootloader}" == "grub2" ] && { accept_keywords="~${arch}"; bootloader_ebuild="grub:2"; }
     
