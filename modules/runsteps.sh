@@ -363,21 +363,6 @@ mount_network_shares() {
     fi
 }
 
-# FIXME think of a way of supporting other URLs so that it works for a funtoo/exherbo profile too
-get_latest_stage_uri() {
-    debug get_latest_stage_uri "getting latest stage uri"
-    if [ -n "${stage_arch}" ]; then
-        local distfiles_base="http://distfiles.gentoo.org/releases/${stage_mainarch}/autobuilds"
-        local latest_stage=$(wget -qO- ${distfiles_base}/latest-stage3-${stage_arch}.txt | egrep "stage3-${stage_arch}.*[0-9]{8}" )
-        [ -z "${latest_stage}" ] && die "Cannot find the relevant stage tarball, use stage_uri in your profile instead"
-        if [ -n "${latest_stage}" ]; then
-            stage_uri="${distfiles_base}/${latest_stage}"
-            do_stage_uri=yes
-            debug get_latest_stage_uri "latest stage uri is ${stage_uri}"
-        fi
-    fi
-}
-
 fetch_stage_tarball() {
     debug fetch_stage_tarball "fetching stage tarball"
     if [ -n ${stage_uri} ]; then

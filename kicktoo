@@ -281,7 +281,6 @@ runstep run_pre_install_script                                          "Running
 [ "${do_luks}"          == "yes" ] && runstep format_devices_luks       "Formatting LUKS devices"
 [ "${do_localmounts}"   == "yes" ] && runstep mount_local_partitions    "Mounting local partitions"
 [ "${do_netmounts}"     == "yes" ] && runstep mount_network_shares      "Mounting network shares"
-[ "${do_stage_latest}"  == "yes" ] && runstep get_latest_stage_uri      "Getting latest stage uri"
 if [ "${do_stage_uri}"  == "yes" ] || [ "${do_stage_path}" == "yes" ]; then
     runstep fetch_stage_tarball                                         "Fetching stage tarball"
     runstep unpack_stage_tarball                                        "Unpacking stage tarball"

@@ -218,8 +218,11 @@ rootpw_crypt() {
     root_password_hash="${pass}"
 }
 
+# FIXME let's have the same for funtoo/exherbo
+# stage_latest_gentoo()?
+# stage_latest_funtoo()?
+# stage_latest_exherbo()?
 stage_latest() {
-    do_stage_latest=yes
     local arch=$1
 
     stage_arch="${arch}"
@@ -233,6 +236,16 @@ stage_latest() {
         *)
             stage_mainarch="${arch}"
     esac
+    if [ -n "${stage_arch}" ]; then
+        local distfiles_base="http://distfiles.gentoo.org/releases/${stage_mainarch}/autobuilds"
+        local latest_stage=$(wget -qO- ${distfiles_base}/latest-stage3-${stage_arch}.txt | egrep "stage3-${stage_arch}.*[0-9]{8}" )
+        [ -z "${latest_stage}" ] && die "Cannot find the relevant stage tarball, use stage_uri in your profile instead"
+        if [ -n "${latest_stage}" ]; then
+            stage_uri="${distfiles_base}/${latest_stage}"
+            do_stage_uri=yes
+            debug stage_latest "latest stage uri is ${stage_uri}"
+        fi
+    fi
 }
 
 stage_uri() {
