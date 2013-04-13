@@ -1,3 +1,5 @@
+# NOTE make your global variables *always* lowercase
+
 mode() {
     mode=$1
 }
