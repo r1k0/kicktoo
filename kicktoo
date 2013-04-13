@@ -277,8 +277,10 @@ fi
 [ "${do_raid}" == "yes" ]           && has "mdadm"
 [ "${do_lvm}"  == "yes" ]           && has "pvcreate"
 [ "${do_luks}" == "yes" ]           && has "cryptsetup"
-[ -n "$(grep xz ${profile})" ]      && has "unxz"
-[ -n "$(grep gptpart ${profile})" ] && has "sgdisk"
+if ! [ -z "${profile}" ]; then
+    [ -n "$(grep xz ${profile})" ]      && has "unxz"
+    [ -n "$(grep gptpart ${profile})" ] && has "sgdisk"
+fi
 
 # chroot into a broken profile run
 if [ "${chrootme}" == "yes" ]; then
