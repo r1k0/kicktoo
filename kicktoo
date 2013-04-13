@@ -131,6 +131,7 @@ while [ ${#} -gt 0 ]; do
         -p|--profile)
             profile_set="yes"
             profile=${1}
+            [ -f "${profile}" ] || { echo "'${profile}' is not a file"; exit 1; }
             ;;
         -u|--dump)
             dump_conf="yes"
