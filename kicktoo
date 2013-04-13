@@ -195,25 +195,33 @@ do
 done
 unset a
 
-# exit if not profile
-if [ -z "${profile}" ]; then
-    if [ "${import_set}" == "yes" ]; then
-        error "You must specify a profile or import a config"
-        usage
-        exit 1
-    fi
-fi
-# exit if profile is not a file
-if [ ! -f "${profile}" ]; then
-    if [ "${import_set}" == "yes" ]; then
-        error "Specified profile does not exist or import config"
-        usage
-        exit 1
-    fi
-fi
+## exit if not profile
+#if [ -z "${profile}" ]; then
+#    if [ "${import_set}" == "yes" ]; then
+#        error "You must specify a profile or import a config"
+#        usage
+#        exit 1
+#    fi
+#fi
+## exit if profile is not a file
+#if [ ! -f "${profile}" ]; then
+#    if [ "${import_set}" == "yes" ]; then
+#        error "Specified profile does not exist or import config"
+#        usage
+#        exit 1
+#    fi
+#fi
 
 # load default vars
 source ${sourcedir}/defaults
+
+# FIXME which one should be first? defaults or config import?
+
+# import config file
+if [ "${import_set}" == "yes" ]; then
+    notify "Importing 'set' config variables"
+    source ${import_file}
+fi
 
 # fallback if we can't log runsteps
 if ! spawn "mkdir -p ${autoresume_root_dir}"; then
@@ -248,11 +256,11 @@ arch=$(get_arch) ; [ -z "${arch}" ] && die "Could not determine system architect
 # arrays declarations
 declare -A grub2_install
 
-# import config file
-if [ "${import_set}" == "yes" ]; then
-    notify "Importing 'set' config variables"
-    source ${import_file}
-fi
+## import config file
+#if [ "${import_set}" == "yes" ]; then
+#    notify "Importing 'set' config variables"
+#    source ${import_file}
+#fi
 
 # load profile
 source "${profile}"
@@ -261,7 +269,7 @@ source "${profile}"
 
 # export profile config to file and exit
 if [ "${export_set}" == "yes" ]; then
-    set -o posix; set | grep ^[a-z] | sed 's/^export_.*//g' > ${export_file} && \
+    set -o posix; set | grep ^[a-z] | sed 's/^export_.*//g' | sed 's/^autoresume.*//g' | sed 's/^removeresume.*//g' > ${export_file} && \
       notify "Exporting kicktoo config to '${export_file}' (stripping out export_set)"
       notify "  use '${0} --import <config>' to re import it"
     exit 0
