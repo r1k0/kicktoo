@@ -7,14 +7,14 @@ map_device_to_grub_device() {
     grep "${device}\$" ${chroot_dir}/boot/grub/device.map | awk '{ print $1; }' | sed -e 's:[()]::g'
 }
 
-map_device_to_grub2_device(){
-    local device=$1
-    if [ ! -f "${chroot_dir}/boot/grub/device.map" ]; then
-        debug map_device_to_grub2_device "device.map doesn't exist...creating"
-        spawn_chroot "echo quit | /sbin/grub-mkdevicemap --no-floppy --device-map=/boot/grub/device.map >/dev/null 2>&1" || die "Could not create grub2 device map"
-    fi
-    grep "${device}\$" ${chroot_dir}/boot/grub/device.map | awk '{ print $1; }' | sed -e 's:[()]::g'
-}
+#map_device_to_grub2_device(){
+#    local device=$1
+#    if [ ! -f "${chroot_dir}/boot/grub2/device.map" ]; then
+#        debug map_device_to_grub2_device "device.map doesn't exist...creating"
+#        spawn_chroot "echo quit | /sbin/grub-mkdevicemap --no-floppy --device-map=/boot/grub2/device.map >/dev/null 2>&1" || die "Could not create grub2 device map"
+#    fi
+#    grep "${device}\$" ${chroot_dir}/boot/grub/device.map | awk '{ print $1; }' | sed -e 's:[()]::g'
+#}
 
 get_kernel_and_initrd() {
     local kernels=""
