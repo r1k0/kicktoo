@@ -208,7 +208,7 @@ if ! spawn "mkdir -p ${autoresume_root_dir}"; then
     autoresume="no"
 fi
 
-profile_name="$(basename ${profile%.profile})"
+profile_name="$(basename ${profile%.profile} > /dev/null 2>&1)"
 
 # set autoresume vars
 autoresume_profile_name=${profile_name}
