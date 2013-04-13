@@ -51,7 +51,7 @@ autoresume_runstep() {
            [ "${func}" == "setup_luks" ]; then
             ${func} # <<<
         else
-            notify "  >>> Done, skipping"
+            echo -e "  > Done, skipping"
         fi
     fi
 }
