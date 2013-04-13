@@ -4,7 +4,7 @@ isafunc() {
     declare -f ${func} > /dev/null
     local exitcode=$?
 #    debug isafunc "${func} with exitcode $exitcode"
-    return $exitcode
+    return ${exitcode}
 }
 
 autoresume_runstep() {
@@ -14,7 +14,7 @@ autoresume_runstep() {
     local doskip="no"
     [ -n "${2}" ] && doskip="yes"
 
-    if ! [ -f "${autoresume_step_file}" ] && [ "$autoresume" == "yes" ] ; then
+    if ! [ -f "${autoresume_step_file}" ] && [ "${autoresume}" == "yes" ] ; then
         [ ${doskip} == "yes" ] && \
         debug autoresume_runstep "SKIPPING ${func}"
 
