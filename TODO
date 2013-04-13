@@ -22,6 +22,7 @@
 = FIXME for next release =
 --------------------------
 
+- make variable to modules/default from distfiles.gentoo.org URL (for stage+snapshot)
 - fork default gentoo profiles to GPT
 - why set timezone cats a file in verbose mode
 - double check bootloader stuff
