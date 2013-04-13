@@ -25,6 +25,7 @@
    i.e. modules/bootloader/funtoo/bootloader_x86.sh
    i.e. modules/bootloader/exherbo/bootloader.sh <- only if it needs custom code 
    play the sourcing game
+- use printf for runsteps and show '...resuming' on a single line if it's autoresuming
 
 --------------------------
 = FIXME for next release =
