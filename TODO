@@ -3,12 +3,10 @@
 -------------
 
 - have a dialog layer that would translate to a working profile
-    kicktoo -g
-      outputs a profile 
-      runs a profile
-    kicktoo -g <profile>
-      loads dialogs sequence with profile variables
-      then same kicktoo -g
+   have dialogs/ don't polute modules/
+   ./kicktoo -g talks like ./kicktoo -u -p <profile>
+   DO NOT try to interface w/ modules/config.sh, too much work/too fragile
+   use ./kicktoo -u
 - make profiles:
     gentoo-luks-lvm.profile
     gentoo-luks-lvm-kbin.profile
