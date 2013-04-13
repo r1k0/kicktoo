@@ -261,7 +261,7 @@ source "${profile}"
 
 # export profile config to file and exit
 if [ "${export_set}" == "yes" ]; then
-    set -o posix; set | grep ^[a-z] | sed 's/export_set=yes//g' > ${export_file} && \
+    set -o posix; set | grep ^[a-z] | sed 's/^export_.*//g' > ${export_file} && \
       notify "Exporting kicktoo config to '${export_file}' (stripping out export_set)"
       notify "  use '${0} --import <config>' to re import it"
     exit 0
