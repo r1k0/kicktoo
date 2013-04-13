@@ -191,6 +191,9 @@ do
 done
 unset a
 
+# declare this array else configure_bootloader_grub2() will fail
+declare -A grub2_install
+
 # load default vars
 source ${sourcedir}/defaults
 
@@ -238,10 +241,6 @@ arch=$(get_arch) ; [ -z "${arch}" ] && die "Could not determine system architect
 [ "${profile_set}" == "yes"  ] && source "${profile}"
 # profile variables are now accessible
 # export  variables are now accessible (i.e. do_luks) from config.sh functions
-
-# declare this array else configure_bootloader_grub2() will fail
-# find a more elegant way to organize this file
-declare -A grub2_install
 
 # dump config to screen
 if [ "${dump_conf}" == "yes" ]; then
