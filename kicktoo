@@ -218,7 +218,7 @@ autoresume_profile_dir="${autoresume_root_dir}/${autoresume_profile_name}"
 # check if we need to clear autoresume points before current run
 if [ ${removeresume} == "yes" ]; then
     unset removeresume
-    if [ -d "${autoresume_profile_dir}" ]; then
+    if [ -d "${autoresume_profile_dir}" ] && [ -n "${profile}" ]; then
         notify "Removing ${autoresume_profile_name} autoresume points"
         [ ${verbose} == "yes" ] && rm_opts="-rfv" || rm_opts="-rf"
         spawn "rm ${rm_opts} ${autoresume_profile_dir}" || die "Unable to remove ${autoresume_profile_name} autoresume points"
