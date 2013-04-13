@@ -711,7 +711,6 @@ setup_root_password() {
         # here is how to generate the encrypted password - http://effbot.org/librarybook/crypt.htm
         # $ python
         # >>> import crypt; print crypt.crypt("<password>","<salt>")
-        #
         #spawn_chroot "echo 'root:${root_password_hash}' | chpasswd -e"  || die "Could not set root password"
         spawn_chroot "usermod -p '${root_password_hash}' root" || die "Could not set root password"
     elif [ -n "${root_password}" ]; then
