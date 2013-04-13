@@ -36,7 +36,7 @@ has() {
 }
 
 import() {
-    module=$1
+    local module=$1
     if source modules/${module}.sh > /dev/null >&1 ; then
         sourcedir="$(pwd)/modules"
         true
