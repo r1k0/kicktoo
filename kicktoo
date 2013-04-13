@@ -61,6 +61,8 @@ Options:
     -h, --help            This
     -v, --verbose         Be verbose (show command output)
     -d, --debug           Output debugging messages
+    -e, --export <file>   Export set config for import
+    -i, --import <file>   Import config from export set
     -c, --client <host>   Act as a client and fetch profiles from a kicktood daemon
     -r, --removeresume    Clear any previously set resume points
     -n, --noautoresume    Turn off autoresume
@@ -89,6 +91,15 @@ while [ ${#} -gt 0 ]; do
             ;;
         -v|--verbose)
             verbose="yes"
+            ;;
+        -e|--export)
+            export_set="yes"
+            export_file=${1}
+            ;;
+        -i|--import)
+            import_set="yes"
+            import_file=${1}
+            [ -f "${import_file}" ] || error "\'${import_file}\' is not a file"
             ;;
         -c|--client)
             server=${1}
@@ -177,8 +188,8 @@ done
 unset a
 
 # exit if not profile
-if [ -z "${profile}" ]; then
-    usage "You must specify a profile"
+if [ -z "${profile}" ] && [ "${import_set}" == "yes" ]; then
+    usage "You must specify a profile or import a config"
     exit 1
 fi
 # exit if profile is not a file
@@ -224,6 +235,22 @@ arch=$(get_arch) ; [ -z "${arch}" ] && die "Could not determine system architect
 
 # arrays declarations
 declare -A grub2_install
+
+# export profile config to file and exit
+if [ "${export_set}" == "yes" ]; then
+    set -o posix; set | grep ^[a-z] > ${export_file} && \
+      notify "Exporting kicktoo config to \'${export_file}\'"
+      notify "  use \'${0} <config>\' to re import it"
+    exit 0
+fi
+
+# import config file
+if [ "${import_set}" == "yes" ]; then
+    notify "Importing \'set\' config variables"
+    source ${import_file}
+fi
+
+# FIXME which one should be default? should imported config overwrite profile?
 
 # load profile
 source "${profile}"
