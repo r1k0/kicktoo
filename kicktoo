@@ -246,14 +246,14 @@ source "${profile}"
 # export profile config to file and exit
 if [ "${export_set}" == "yes" ]; then
     set -o posix; set | grep ^[a-z] > ${export_file} && \
-      notify "Exporting kicktoo config to \'${export_file}\'"
-      notify "  use \'${0} <config>\' to re import it"
+      notify "Exporting kicktoo config to '${export_file}'"
+      notify "  use '${0} --import <config>' to re import it"
     exit 0
 fi
 
 # import config file
 if [ "${import_set}" == "yes" ]; then
-    notify "Importing \'set\' config variables"
+    notify "Importing 'set' config variables"
     source ${import_file}
 fi
 
