@@ -211,7 +211,7 @@ fi
 source ${sourcedir}/defaults
 
 # fallback if we can't log runsteps
-if ! mkdir -p ${autoresume_root_dir}; then
+if ! spawn "mkdir -p ${autoresume_root_dir}"; then
     warn   "Unable to create step point tracking directory"
     notify "Switching AUTORESUME back off"
     autoresume="no"
