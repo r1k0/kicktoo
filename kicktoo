@@ -302,7 +302,7 @@ fi
 
 # don't run if the minimum is not set
 if [ -z "${profile}" ] && [ -z "${import_file}" ]; then
-    error "No point running..."
+    error "Nothing to do..."
     usage
     exit 1
 fi
