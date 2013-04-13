@@ -129,7 +129,7 @@ while [ ${#} -gt 0 ]; do
             nocolor="yes" 
             ;;
         -p|--profile)
-	profile_set="yes"
+            profile_set="yes"
             profile=${1}
             ;;
         -u|--dump)
@@ -139,9 +139,6 @@ while [ ${#} -gt 0 ]; do
             usage "You have specified an invalid option: ${a}"
             exit 1
             ;;
-#        *)
-#            profile=${a}
-#            ;;
     esac
     unset a
 done
@@ -219,7 +216,7 @@ fi
 profile_name="$(basename ${profile%.profile})"
 
 # set autoresume vars
-autoresume_profile_name="$(basename ${profile%.profile})"
+autoresume_profile_name=${profile_name}
 autoresume_profile_dir="${autoresume_root_dir}/${autoresume_profile_name}"
 
 # check if we need to clear autoresume points before current run
@@ -241,9 +238,6 @@ fi
 # what arch am I running on?
 arch=$(get_arch) ; [ -z "${arch}" ] && die "Could not determine system architecture!"
 
-# arrays declarations
-#declare -A grub2_install
-
 # load profile
 [ "${profile_set}" == "yes"  ] && source "${profile}"
 # profile variables are now accessible
@@ -256,16 +250,16 @@ fi
 
 # export profile config to file and exit
 if [ "${export_set}" == "yes" ]; then
-    set -o posix; set \
-      | grep ^[a-z] \
-      | sed 's/^export_.*//g' \
-      | sed 's/^profile_set.*//g' \
-      | sed 's/^autoresume.*//g' \
+    set -o posix; set              \
+      | grep ^[a-z]                \
+      | sed 's/^export_.*//g'      \
+      | sed 's/^profile_set.*//g'  \
+      | sed 's/^autoresume.*//g'   \
       | sed 's/^removeresume.*//g' \
-      | sed 's/^dump_conf.*//g' \
-      | sed 's/^verbose.*//g' \
-      | sed 's/^debug*//g' \
-      > ${export_file} && \
+      | sed 's/^dump_conf.*//g'    \
+      | sed 's/^verbose.*//g'      \
+      | sed 's/^debug*//g'         \
+      > ${export_file} &&          \
       notify "Exporting kicktoo config to '${export_file}' (stripping out export_set)"
       notify "  use '${0} --import <config>' to re import it"
     exit 0
