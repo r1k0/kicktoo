@@ -57,14 +57,16 @@ configure_bootloader_grub2() {
     check_chroot_fstab /boot && spawn_chroot "[ -z \"\$(mount | grep /boot)\" ] && mount /boot"            
 
     for device in "${!grub2_install[@]}"; do
-#       FIXME - only accepts a single option currently (--modules=)        
+        # FIXME only accepts a single option currently (--modules=)        
         local key=$(echo ${grub2_install["${device}"]} | cut -d'=' -f1)
         local value=$(echo ${grub2_install["${device}"]} | cut -d'=' -f2)
     
-        debug configure_bootloader_grub2 "deploying grub2-install $key=$value /dev/${device}"
-        spawn_chroot "grub2-install $key=$value /dev/${device}" || die "Could not deploy grub2-install $key=$value /dev/${device}"
-        #spawn "grub2-install $key=$value /dev/${device}" || die "Could not deploy grub2-install $key=$value /dev/${device}"
-                
+        if [ -n "${key}" ] && [ -n "${value}" ]; then 
+            debug configure_bootloader_grub2 "deploying grub2-install $key=$value /dev/${device}"
+            spawn_chroot "grub2-install ${key}=${value} /dev/${device}" || die "Could not deploy grub2-install $key=$value /dev/${device}"
+        else
+            spawn_chroot "grub2-install /dev/${device}" || die "Could not deploy grub2-install /dev/${device}"
+        fi
         #spawn_chroot "grub2-install --modules=\"part_gpt mdraid1x lvm xfs\" /dev/sda" || die "Could not deploy with grub2-install on /dev/sda"
         #spawn_chroot "grub2-install --modules=\"part_gpt mdraid1x lvm xfs\" /dev/sdb" || die "Could not deploy with grub2-install on /dev/sdb"
     done
