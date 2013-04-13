@@ -137,6 +137,7 @@ for i in output         \
 do
     import ${i}
 done
+unset i
 
 # nocolor overwrites output module 
 if [ "${nocolor}" == "yes" ]; then
@@ -173,6 +174,7 @@ for a in bash       \
 do  
     has "${a}"
 done
+unset a
 
 # exit if not profile
 if [ -z "${profile}" ]; then
