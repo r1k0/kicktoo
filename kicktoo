@@ -59,12 +59,12 @@ Usage:
 
 Options:
     -p, --profile <file>  Run the profile
-    -e, --export <file>   Export set config for import
-    -i, --import <file>   Import and run config from export
-    -c, --client <host>   Act as a client and fetch profiles from a kicktood daemon
+    -u, --dump            Dump config to stdout
+    -e, --export  <file>  Export set config for import
+    -i, --import  <file>  Import and run config from export
+    -c, --client  <host>  Act as a client and fetch profiles from a kicktood daemon
     -r, --removeresume    Clear any previously set resume points
     -n, --noautoresume    Turn off autoresume
-
     -h, --help            This
     -v, --verbose         Be verbose (show command output)
     -d, --debug           Output debugging messages
@@ -130,6 +130,9 @@ while [ ${#} -gt 0 ]; do
             ;;
         -p|--profile)
             profile=${1}
+            ;;
+        -u|--dump)
+            dump_conf="yes"
             ;;
         -*)
             usage "You have specified an invalid option: ${a}"
@@ -267,9 +270,14 @@ source "${profile}"
 # profile variables are now accessible
 # export  variables are now accessible (i.e. do_luks) from config.sh functions
 
+# dump config to screen
+if [ "${dump_conf}" == "yes" ]; then
+    set -o posix; set | grep ^[a-z] && exit 0
+fi
+
 # export profile config to file and exit
 if [ "${export_set}" == "yes" ]; then
-    set -o posix; set | grep ^[a-z] | sed 's/^export_.*//g' | sed 's/^autoresume.*//g' | sed 's/^removeresume.*//g' > ${export_file} && \
+    set -o posix; set | grep ^[a-z] | sed 's/^export_.*//g' | sed 's/^autoresume.*//g' | sed 's/^removeresume.*//g' | sed 's/^dump_conf.*//g' > ${export_file} && \
       notify "Exporting kicktoo config to '${export_file}' (stripping out export_set)"
       notify "  use '${0} --import <config>' to re import it"
     exit 0
