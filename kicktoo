@@ -258,7 +258,7 @@ if [ "${export_set}" == "yes" ]; then
       | sed 's/^removeresume.*//g' \
       | sed 's/^dump_conf.*//g'    \
       | sed 's/^verbose.*//g'      \
-      | sed 's/^debug*//g'         \
+      | sed 's/^debug.*//g'        \
       > ${export_file} &&          \
       notify "Exporting kicktoo config to '${export_file}' (stripping out export_set)"
       notify "  use '${0} --import <config>' to re import it"
@@ -296,6 +296,14 @@ fi
 [ "${verbose}" ==  "yes" ] && [ "${debug}"   ==  "no" ]  && emerge_global_opts+=" -qv"
 [ "${debug}"   ==  "yes" ] && [ "${verbose}" ==  "no" ]  && emerge_global_opts+=" -v"
 [ "${verbose}" ==  "yes" ] && [ "${debug}"   ==  "yes" ] && emerge_global_opts+=" -v"
+
+# don't run if the minimum is not set
+if [ -z "${profile}" ] && [ -z "${import_file}" ]; then
+    error "No point running..."
+    usage
+    exit 1
+fi
+
 
 #########################################################################
 # runsteps
