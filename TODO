@@ -17,6 +17,14 @@
 - port all working gentoo profiles to funtoo
 - find an elegant way to split the kicktoo file for readability and design
    but specific distro conflicting functions into their own distro subfolder
+  make a folder for each module, then put the code of each module in different files (ideally one per file)
+   and make distro specific subfolders with files same name that overwrite the "default" ones
+   i.e. modules/bootloader/bootloader.sh
+   i.e. modules/bootloader/bootloader_x86.sh
+   i.e. modules/bootloader/funtoo/bootloader.sh <- only if it needs custom code 
+   i.e. modules/bootloader/funtoo/bootloader_x86.sh
+   i.e. modules/bootloader/exherbo/bootloader.sh <- only if it needs custom code 
+   play the sourcing game
 
 --------------------------
 = FIXME for next release =
