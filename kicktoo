@@ -213,7 +213,7 @@ if ! spawn "mkdir -p ${autoresume_root_dir}"; then
 fi
 
 profile_name="$(basename ${profile%.profile} > /dev/null 2>&1)"
-debug kicktoo "profile_name is: _${profile_name}_"
+debug main "profile_name is: _${profile_name}_"
 
 # set autoresume vars
 autoresume_profile_name=${profile_name}
