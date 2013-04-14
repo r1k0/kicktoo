@@ -1,5 +1,17 @@
 # NOTE make your global variables *always* lowercase
 
+gentoo() {
+    distro="gentoo"
+}
+
+funtoo() {
+    distro="funtoo"
+}
+
+exherbo() {
+    distro="exherbo"
+}
+
 mode() {
     mode=$1
 }
