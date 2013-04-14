@@ -80,9 +80,10 @@ sfdisk_command() {
     [ -n "${cylinders}" ] && geometry_args="${geometry_args} -C ${cylinders}"
     
     # NOTE fix 2048 missing space before first partition, gosh I've chased this one...
+    debug sfdisk_command "running fdisk pad 2048 before the first partition"
     spawn "( echo x; echo b; echo 1; echo 2048; echo r; echo w ) | fdisk ${device}" || die "cannot pad 2048 space before first partition (needed for grub:2)"
-    debug sfdisk_command "running sfdisk partitions '${partitions}' on device ${device} with geometry ${geometry_args}"
     # hdparm -z force really works partprobe not
+    debug sfdisk_command "running sfdisk partitions '${partitions}' on device ${device} with geometry ${geometry_args}"
     spawn "echo -e '${partitions}' | sfdisk -uM ${geometry_args} ${device}" && spawn "hdparm -z ${device}"
     
     return $?
