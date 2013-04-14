@@ -243,6 +243,10 @@ arch=$(get_arch) ; [ -z "${arch}" ] && die "Could not determine system architect
 # profile variables are now accessible
 # export  variables are now accessible (i.e. do_luks) from config.sh functions
 
+# now we know which distro we're running on
+# source distro specific modules to overwrite gentoo 
+# here
+
 # dump config to screen
 if [ "${dump_conf}" == "yes" ]; then
     set -o posix; set | grep ^[a-z] && exit 0
