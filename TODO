@@ -33,11 +33,4 @@
 
 - make variable to modules/default from distfiles.gentoo.org URL (for stage+snapshot)
 - fork default gentoo profiles to GPT
-- why set timezone cats a file in verbose mode
-- double check bootloader stuff
-    grub1+autoresume is ok
-    look at grub2
-  the general consensus seems to be that you need to have at least 1M before the first partition when using MBR 
-  or have a dedicated 1M+ grub bios partition under GPT when installing newer grub version with softraid and/or lvm.
-  -> do I need to pad 1M free space then for MSDOS partition (non GPT)?
-- see if I can adapt lilo too with novikane's commit for grub() and mdraid
+- test mdraid + grub2 template
