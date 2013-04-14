@@ -16,19 +16,21 @@ mountfs /dev/sda3 ext4 / noatime
 tree_type   snapshot    http://distfiles.gentoo.org/snapshots/portage-latest.tar.bz2
 
 # ship the binary kernel instead of compiling (faster)
-kernel_binary           $(pwd)/kbin/kernel-genkernel-${arch}-3.7.10-gentoo
-initramfs_binary        $(pwd)/kbin/initramfs-genkernel-${arch}-3.7.10-gentoo
-systemmap_binary        $(pwd)/kbin/System.map-genkernel-${arch}-3.7.10-gentoo
+kernel_binary     $(pwd)/kbin/kernel-genkernel-${arch}-3.7.10-gentoo
+initramfs_binary  $(pwd)/kbin/initramfs-genkernel-${arch}-3.7.10-gentoo
+systemmap_binary  $(pwd)/kbin/System.map-genkernel-${arch}-3.7.10-gentoo
 
-timezone                UTC
-rootpw                  a
-bootloader              grub:2
-keymap	                us # be-latin1 fr
-hostname                gentoo
-extra_packages          dhcpcd # syslog-ng vim openssh
+timezone           UTC
+rootpw             a
+bootloader         grub:2
+keymap	           us # be-latin1 fr
+hostname           gentoo
+extra_packages     dhcpcd # syslog-ng vim openssh
 
-#rcadd                   sshd       default
-#rcadd                   syslog-ng  default
+grub2_install      /dev/sda
+
+#rcadd              sshd       default
+#rcadd              syslog-ng  default
 
 pre_install_bootloader() {
     spawn_chroot "emerge grub:2 --autounmask-write" # FIXME check exit status
