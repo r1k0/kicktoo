@@ -66,6 +66,7 @@ configure_bootloader_grub2() {
             debug configure_bootloader_grub2 "deploying grub2-install $key=$value /dev/${device}"
             spawn_chroot "grub2-install ${key}=${value} /dev/${device}" || die "Could not deploy grub2-install $key=$value /dev/${device}"
         else
+            debug configure_bootloader_grub2 "deploying grub2-install /dev/${device}"
             spawn_chroot "grub2-install /dev/${device}" || die "Could not deploy grub2-install /dev/${device}"
         fi
         #spawn_chroot "grub2-install --modules=\"part_gpt mdraid1x lvm xfs\" /dev/sda" || die "Could not deploy with grub2-install on /dev/sda"
