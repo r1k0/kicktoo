@@ -79,6 +79,8 @@ sfdisk_command() {
     [ -n "${sectors}" ]   && geometry_args="${geometry_args} -S ${sectors}"
     [ -n "${cylinders}" ] && geometry_args="${geometry_args} -C ${cylinders}"
     
+    # NOTE fix 2048 missing space before first partition, gosh I've chased this one...
+    ( echo x; echo b; echo 1; echo 2048; echo r; echo w ) | fdisk ${device}
     debug sfdisk_command "running sfdisk partitions '${partitions}' on device ${device} with geometry ${geometry_args}"
     # hdparm -z force really works partprobe not
     spawn "echo -e '${partitions}' | sfdisk -uM ${geometry_args} ${device}" && spawn "hdparm -z ${device}"
