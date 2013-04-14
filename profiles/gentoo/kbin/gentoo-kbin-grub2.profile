@@ -22,11 +22,11 @@ systemmap_binary  $(pwd)/kbin/System.map-genkernel-${arch}-3.7.10-gentoo
 
 timezone           UTC
 rootpw             a
-bootloader         grub:2
 keymap	           us # be-latin1 fr
 hostname           gentoo
 extra_packages     dhcpcd # syslog-ng vim openssh
 
+bootloader         grub:2
 grub2_install      /dev/sda
 
 #rcadd              sshd       default
