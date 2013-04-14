@@ -35,6 +35,8 @@ post_unpack_repo_tree() {
     spawn_chroot "cd /usr/portage && git checkout funtoo.org" || die "could not checkout funtoo git repo"
 }
 post_install_bootloader() {
+    # make sure /boot is mounted
+    check_chroot_fstab /boot && spawn_chroot "[ -z \"\$(mount | grep /boot)\" ] && mount /boot"            
     # $(echo ${device} | cut -c1-8) is like /dev/sdx
     spawn_chroot "grub-install $(echo ${device} | cut -c1-8)" || die "cannot grub-install $(echo ${device} | cut -c1-8)"
     spawn_chroot "boot-update"                                || die "boot-update failed"
