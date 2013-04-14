@@ -212,7 +212,7 @@ if ! spawn "mkdir -p ${autoresume_root_dir}"; then
     autoresume="no"
 fi
 
-profile_name="$(basename ${profile%.profile} > /dev/null 2>&1)"
+profile_name="$(get_filename_from_uri ${profile} | sed 's/.profile//g')" #> /dev/null 2>&1)"
 debug main "profile_name is: _${profile_name}_"
 
 # set autoresume vars
