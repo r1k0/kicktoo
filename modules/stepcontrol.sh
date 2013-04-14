@@ -51,7 +51,7 @@ autoresume_runstep() {
            [ "${func}" == "setup_luks" ]; then
             ${func} # <<<
         else
-            echo -e ' `->  ${HILITE}resuming${NORMAL}'
+            echo -e " \`->  ${HILITE}resuming${NORMAL}"
         fi
     fi
 }
