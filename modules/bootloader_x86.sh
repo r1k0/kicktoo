@@ -56,6 +56,7 @@ configure_bootloader_grub2() {
 
     check_chroot_fstab /boot && spawn_chroot "[ -z \"\$(mount | grep /boot)\" ] && mount /boot"            
 
+    [ -z "${!grub2_install[@]}" ] && warn "looks like it's pulling grub:2 but 'grub2_install' is not set... is it intended?"
     for device in "${!grub2_install[@]}"; do
         # FIXME only accepts a single option currently (--modules=)        
         local key=$(echo ${grub2_install["${device}"]} | cut -d'=' -f1)
