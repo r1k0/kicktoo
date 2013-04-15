@@ -364,7 +364,7 @@ mount_network_shares() {
 
 fetch_stage_tarball() {
     debug fetch_stage_tarball "fetching stage tarball"
-    if [ -n ${stage_uri} ]; then
+    if [ -n "${stage_uri}" ]; then
         fetch "${stage_uri}" "${chroot_dir}/$(get_filename_from_uri ${stage_uri})" || die "Could not fetch stage tarball"
     fi
 }
