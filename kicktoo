@@ -259,16 +259,16 @@ if [ "${export_set}" == "yes" ]; then
     else
         error "specify a file"; exit 1
     fi
-    set -o posix; set              \
-      | grep ^[a-z]                \
-      | sed 's/^export_.*//g'      \
-      | sed 's/^profile_set.*//g'  \
-      | sed 's/^autoresume.*//g'   \
-      | sed 's/^removeresume.*//g' \
-      | sed 's/^dump_conf.*//g'    \
-      | sed 's/^verbose.*//g'      \
-      | sed 's/^debug.*//g'        \
-      > ${export_file} &&          \
+    set -o posix; set                \
+      | grep ^[a-z]                  \
+      | sed 's/^export_.*/#&/g'      \
+      | sed 's/^profile_set.*/#&/g'  \
+      | sed 's/^autoresume.*/#&/g'   \
+      | sed 's/^removeresume.*/#&/g' \
+      | sed 's/^dump_conf.*/#&/g'    \
+      | sed 's/^verbose.*/#&/g'      \
+      | sed 's/^debug.*/#&/g'        \
+      > ${export_file} &&            \
       notify "Exporting kicktoo config to '${export_file}' (some are stripped out, which ones? diff it with ${0} -u -p ${profile})"
     exit 0
 fi
