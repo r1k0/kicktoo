@@ -331,11 +331,8 @@ mount_local_partitions() {
                     ;;
             esac
         done
-#       FIXME - can't get this to put root volume first on the list
-        #sort -k5 /tmp/install.mounts | while read mount; do
-        #sed 's/$(basename ${chroot_dir})\/ /$(basename ${chroot_dir}) /' /tmp/install.mounts | sort -k5 | while read mount; do
-        #so fallbacking to:
-        cat /tmp/install.mounts | while read mount; do
+        # make sure / is mounted first
+        sort -rk5 /tmp/install.mounts | while read mount; do
             mkdir -p $(echo ${mount} | awk '{ print $5; }')
             spawn "${mount}" || die "Could not mount with: ${mount}"
         done
