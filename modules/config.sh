@@ -253,9 +253,9 @@ stage_latest() {
     if [ -n "${stage_arch}" ]; then
         local distfiles_base="http://distfiles.gentoo.org/releases/${stage_mainarch}/autobuilds"
         if [ "${stage_arch}" == "amd64" ]; then
-            local latest_stage=$(wget -qO- ${distfiles_base}/latest-stage3.txt | egrep "stage3-${stage_arch}.*[0-9]{8}" )
+            local latest_stage=$(wget -qO- ${distfiles_base}/latest-stage3.txt | egrep "stage3-${stage_arch}[^\n]*[0-9]{8}" )
         elif [[ ${stage_arch} =~ ^i.86$ ]]; then
-            local latest_stage=$(wget -qO- ${distfiles_base}/latest-stage3.txt | egrep "stage3-i.86.*[0-9]{8}" )
+            local latest_stage=$(wget -qO- ${distfiles_base}/latest-stage3.txt | egrep "stage3-i.86[^\n]*[0-9]{8}" )
         fi
         [ -z "${latest_stage}" ] && die "Cannot find the relevant stage tarball, use stage_uri in your profile instead"
         if [ -n "${latest_stage}" ]; then
