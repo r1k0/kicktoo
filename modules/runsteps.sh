@@ -720,9 +720,9 @@ setup_root_password() {
 
 setup_timezone() {
     debug setup_timezone "Setting timezone: ${timezone}"
-    spawn "sed -e 's:clock=\".*\":clock=\"${timezone}\":' ${chroot_dir}/etc/conf.d/hwclock" || die "Could not adjust clock config in /etc/conf.d/hwclock"
-    spawn "echo \"${timezone}\" > ${chroot_dir}/etc/timezone"                               || die "Could not set timezone in /etc/timezone"
-    spawn "cp ${chroot_dir}/usr/share/zoneinfo/${timezone} ${chroot_dir}/etc/localtime"     || die "Could not set timezone in /etc/localtime" 
+    spawn "sed -i -n -e 's:clock=\".*\":clock=\"${timezone}\":' ${chroot_dir}/etc/conf.d/hwclock" || die "Could not adjust clock config in /etc/conf.d/hwclock"
+    spawn "echo \"${timezone}\" > ${chroot_dir}/etc/timezone"                                     || die "Could not set timezone in /etc/timezone"
+    spawn "cp ${chroot_dir}/usr/share/zoneinfo/${timezone} ${chroot_dir}/etc/localtime"           || die "Could not set timezone in /etc/localtime" 
 }
 
 setup_keymap(){
