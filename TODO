@@ -16,7 +16,6 @@
 - make chroot.sh more usable
 - port all working gentoo profiles to funtoo
 - find an elegant way to split the kicktoo file for readability and design
-- use printf for runsteps and show '...resuming' on a single line
 
 --------------------------
 = FIXME for next release =
