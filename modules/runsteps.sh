@@ -720,9 +720,9 @@ setup_root_password() {
 
 setup_timezone() {
     debug setup_timezone "Setting timezone: ${timezone}"
-    spawn "sed -e 's:clock=\".*\":clock=\"${timezone}\":' ${chroot_dir}/etc/conf.d/hwclock" || die "Could not adjust clock config in /etc/conf.d/hwclock"
-    spawn "echo \"${timezone}\" > ${chroot_dir}/etc/timezone"                               || die "Could not set timezone in /etc/timezone"
-    spawn "cp ${chroot_dir}/usr/share/zoneinfo/${timezone} ${chroot_dir}/etc/localtime"     || die "Could not set timezone in /etc/localtime" 
+    spawn "sed -i -n -e 's:clock=\".*\":clock=\"${timezone}\":' ${chroot_dir}/etc/conf.d/hwclock" || die "Could not adjust clock config in /etc/conf.d/hwclock"
+    spawn "echo \"${timezone}\" > ${chroot_dir}/etc/timezone"                                     || die "Could not set timezone in /etc/timezone"
+    spawn "cp ${chroot_dir}/usr/share/zoneinfo/${timezone} ${chroot_dir}/etc/localtime"           || die "Could not set timezone in /etc/localtime" 
 }
 
 setup_keymap(){
@@ -840,8 +840,7 @@ cleanup() {
         spawn "vgchange -a n ${volgroup}"  || warn "Could not remove vg ${volgroup}"
         sleep 0.2
     done
-    # NOTE possible leftovers like /mnt/gentoo/boot that get probably mounted twice
-    # FIXME find out why sometimes (ie mdraid profile) /mnt/gentoo/boot is mounted twice
+    # NOTE possible leftovers like /mnt/gentoo/boot that gets mounted twice, not needed anymore but does no harm
     if [ -f "/proc/mounts" ]; then
         for mnt in $(awk '{ print $2; }' /proc/mounts | grep ^${chroot_dir} | sort -ur); do
             spawn "umount ${mnt}" || warn "Could really not unmount ${mnt}"

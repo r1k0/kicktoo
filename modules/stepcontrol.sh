@@ -68,7 +68,7 @@ runstep() {
     fi
 
     if $(isafunc pre_${func}); then
-        echo -e " >>>   pre_${func}()"
+        echo -e " \`->  ${BOLD}pre_${func}()${NORMAL}"
         debug runstep "executing pre-hook for ${func}"
         [ ${autoresume} = "yes" ] && autoresume_runstep pre_${func} || pre_${func}
     fi
@@ -86,7 +86,7 @@ runstep() {
     fi
 
     if $(isafunc post_${func}); then
-        echo -e " >>>   post_${func}()"
+        echo -e " \`->  ${BOLD}post_${func}()${NORMAL}"
         debug runstep "executing post-hook for ${func}"
         [ ${autoresume} = "yes" ] && autoresume_runstep post_${func} || post_${func}
     fi
