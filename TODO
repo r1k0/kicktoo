@@ -23,4 +23,3 @@
 
 - make variable to modules/default from distfiles.gentoo.org URL (for stage+snapshot)
 - fork default gentoo profiles to GPT
-- test mdraid + grub2 template
