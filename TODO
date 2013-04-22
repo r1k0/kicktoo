@@ -11,8 +11,6 @@
     gentoo-luks-lvm-kbin.profile
     gentoo-noboot-noinitramfs.profile
     gentoo-noboot-noinitramfs-kbin.profile
-    gentoo-mdraid-grub2.profile
-    gentoo-mdraid-grub2-kbin.profile
 - make chroot.sh more usable
 - port all working gentoo profiles to funtoo
 - find an elegant way to split the kicktoo file for readability and design
