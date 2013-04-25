@@ -19,6 +19,5 @@
 = FIXME for next release =
 --------------------------
 
-- make variable to modules/default from distfiles.gentoo.org URL (for stage+snapshot)
 - fork default gentoo profiles to GPT
 - -u export kicktoo post_ and pre_ functions too, not just variables

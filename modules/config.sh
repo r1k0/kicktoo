@@ -251,7 +251,7 @@ stage_latest() {
             stage_mainarch="${arch}"
     esac
     if [ -n "${stage_arch}" ]; then
-        local distfiles_base="http://distfiles.gentoo.org/releases/${stage_mainarch}/autobuilds"
+        local distfiles_base="${distfiles_url}/releases/${stage_mainarch}/autobuilds"
         if [ "${stage_arch}" == "amd64" ]; then
             local latest_stage=$(wget -qO- ${distfiles_base}/latest-stage3.txt | egrep "stage3-${stage_arch}[^\n]*[0-9]{8}" )
         elif [[ ${stage_arch} =~ ^i.86$ ]]; then
