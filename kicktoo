@@ -259,7 +259,7 @@ if [ "${export_set}" == "yes" ]; then
     else
         error "specify a file"; exit 1
     fi
-    echo '# === START ===' > ${export_file}
+    echo '# === START VARIABLES ===' > ${export_file}
     set -o posix; set                \
       | grep ^[a-z]                  \
       | sed 's/^export_.*/#&/g'      \
@@ -269,8 +269,13 @@ if [ "${export_set}" == "yes" ]; then
       | sed 's/^dump_conf.*/#&/g'    \
       | sed 's/^verbose.*/#&/g'      \
       | sed 's/^debug.*/#&/g'        \
-      >> ${export_file} &&            \
-    echo '# === END ===' >> ${export_file} && \
+      >> ${export_file} &&           \
+    echo '# === END VARIABLES ==='   >> ${export_file} 
+    echo '# === START FUNCTIONS ===' >> ${export_file} && \
+    # FIXME ideally grep for ^pre_|^post_ functions only, not the whole
+    # but no harm done
+    typeset -f >> ${export_file} &&                       \
+    echo '# === END FUNCTIONS ==='   >> ${export_file} && \
     notify "Exporting kicktoo config to '${export_file}' (some are stripped out, which ones? diff it with ${0} -u -p ${profile})"
     exit 0
 fi
