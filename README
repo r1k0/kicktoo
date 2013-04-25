@@ -49,10 +49,10 @@ Options:
 Tip:
     read profiles/config.txt for all profile features and options
   #
-  # ./kicktoo -p profiles/gentoo/gentoo.profile
+  # ./kicktoo --profile profiles/gentoo/gentoo.profile
 OR
-  # ./kicktoo -u -p profiles/gentoo/gentoo.profile
-  # ./kicktoo --export /tmp/myconf -p profiles/gentoo/gentoo.profile
+  # ./kicktoo --dump --profile profiles/gentoo/gentoo.profile
+  # ./kicktoo --export /tmp/myconf --profile profiles/gentoo/gentoo.profile
   # ./kicktoo --import /tmp/myconf 
 
 3) Reboot
