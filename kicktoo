@@ -152,7 +152,7 @@ for i in output         \
         bootloader      \
         partition       \
         runsteps        \
-        config          \
+        profile         \
         stepcontrol     \
         server
 do
@@ -241,7 +241,7 @@ arch=$(get_arch) ; [ -z "${arch}" ] && die "Could not determine system architect
 # load profile
 [ "${profile_set}" == "yes"  ] && source "${profile}"
 # profile variables are now accessible
-# export  variables are now accessible (i.e. do_luks) from config.sh functions
+# export  variables are now accessible (i.e. do_luks) from profile.sh functions
 
 # now we know which distro we're running on
 # source distro specific modules to overwrite gentoo 
