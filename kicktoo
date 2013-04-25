@@ -271,11 +271,13 @@ if [ "${export_set}" == "yes" ]; then
       | sed 's/^debug.*/#&/g'        \
       >> ${export_file} &&           \
     echo '# === END VARIABLES ==='   >> ${export_file} 
-    echo '# === START FUNCTIONS ===' >> ${export_file} && \
-    # FIXME ideally grep for ^pre_|^post_ functions only, not the whole
-    # but no harm done
-    typeset -f >> ${export_file} &&                       \
-    echo '# === END FUNCTIONS ==='   >> ${export_file} && \
+    echo '# === START FUNCTIONS ===' >> ${export_file}
+#    typeset -f >> ${export_file} # this will dump all functions
+    # only export custom functions, namely ^pre_*|^post_* 
+    for i in $(declare -F | awk '$3 ~ /(^pre_)|(^post_)/ { print }' | cut -d' ' -f3 ); do
+        type ${i} | grep -v 'is a function' >> ${export_file}
+    done
+    echo '# === END FUNCTIONS ==='   >> ${export_file}
     notify "Exporting kicktoo config to '${export_file}' (some are stripped out, which ones? diff it with ${0} -u -p ${profile})"
     exit 0
 fi
