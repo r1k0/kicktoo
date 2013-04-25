@@ -282,7 +282,7 @@ if [ "${export_set}" == "yes" ]; then
         type ${i} | grep -v 'is a function' >> ${export_file}
     done
     echo '# === END FUNCTIONS ==='   >> ${export_file}
-    notify "Exporting kicktoo config to '${export_file}' (some are stripped out, which ones? diff it with ${0} -u -p ${profile})"
+    notify "Exporting kicktoo config to '${export_file}'"
     exit 0
 fi
 
