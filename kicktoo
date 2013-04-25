@@ -249,7 +249,11 @@ arch=$(get_arch) ; [ -z "${arch}" ] && die "Could not determine system architect
 
 # dump config to screen
 if [ "${dump_conf}" == "yes" ]; then
-    set -o posix; set | grep ^[a-z] && exit 0
+    set -o posix; set | grep ^[a-z] 
+    for i in $(declare -F | awk '$3 ~ /(^pre_)|(^post_)/ { print }' | cut -d' ' -f3 ); do
+        type ${i} | grep -v 'is a function'
+    done
+    exit 0
 fi
 
 # export profile config to file and exit
