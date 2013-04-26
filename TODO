@@ -20,3 +20,4 @@
 --------------------------
 
 - fork default gentoo profiles to GPT
+- bump KV to 3.8 for exherbo since systemd-202 requires it
