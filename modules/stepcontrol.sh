@@ -82,7 +82,7 @@ runstep() {
 
     else
         debug runstep "skipping step ${func}"
-        echo -e " ${GOOD}>>>${NORMAL} ${BOLD}skipping{NORMAL} ${func}"
+        echo -e " ${GOOD}>>>${NORMAL} ${BOLD}skipping${NORMAL} ${func}"
         [ ${autoresume} = "yes" ] && autoresume_runstep ${func} skip
     fi
 
