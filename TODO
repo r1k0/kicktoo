@@ -14,6 +14,7 @@
 - make chroot.sh more usable
 - port all working gentoo profiles to funtoo
 - find an elegant way to split the kicktoo file for readability and design
+- find a way to fix profile structure (source kbin|gpt|etc?)
 
 --------------------------
 = FIXME for next release =
