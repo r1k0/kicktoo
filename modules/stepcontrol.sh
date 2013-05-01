@@ -51,7 +51,7 @@ autoresume_runstep() {
            [ "${func}" == "setup_luks" ]; then
             ${func} # <<<
         else
-            echo -e " \`->  ${BOLD}resuming${NORMAL}"
+            echo -e " >>>  ${BOLD}resuming${NORMAL}"
         fi
     fi
 }
@@ -68,7 +68,7 @@ runstep() {
     fi
 
     if $(isafunc pre_${func}); then
-        echo -e " \`->  ${BOLD}pre_${func}()${NORMAL}"
+        echo -e " >>>  ${BOLD}pre_${func}()${NORMAL}"
         debug runstep "executing pre-hook for ${func}"
         [ ${autoresume} = "yes" ] && autoresume_runstep pre_${func} || pre_${func}
     fi
@@ -82,11 +82,12 @@ runstep() {
 
     else
         debug runstep "skipping step ${func}"
+        echo -e " ${GOOD}>>>${NORMAL} ${BOLD}skipping${NORMAL} ${func}"
         [ ${autoresume} = "yes" ] && autoresume_runstep ${func} skip
     fi
 
     if $(isafunc post_${func}); then
-        echo -e " \`->  ${BOLD}post_${func}()${NORMAL}"
+        echo -e " >>>  ${BOLD}post_${func}()${NORMAL}"
         debug runstep "executing post-hook for ${func}"
         [ ${autoresume} = "yes" ] && autoresume_runstep post_${func} || post_${func}
     fi
