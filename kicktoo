@@ -212,6 +212,12 @@ if ! spawn "mkdir -p ${autoresume_root_dir}"; then
     autoresume="no"
 fi
 
+# fetch profile from a kicktood daemon
+if [ -n "${server}" ]; then
+    server_init
+    server_get_profile && { profile_set="yes"; profile="/tmp/kicktoo_profile"; }
+fi
+
 profile_name="$(get_filename_from_uri ${profile} | sed 's/.profile//g')" #> /dev/null 2>&1)"
 debug main "profile_name is: '${profile_name}'"
 
@@ -227,12 +233,6 @@ if [ ${removeresume} == "yes" ]; then
         [ ${verbose} == "yes" ] && rm_opts="-rfv" || rm_opts="-rf"
         spawn "rm ${rm_opts} ${autoresume_profile_dir}" || die "Unable to remove ${autoresume_profile_name} autoresume points"
     fi
-fi
-
-# fetch profile from a kicktood daemon
-if [ -n "${server}" ]; then
-    server_init
-    server_get_profile && profile="/tmp/kicktoo_profile"
 fi
 
 # what arch am I running on?
