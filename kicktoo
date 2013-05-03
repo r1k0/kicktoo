@@ -215,7 +215,7 @@ fi
 # fetch profile from a kicktood daemon
 if [ -n "${server}" ]; then
     server_init
-    server_get_profile && profile="/tmp/kicktoo_profile"
+    server_get_profile && { profile_set="yes"; profile="/tmp/kicktoo_profile"; }
 fi
 
 profile_name="$(get_filename_from_uri ${profile} | sed 's/.profile//g')" #> /dev/null 2>&1)"
