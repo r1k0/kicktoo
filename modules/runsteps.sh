@@ -755,7 +755,7 @@ install_bootloader() {
     check_chroot_fstab /boot && spawn_chroot "[ -z \"\$(mount | grep /boot)\" ] && mount /boot"            
 
     # grub:2 is still considered unstable
-    [ "${bootloader}" == "grub2" ] && { accept_keywords="~${arch}"; bootloader_ebuild="grub:2"; }
+    [ "${bootloader}" == "grub:2" ] && { accept_keywords="~${arch}"; bootloader_ebuild="grub:2"; }
     
     # NOTE pkg might already be installed if -a called
     check_emerge_installed_pkg ${bootloader_ebuild} || \
