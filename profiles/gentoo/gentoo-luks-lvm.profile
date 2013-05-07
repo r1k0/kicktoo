@@ -38,10 +38,15 @@ mountfs /dev/vg/tmp       ext4 /tmp  noatime
 [ "${arch}" == "amd64" ] && stage_latest amd64
 tree_type   snapshot    http://distfiles.gentoo.org/snapshots/portage-latest.tar.bz2
 
-# ship the binary kernel instead of compiling (faster)
-kernel_binary           $(pwd)/kbin/kernel-genkernel-${arch}-3.7.10-gentoo
-systemmap_binary        $(pwd)/kbin/System.map-genkernel-${arch}-3.7.10-gentoo
-initramfs_binary        $(pwd)/kbin/initramfs-genkernel-${arch}-3.7.10-gentoo
+# get kernel dotconfig from the official running kernel
+cat $(pwd)/kconfig/livedvd-x86-amd64-32ul-2012.1.kconfig > /dotconfig
+grep -v CONFIG_EXTRA_FIRMWARE /dotconfig > /dotconfig2 ; mv /dotconfig2 /dotconfig
+grep -v LZO                   /dotconfig > /dotconfig2 ; mv /dotconfig2 /dotconfig
+kernel_config_file       /dotconfig
+kernel_sources           gentoo-sources
+initramfs_builder
+genkernel_kernel_opts    --loglevel=5
+genkernel_initramfs_opts --loglevel=5
 
 timezone                UTC
 rootpw                  a
