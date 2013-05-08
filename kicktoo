@@ -386,3 +386,5 @@ fi
 
 runstep run_post_install_script                                         "Running post-install script if any"
 runstep finishing_cleanup                                               "Cleaning up system environment"
+
+exit 0

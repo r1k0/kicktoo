@@ -872,13 +872,11 @@ finishing_cleanup() {
     cleanup
     notify "Install complete!"
     [ "${reboot}" == "yes" ] && notify "Rebooting..." && reboot
-    exit 0
 }
 
 failure_cleanup() {
     [ -f ${logfile} ] && spawn "mv ${logfile} ${logfile}.failed" || warn "Could not move ${logfile} to ${logfile}.failed"
     cleanup
-    exit 1
 }
 
 trap_cleanup() {

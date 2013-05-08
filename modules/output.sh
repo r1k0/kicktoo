@@ -39,6 +39,7 @@ die() {
     
     error "${msg}"
     runstep failure_cleanup "Cleaning up after install failure"
+    kill $$
     exit 1
 }
 
