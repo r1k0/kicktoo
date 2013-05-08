@@ -16,7 +16,7 @@
 - port all working gentoo profiles to funtoo
 - find an elegant way to split the kicktoo file for readability and design
 - find a way to fix profile structure (source kbin|gpt|etc?)
-- what if luks over lvm or lvm over luks?
+- what if lvm over luks?
 
 --------------------------
 = FIXME for next release =
