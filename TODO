@@ -8,8 +8,6 @@
 - have a dialog layer that would translate to a working kicktoo import
     have dialogs/ output same as ./kicktoo -u
 - make profiles:
-    gentoo-luks-lvm.profile
-    gentoo-luks-lvm-kbin.profile
     gentoo-noboot-noinitramfs.profile
     gentoo-noboot-noinitramfs-kbin.profile
 - make chroot.sh more usable
