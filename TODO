@@ -17,6 +17,7 @@
 - find an elegant way to split the kicktoo file for readability and design
 - find a way to fix profile structure (source kbin|gpt|etc?)
 - what if lvm over luks?
+- add option to erase disk to luks profiles
 
 --------------------------
 = FIXME for next release =
