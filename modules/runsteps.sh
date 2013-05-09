@@ -872,6 +872,7 @@ finishing_cleanup() {
     cleanup
     notify "Install complete!"
     [ "${reboot}" == "yes" ] && notify "Rebooting..." && reboot
+    exit 0
 }
 
 failure_cleanup() {
