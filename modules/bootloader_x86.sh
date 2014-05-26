@@ -81,8 +81,8 @@ configure_bootloader_grub2() {
         spawn "sed -i 's:GRUB_CMDLINE_LINUX=\"\":GRUB_CMDLINE_LINUX=\"'\"${args}\"'\":' ${chroot_dir}/etc/default/grub" || \
         die "Could not adjust GRUB_CMDLINE_LINUX with bootloader args $(echo ${args})"
     fi
-    debug configure_grub2 "generating /boot/grub2/grub.cfg"
-    spawn_chroot "grub2-mkconfig -o /boot/grub2/grub.cfg" || die "Could not generate /boot/grub2/grub.cfg"
+    debug configure_grub2 "generating /boot/grub/grub.cfg"
+    spawn_chroot "grub2-mkconfig -o /boot/grub/grub.cfg" || die "Could not generate /boot/grub2/grub.cfg"
 }
 
 # made for funtoo, broken for gentoo
