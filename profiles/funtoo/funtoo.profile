@@ -16,7 +16,7 @@ mountfs /dev/sda4 ext4 / noatime
 tree_type   snapshot    http://ftp.osuosl.org/pub/funtoo/funtoo-stable/snapshots/portage-latest.tar.xz
 
 # get kernel dotconfig from official running kernel
-cat $(pwd)/kconfig/livedvd-x86-amd64-32ul-2012.1.kconfig > /dotconfig
+cat /proc/config.gz | gzip -d > /dotconfig
 # get rid of Gentoo official firmware .config..
 grep -v CONFIG_EXTRA_FIRMWARE /dotconfig > /dotconfig2 ; mv /dotconfig2 /dotconfig
 # ..and lzo compression

@@ -13,7 +13,7 @@ mountfs /dev/sda2 ext4 / noatime
 tree_type   snapshot    http://distfiles.gentoo.org/snapshots/portage-latest.tar.bz2
 
 # get kernel dotconfig from the official running kernel
-cat $(pwd)/kconfig/livedvd-x86-amd64-32ul-2012.1.kconfig > /dotconfig
+cat /proc/config.gz | gzip -d > /dotconfig
 grep -v CONFIG_EXTRA_FIRMWARE /dotconfig > /dotconfig2 ; mv /dotconfig2 /dotconfig
 grep -v LZO                   /dotconfig > /dotconfig2 ; mv /dotconfig2 /dotconfig
 kernel_config_file      /dotconfig
