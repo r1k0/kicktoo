@@ -25,6 +25,8 @@ initramfs_builder
 genkernel_kernel_opts    --loglevel=5
 genkernel_initramfs_opts --loglevel=5
 
+grub2_install /dev/sda
+
 timezone                UTC
 rootpw                  a
 bootloader              grub
