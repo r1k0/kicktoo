@@ -78,8 +78,9 @@ configure_bootloader_grub2() {
         sed -e 's:{{root_keydev_uuid}}:$(get_uuid ${luks_remdev}):' | \
         sed -e 's:{{root_key}}:${luks_key}:')
         debug configure_bootloader_grub2 "GRUB_CMDLINE_LINUX=$(echo ${args}) to /etc/default/grub"
-        spawn "sed -i 's:GRUB_CMDLINE_LINUX=\"\":GRUB_CMDLINE_LINUX=\"'\"${args}\"'\":' ${chroot_dir}/etc/default/grub" || \
-        die "Could not adjust GRUB_CMDLINE_LINUX with bootloader args $(echo ${args})"
+	spawn "cp -f ${chroot_dir}/etc/default/grub ${chroot_dir}/etc/default/grub.example" || die "Could not copy ${chroot_dir}/etc/default/grub to ${chroot_dir}/etc/default/grub.example"
+	spawn "cat ${chroot_dir}/etc/default/grub.example | sed -v '^#.*' > ${chroot_dir}/etc/default/grub" || die "Could not filter comments out from ${chroot_dir}/etc/default/grub"
+	spawn "echo -e '\n\nGRUB_CMDLINE_LINUX=\"\$GRUB_CMDLINE_LINUX\" dolvm' > ${chroot_dir}/etc/default/grub" || die "Could not add dolvm option to ${chroot_dir}/etc/default/grub"
     fi
     debug configure_grub2 "generating /boot/grub/grub.cfg"
     spawn_chroot "grub2-mkconfig -o /boot/grub/grub.cfg" || die "Could not generate /boot/grub2/grub.cfg"
