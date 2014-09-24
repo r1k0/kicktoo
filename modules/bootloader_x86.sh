@@ -80,7 +80,7 @@ configure_bootloader_grub2() {
         debug configure_bootloader_grub2 "GRUB_CMDLINE_LINUX=$(echo ${args}) to /etc/default/grub"
 	spawn "cp -f ${chroot_dir}/etc/default/grub ${chroot_dir}/etc/default/grub.example" || die "Could not copy ${chroot_dir}/etc/default/grub to ${chroot_dir}/etc/default/grub.example"
 	spawn "cat ${chroot_dir}/etc/default/grub.example | grep -v ^#.* > ${chroot_dir}/etc/default/grub" || die "Could not filter comments out from ${chroot_dir}/etc/default/grub"
-	spawn "echo -e '\n\nGRUB_CMDLINE_LINUX=\"\$GRUB_CMDLINE_LINUX\" dolvm' >> ${chroot_dir}/etc/default/grub" || die "Could not add dolvm option to ${chroot_dir}/etc/default/grub"
+	spawn "echo -e '\n\nGRUB_CMDLINE_LINUX=\"\$GRUB_CMDLINE_LINUX dolvm\"' >> ${chroot_dir}/etc/default/grub" || die "Could not add dolvm option to ${chroot_dir}/etc/default/grub"
     fi
     debug configure_grub2 "generating /boot/grub/grub.cfg"
     spawn_chroot "grub2-mkconfig -o /boot/grub/grub.cfg" || die "Could not generate /boot/grub2/grub.cfg"
