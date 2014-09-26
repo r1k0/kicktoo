@@ -31,9 +31,9 @@ post_configure_bootloader() {
 #    spawn_chroot "cave resolve world -x"                               || warn "Could not update world"
 
     # compile kernel
-    fetch "http://www.kernel.org/pub/linux/kernel/v3.x/linux-${KV}.tar.gz" "${chroot_dir}/usr/src/linux-${KV}.tar.bz2"  || die "Could not fetch kernel source"
-    spawn_chroot "tar xfz /usr/src/linux-${KV}.tar.gz -C /usr/src/"                                                     || die "Could not untar kernel tarball"
-    spawn_chroot "ln -sf /usr/src/linux-${KV} /usr/src/linux"                                                           || die "Could not symlink source"
+    fetch "http://www.kernel.org/pub/linux/kernel/v3.x/linux-${KV}.tar.xz" "${chroot_dir}/usr/src/linux-${KV}.tar.xz" || die "Could not fetch kernel source"
+    spawn_chroot "tar Jxpf /usr/src/linux-${KV}.tar.xz -C /usr/src/"                                                  || die "Could not untar kernel tarball"
+    spawn_chroot "ln -sf /usr/src/linux-${KV} /usr/src/linux"                                                         || die "Could not symlink source"
     spawn_chroot "cat $(pwd)/kconfig/livedvd-x86-amd64-32ul-2012.1.kconfig | grep -v CONFIG_EXTRA_FIRMWARE | grep -v LZO > /usr/src/linux/.config" || die "Could not copy kernel config"
     spawn_chroot "cd /usr/src/linux && yes '' |  make -s oldconfig && make && make modules_install"                     || die "Could not build the kernel"
     spawn_chroot "mount /boot"
