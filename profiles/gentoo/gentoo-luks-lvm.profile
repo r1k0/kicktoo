@@ -40,8 +40,6 @@ tree_type   snapshot    http://distfiles.gentoo.org/snapshots/portage-latest.tar
 
 # get kernel dotconfig from the official running kernel
 cat /proc/config.gz | gzip -d > /dotconfig
-grep -v CONFIG_EXTRA_FIRMWARE /dotconfig > /dotconfig2 ; mv /dotconfig2 /dotconfig
-grep -v LZO                   /dotconfig > /dotconfig2 ; mv /dotconfig2 /dotconfig
 kernel_config_file       /dotconfig
 kernel_sources           gentoo-sources
 initramfs_builder

@@ -21,11 +21,6 @@ tree_type   snapshot    http://distfiles.gentoo.org/snapshots/portage-latest.tar
 
 # get kernel dotconfig from the official running kernel
 cat /proc/config.gz | gzip -d > /dotconfig
-grep -v CONFIG_EXTRA_FIRMWARE /dotconfig > /dotconfig2 ; mv /dotconfig2 /dotconfig
-grep -v LZO                   /dotconfig > /dotconfig2 ; mv /dotconfig2 /dotconfig
-grep -v CONFIG_CRYPTO_AES     /dotconfig > /dotconfig2 ; mv /dotconfig2 /dotconfig
-grep -v CONFIG_CRYPTO_CBC     /dotconfig > /dotconfig2 ; mv /dotconfig2 /dotconfig
-grep -v CONFIG_CRYPTO_SHA256  /dotconfig > /dotconfig2 ; mv /dotconfig2 /dotconfig
 # enable the required ones
 echo "CONFIG_CRYPTO_AES=y"    >> /dotconfig
 echo "CONFIG_CRYPTO_CBC=y"    >> /dotconfig
