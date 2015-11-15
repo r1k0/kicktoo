@@ -9,10 +9,10 @@ luks /dev/sda4 root aes sha256
 
 lvm_volgroup vg /dev/mapper/root
 
-lvm_logvol vg 15G usr
+lvm_logvol vg 10G usr
 lvm_logvol vg 5G home
 lvm_logvol vg 5G opt
-lvm_logvol vg 15G var
+lvm_logvol vg 10G var
 lvm_logvol vg 4G tmp
 
 format /dev/sda1        ext2
