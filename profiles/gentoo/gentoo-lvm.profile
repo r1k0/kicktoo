@@ -34,11 +34,8 @@ mountfs /dev/vg/tmp  ext4 /tmp  noatime
 [ "${arch}" == "amd64" ] && stage_latest amd64
 tree_type   snapshot    http://distfiles.gentoo.org/snapshots/portage-latest.tar.bz2
 
-# get kernel dotconfig from the official running kernel
-cat /proc/config.gz | gzip -d > /dotconfig
-grep -v CONFIG_EXTRA_FIRMWARE   /dotconfig > /dotconfig2 ; mv /dotconfig2 /dotconfig
-grep -v LZO                     /dotconfig > /dotconfig2 ; mv /dotconfig2 /dotconfig
-kernel_config_file       /dotconfig
+#cat /proc/config.gz | gzip -d > /dotconfig
+#kernel_config_file       /dotconfig
 kernel_sources           gentoo-sources
 initramfs_builder
 genkernel_kernel_opts    --loglevel=5
@@ -56,3 +53,11 @@ extra_packages           lvm2 dhcpcd # vim openssh vixie-cron syslog-ng
 
 rcadd                    lvm            default
 rcadd                    lvm-monitoring default
+
+pre_build_kernel() {
+    # NOTE we need cryptsetup *before* the kernel
+    spawn_chroot "emerge lvm2 --autounmask-write" || die "could not autounmask lvm2"
+    spawn_chroot "etc-update --automode -5" || die "could not etc-update --automode -5"
+    spawn_chroot "emerge lvm2 -q" || die "could not emerge lvm2"
+}
+
