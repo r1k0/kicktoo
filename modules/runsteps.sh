@@ -841,12 +841,12 @@ cleanup() {
         sleep 0.2
     done
     # NOTE possible leftovers like /mnt/gentoo/boot that gets mounted twice, not needed anymore but does no harm
-    if [ -f "/proc/mounts" ]; then
-        for mnt in $(awk '{ print $2; }' /proc/mounts | grep ^${chroot_dir} | sort -ur); do
-            spawn "umount ${mnt}" || warn "Could really not unmount ${mnt}"
-            sleep 0.2
-        done
-    fi
+#    if [ -f "/proc/mounts" ]; then
+#        for mnt in $(awk '{ print $2; }' /proc/mounts | grep ^${chroot_dir} | sort -ur); do
+#            spawn "umount ${mnt}" || warn "Could really not unmount ${mnt}"
+#            sleep 0.2
+#        done
+#    fi
     # NOTE: let mdadm clean up after lvm AND luks; if all were used, shutdown layers, top->bottom: lvm->luks->mdadm
     for array in $(set | grep '^mdraid_' | cut -d= -f1 | sed -e 's:^mdraid_::' | sort); do
         spawn "mdadm --manage --stop /dev/${array}" || warn "Could not stop mdraid array ${array}"
@@ -878,6 +878,7 @@ finishing_cleanup() {
 failure_cleanup() {
     [ -f ${logfile} ] && spawn "mv ${logfile} ${logfile}.failed" || warn "Could not move ${logfile} to ${logfile}.failed"
     cleanup
+    exit 1
 }
 
 trap_cleanup() {
