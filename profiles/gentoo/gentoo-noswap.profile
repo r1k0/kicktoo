@@ -12,7 +12,6 @@ mountfs /dev/sda2 ext4 / noatime
 [ "${arch}" == "amd64" ] && stage_latest amd64
 tree_type   snapshot    http://distfiles.gentoo.org/snapshots/portage-latest.tar.bz2
 
-# get kernel dotconfig from the official running kernel
 #cat /proc/config.gz | gzip -d > /dotconfig
 #kernel_config_file       /dotconfig
 kernel_sources	         gentoo-sources
