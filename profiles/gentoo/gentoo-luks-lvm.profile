@@ -59,6 +59,14 @@ rcadd                   dmcrypt        default
 rcadd                   lvm            default
 rcadd                   lvm-monitoring default
 
+pre_build_kernel() {
+    # NOTE we need cryptsetup *before* the kernel
+    spawn_chroot "mkdir /etc/portage/package.use/ && echo 'sys-fs/cryptsetup static >> /etc/portage/package.use/common'"
+    spawn_chroot "emerge cryptsetup --autounmask-write" || die "could not autounmask cryptsetup"
+    spawn_chroot "etc-update --automode -5" || die "could not etc-update --automode -5"
+    spawn_chroot "emerge cryptsetup -q" || die "could not emerge cryptsetup"
+}
+
 post_install_extra_packages() {
     # this tells luks where to find the swap
     cat >> ${chroot_dir}/etc/conf.d/dmcrypt <<EOF
