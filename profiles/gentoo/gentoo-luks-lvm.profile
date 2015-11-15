@@ -1,4 +1,4 @@
-part sda 1 83 100M
+part sda 1 83 500M
 part sda 2 82 2G # swap
 part sda 3 83 2G
 part sda 4 8e +  # linux lvm type
@@ -9,11 +9,11 @@ luks /dev/sda4 root aes sha256
 
 lvm_volgroup vg /dev/mapper/root
 
-lvm_logvol vg 5G usr
+lvm_logvol vg 15G usr
 lvm_logvol vg 5G home
 lvm_logvol vg 5G opt
-lvm_logvol vg 5G var
-lvm_logvol vg 2G tmp
+lvm_logvol vg 15G var
+lvm_logvol vg 4G tmp
 
 format /dev/sda1        ext2
 format /dev/mapper/swap swap
