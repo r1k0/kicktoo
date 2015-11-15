@@ -19,7 +19,7 @@ tree_type   snapshot    http://distfiles.gentoo.org/snapshots/portage-latest.tar
 #kernel_config_file      /dotconfig
 kernel_sources	        gentoo-sources
 kernel_builder          kigen
-kigen_kernel_opts       -d --localyesconfig
+kigen_kernel_opts       -d --localyesconfig -x
 
 timezone                UTC
 rootpw                  a
