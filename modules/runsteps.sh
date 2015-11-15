@@ -45,8 +45,8 @@ partition() {
         if [ "$(get_arch)" != "sparc64" ]; then
             # FIXME isnt it here where I should pad 2M at the very start of the device?
             # writing added partitions to device
-	    # FIXME++ random error during sfdisk_command with BLKRRPART: Device or resource busy
-	    #         https://github.com/coreos/bugs/issues/152
+            # FIXME++ random error during sfdisk_command with BLKRRPART: Device or resource busy
+            #         https://github.com/coreos/bugs/issues/152
             sfdisk_command "${device}" && sleep 1 || die "Could not write partitions ${partitions} to device ${device}"        
             # clear partitions for next device
             partitions=""
