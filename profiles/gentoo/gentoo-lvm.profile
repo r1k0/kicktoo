@@ -55,7 +55,7 @@ rcadd                    lvm            default
 rcadd                    lvm-monitoring default
 
 pre_build_kernel() {
-    # NOTE we need cryptsetup *before* the kernel
+    # NOTE we need lvm2 *before* the kernel
     spawn_chroot "emerge lvm2 --autounmask-write" || die "could not autounmask lvm2"
     spawn_chroot "etc-update --automode -5" || die "could not etc-update --automode -5"
     spawn_chroot "emerge lvm2 -q" || die "could not emerge lvm2"
