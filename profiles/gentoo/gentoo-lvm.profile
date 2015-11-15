@@ -39,7 +39,7 @@ tree_type   snapshot    http://distfiles.gentoo.org/snapshots/portage-latest.tar
 kernel_sources           gentoo-sources
 initramfs_builder
 genkernel_kernel_opts    --loglevel=5
-genkernel_initramfs_opts --lvm
+genkernel_initramfs_opts --loglevel=5 --lvm
 
 grub2_install /dev/sda
 
