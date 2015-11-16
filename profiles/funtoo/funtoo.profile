@@ -15,13 +15,8 @@ mountfs /dev/sda4 ext4 / noatime
 [ "${arch}" == "amd64" ] && stage_uri http://ftp.osuosl.org/pub/funtoo/funtoo-stable/x86-64bit/generic_64/stage3-latest.tar.xz
 tree_type   snapshot    http://ftp.osuosl.org/pub/funtoo/funtoo-stable/snapshots/portage-latest.tar.xz
 
-# get kernel dotconfig from official running kernel
-cat /proc/config.gz | gzip -d > /dotconfig
-# get rid of Gentoo official firmware .config..
-grep -v CONFIG_EXTRA_FIRMWARE /dotconfig > /dotconfig2 ; mv /dotconfig2 /dotconfig
-# ..and lzo compression
-grep -v LZO /dotconfig > /dotconfig2 ; mv /dotconfig2 /dotconfig
-kernel_config_file      /dotconfig
+#cat /proc/config.gz | gzip -d > /dotconfig
+#kernel_config_file      /dotconfig
 kernel_sources          gentoo-sources
 genkernel_kernel_opts    --loglevel=5
 genkernel_initramfs_opts --loglevel=5
@@ -29,7 +24,7 @@ genkernel_initramfs_opts --loglevel=5
 timezone		UTC
 rootpw 			a
 bootloader 		grub
-keymap			fr # be-latin1 en
+keymap			en # be-latin1 fr
 hostname		funtoo
 #extra_packages vixie-cron syslog-ng openssh
 #rcadd			vixie-cron default
