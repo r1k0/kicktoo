@@ -16,9 +16,11 @@ mountfs /dev/sda3 ext4 / noatime
 tree_type   snapshot    http://distfiles.gentoo.org/snapshots/portage-latest.tar.bz2
 
 # ship the binary kernel instead of compiling (faster)
-kernel_binary           $(pwd)/kbin/kernel-genkernel-${arch}-3.7.10-gentoo
-initramfs_binary        $(pwd)/kbin/initramfs-genkernel-${arch}-3.7.10-gentoo
-systemmap_binary        $(pwd)/kbin/System.map-genkernel-${arch}-3.7.10-gentoo
+kernel_binary           $(pwd)/kbin/kernel-genkernel-x86_64-4.1.12-gentoo
+initramfs_binary        $(pwd)/kbin/initramfs-genkernel-x86_64-4.1.12-gentoo
+systemmap_binary        $(pwd)/kbin/System.map-genkernel-x86_64-4.1.12-gentoo
+
+grub2_install /dev/sda
 
 timezone                UTC
 rootpw                  a
