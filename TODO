@@ -20,3 +20,6 @@
 --------------------------
 = FIXME for next release =
 --------------------------
+
+- cleanup/remove notion of size suffix conversion: human_size_to_mb
+    deprecated in sfdisk

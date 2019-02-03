@@ -3,7 +3,7 @@ isafunc() {
 
     declare -f ${func} > /dev/null
     local exitcode=$?
-#    debug isafunc "${func} with exitcode $exitcode"
+    debug isafunc "${func} with exitcode $exitcode"
     return ${exitcode}
 }
 
@@ -19,7 +19,7 @@ autoresume_runstep() {
         debug autoresume_runstep "SKIPPING ${func}"
 
         [ ${doskip} == "no" ] && ${func}
-        # NOTE do not setup autoresume points for the following runsteps: 
+        # NOTE do not setup autoresume points for the following runsteps:
         #    starting_cleanup     (since we do cleanup on start)
         #    finishing_cleanup    (since it makes no sense resuming the last runstep)
         #    failure_cleanup      (since it makes no sense)
@@ -39,7 +39,7 @@ autoresume_runstep() {
         if [ "${func}" == "unpack_stage_tarball" ]; then
             spawn "rm -f ${autoresume_profile_dir}/prepare_chroot" || warn "Cannot remove ${autoresume_profile_dir}/prepare_chroot resume points, should not autoresume"
         fi
-       
+
         # NOTE we want to run these nonetheless and let them handle the autoresume by themselves
         #   setup_mdraid
         #   setup_lvm

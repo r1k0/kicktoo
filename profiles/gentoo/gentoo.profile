@@ -19,7 +19,7 @@ tree_type   snapshot    http://distfiles.gentoo.org/snapshots/portage-latest.tar
 #cat /proc/config.gz | gzip -d > /dotconfig
 #kernel_config_file       /dotconfig
 kernel_sources	         gentoo-sources
-initramfs_builder               
+initramfs_builder
 genkernel_kernel_opts    --loglevel=5
 genkernel_initramfs_opts --loglevel=5
 

@@ -1,12 +1,12 @@
 get_filename_from_uri() {
     local uri=$1
-    
+
     basename "${1}"
 }
 
 get_path_from_uri() {
     local uri=$1
-    
+
     echo "${uri}" | cut -d / -f 4-
 }
 
@@ -19,7 +19,7 @@ get_protocol_from_uri() {
 fetch_kicktoo() {
     local uri=$1
     local localfile=$2
-    
+
     local realurl="http://${server_host}:${server_port}/$(get_path_from_uri "${uri}")"
     fetch_http_https_ftp "${realurl}" "${localfile}"
 }
@@ -54,7 +54,7 @@ fetch_http_https_ftp() {
 fetch_file() {
     local uri=$1
     local localfile=$2
-    
+
     uri=$(echo "${uri}" | sed -e 's|^file://||')
     debug fetch_file "Symlinking local file ${uri} to ${localfile}"
     ln -s "${uri}" "${localfile}"
@@ -63,7 +63,7 @@ fetch_file() {
 fetch_tftp() {
     local uri=$1
     local localfile=$2
-    
+
     spawn "curl ${uri} -o ${localfile}"
     local curl_exitcode=$?
     debug fetch_tftp "exit code from curl was ${curl_exitcode}"
@@ -77,7 +77,7 @@ fetch() {
     local protocol=$(get_protocol_from_uri "${uri}")
     debug fetch "protocol is ${protocol}"
 
-    if isafunc "fetch_${protocol}" ; then
+    if $(isafunc fetch_${protocol}) ; then
         fetch_${protocol} "${1}" "${2}"
         return $?
     else
