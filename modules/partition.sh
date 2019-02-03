@@ -81,7 +81,7 @@ sfdisk_command() {
     
     # hdparm -z force really works partprobe not
     debug sfdisk_command "running sfdisk partitions '${partitions}' on device ${device} with geometry ${geometry_args}"
-    spawn "echo -e '${partitions}' | sfdisk -uM ${geometry_args} ${device}" && spawn "hdparm -z ${device}" && \
+    spawn "echo -e '${partitions}' | sfdisk ${geometry_args} ${device}" && spawn "hdparm -z ${device}" && \
     sleep 1 && \
     # NOTE fix 2048 missing space before first partition, gosh I've chased this one...
     debug sfdisk_command "running fdisk pad 2048 before the first partition" && \
