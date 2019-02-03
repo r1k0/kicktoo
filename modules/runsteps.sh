@@ -39,7 +39,7 @@ partition() {
                 inputsize="${newsize}"
             fi
             [ -n "${bootable}" ] && bootable="*"
-            
+
             add_partition "${device}" "${minor}" "${inputsize}" "${type}" "${bootable}" || die "Could not add partition ${minor} to device ${device}"
         done
         if [ "$(get_arch)" != "sparc64" ]; then
@@ -47,7 +47,7 @@ partition() {
             # writing added partitions to device
             # FIXME++ random error during sfdisk_command with BLKRRPART: Device or resource busy
             #         https://github.com/coreos/bugs/issues/152
-            sfdisk_command "${device}" && sleep 1 || die "Could not write partitions ${partitions} to device ${device}"        
+            sfdisk_command "${device}" && sleep 1 || die "Could not write partitions ${partitions} to device ${device}"
             # clear partitions for next device
             partitions=""
         fi
@@ -121,9 +121,9 @@ setup_mdraid() {
                 spawn "mdadm --stop /dev/${array}" || die "Could not stop mdraid array ${array}"
                 local devices="/dev$(echo ${arrayopts}|sed -e 's/\/dev/$/'|cut -d'$' -f2-)"
                 spawn "mdadm --assemble /dev/${array} --run --update=uuid --uuid=${uuid} ${devices}" || die "Could not assemble and update mdraid array ${array} with uuid=${uuid}"
-            fi 
+            fi
         done
-        
+
     elif [ "${autoresume}" == "yes" ] && [ -f "${autoresume_profile_dir}/setup_mdraid" ]; then
         # we add raid device, don't create them
         for array in $(set | grep '^mdraid_' | cut -d= -f1 | sed -e 's:^mdraid_::' | sort); do
@@ -409,7 +409,7 @@ set_profile() {
     debug set_profile "setting profile with eselect to ${eselect_profile}"
     if [ -n "${eselect_profile}" ]; then
         spawn_chroot "eselect profile set ${eselect_profile}" || die "Could not set profile with eselect"
-    fi    
+      fi
 }
 
 create_mdadmconf() {
@@ -423,7 +423,7 @@ create_mdadmconf() {
 }
 
 create_dmcrypt() {
-    debug create_dmcrypt "writing to /etc/conf.d/dmcrypt"    
+    debug create_dmcrypt "writing to /etc/conf.d/dmcrypt"
     for device in ${luks}; do
         debug setup_luks "LUKSifying ${device}"
         local devicetmp=$(echo ${device}   | cut -d: -f1)
@@ -478,7 +478,7 @@ set_locale() {
     local first_locale=$(echo ${locales} | awk '{print $1}')
     local system_locale=$(cat /usr/share/i18n/SUPPORTED | grep "^${first_locale}" | head -n 1 | awk '{print $1}')
     echo "LANG=\"${system_locale}\"" >> ${chroot_dir}/etc/env.d/02locale
-	
+
     # remove existing locale.gen
     spawn "rm ${chroot_dir}/etc/locale.gen" || die "Could not rm ${chroot_dir}/etc/locale.gen"
 
@@ -486,7 +486,7 @@ set_locale() {
     for locale in ${locales}; do
         grep "^${locale}" /usr/share/i18n/SUPPORTED >> ${chroot_dir}/etc/locale.gen
     done
-	
+
     # make sure locale.gen is not overwritten automatically
     export CONFIG_PROTECT="/etc/locale.gen"
 }
@@ -542,7 +542,7 @@ fetch_repo_tree() {
     else
         die "Unrecognized tree_type: ${tree_type}"
     fi
-    
+
     if [ "${do_packages}" == "yes" ]; then
         notify "Fetching package repository tree"
         fetch "${portage_packages_uri}" "${chroot_dir}/$(get_filename_from_uri ${portage_packages_uri})"
@@ -565,14 +565,14 @@ unpack_repo_tree() {
             spawn "tar --lzma -xpf ${chroot_dir}/${tarball} -C ${chroot_dir}/usr" || die "Could not untar portage tarball"
         fi
     fi
-    
+
     # tarball contains a ./packages/ snapshot from previous installs or binary host builds
     if [ "${do_packages}" == "yes" ] && [ -n "${portage_packages_uri}" ]; then
         debug unpack_repo_tree "extracting packages tree"
         notify "Unpacking package repository tree"
         tarball=$(get_filename_from_uri ${portage_packages_uri})
         extension=${portage_packages_uri##*.}
-        
+
         spawn "mkdir ${chroot_dir}/usr/portage/packages"	|| die "Could not create '/usr/portage/packages'"
         if [ "$extension" == "bz2" ] ; then
             spawn "tar xjpf ${chroot_dir}/${tarball} -C ${chroot_dir}/usr/portage"        || die "Could not untar portage tarball"
@@ -590,7 +590,7 @@ copy_kernel() {
     debug copy_kernel "copying kernel binary ${kernel_binary} -> ${chroot_dir}/boot"
     # since genkernel might mount /boot we should do the same when copying to ${chroot_dir}/boot
 #    check_chroot_fstab /boot && spawn_chroot "mount /boot"
-    check_chroot_fstab /boot && spawn_chroot "[ -z \"\$(mount | grep /boot)\" ] && mount /boot"            
+    check_chroot_fstab /boot && spawn_chroot "[ -z \"\$(mount | grep /boot)\" ] && mount /boot"
     cp "${kernel_binary}"    "${chroot_dir}/boot" || die  "Could not copy precompiled kernel to ${chroot_dir}/boot"
     cp "${systemmap_binary}" "${chroot_dir}/boot" || warn "Could not copy precompiled System.map to ${chroot_dir}/boot"
 }
@@ -615,8 +615,8 @@ unpack_kernel_tarball() {
     local extension=${kernel_filename##*.}
 
     #check_chroot_fstab /boot && spawn_chroot "mount /boot"
-    check_chroot_fstab /boot && spawn_chroot "[ -z \"\$(mount | grep /boot)\" ] && mount /boot"            
-                                    
+    check_chroot_fstab /boot && spawn_chroot "[ -z \"\$(mount | grep /boot)\" ] && mount /boot"
+
     if [ "$extension" == "bz2" ] || [ "$extension" == "tbz2" ] ; then
         spawn "tar xjpf ${chroot_dir}/${kernel_filename} -C ${chroot_dir}"        || die "Could not untar kernel tarball"
     elif [ "$extension" == "gz" ] || [ "$extension" == "tgz" ] ; then
@@ -752,13 +752,13 @@ install_bootloader() {
     debug install_bootloader "merging bootloader: ${bootloader}"
     local accept_keywords=""
     local bootloader_ebuild=${bootloader}
-    
+
     # make sure /boot is mounted if it should be
-    check_chroot_fstab /boot && spawn_chroot "[ -z \"\$(mount | grep /boot)\" ] && mount /boot"            
+    check_chroot_fstab /boot && spawn_chroot "[ -z \"\$(mount | grep /boot)\" ] && mount /boot"
 
     # grub:2 is still considered unstable
     [ "${bootloader}" == "grub:2" ] && { accept_keywords="~${arch}"; bootloader_ebuild="grub:2"; }
-    
+
     # NOTE pkg might already be installed if -a called
     check_emerge_installed_pkg ${bootloader_ebuild} || \
     spawn_chroot "ACCEPT_KEYWORDS=${accept_keywords} emerge ${emerge_global_opts} ${bootloader_ebuild}" || die "Could not emerge bootloader"
