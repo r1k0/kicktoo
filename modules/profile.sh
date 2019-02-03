@@ -38,7 +38,7 @@ part() {
     local type=$3
     local size=$4
     local bootable=$5
-    
+
     drive=$(echo ${drive} | sed -e 's:^/dev/::' -e 's:/:_:g')
     local drive_temp="partitions_${drive}"
     local tmppart="${minor}:${type}:${size}:${bootable}"
@@ -118,7 +118,7 @@ lvm_logvol() {
     local volgroup=$1
     local size=$2
     local name=$3
-    
+
     local tmplogvol="${volgroup}|${size}|${name}"
     if [ -n "${lvm_logvols}" ]; then
         lvm_logvols="${lvm_logvols} ${tmplogvol}"
@@ -154,7 +154,7 @@ format() {
     local device=$1
     local fs=$2; shift 2;
     local options=$(echo ${@} | sed s/\ /__/g)
-   
+
     local tmpformat="${device}:${fs}:${options}"
     if [ "${device:0:11}" = '/dev/mapper' ]; then
         if [ -n "${format_luks}" ]; then
@@ -178,7 +178,7 @@ mountfs() {
     local type=$2
     local mountpoint=$3
     local mountopts=$4
-    
+
     [ -z "${mountopts}" ] && mountopts="defaults"
     [ -z "${mountpoint}" ] && mountpoint="none"
     local tmpmount="${device}:${type}:${mountpoint}:${mountopts}"
@@ -195,7 +195,7 @@ netmount() {
     local type=$2
     local mountpoint=$3
     local mountopts=$4
-    
+
     [ -z "${mountopts}" ] && mountopts="defaults"
     local tmpnetmount="${export}|${type}|${mountpoint}|${mountopts}"
     if [ -n "${netmounts}" ]; then
@@ -203,7 +203,7 @@ netmount() {
     else
         netmounts="${tmpnetmount}"
     fi
-}  
+}
 
 bootloader() {
     do_bootloader=yes
@@ -214,21 +214,21 @@ bootloader() {
 
 bootloader_kernel_args() {
     local kernel_args=${@}
-    
+
     bootloader_kernel_args="${kernel_args}"
 }
 
 rootpw() {
     do_password=yes
     local pass=$1
-    
+
     root_password="${pass}"
 }
 
 rootpw_crypt() {
     do_password=yes
     local pass=$1
-    
+
     root_password_hash="${pass}"
 }
 
@@ -269,7 +269,7 @@ stage_latest() {
 stage_uri() {
     do_stage_uri=yes
     local uri=$1
-    
+
     stage_uri="${uri}"
 }
 
@@ -282,7 +282,7 @@ stage_file() {
 kernel_uri() {
     do_kernel_uri=yes
     local uri=$1
-    
+
     kernel_uri="${uri}"
 }
 
@@ -290,7 +290,7 @@ makeconf_line() {
     do_makeconf=yes
     local key=$(echo "$@" | cut -d= -f1)
     local val=$(echo "$@" | cut -d= -f2)
-    
+
     eval "makeconf_${key}=\"${val}\""
 }
 
@@ -302,7 +302,7 @@ locale_set() {
 tree_type() {
     local type=$1
     local uri=$2
-    
+
     if [ "${type}" == "packages" ]; then
         do_packages=yes
         portage_packages_uri="${uri}"
@@ -315,27 +315,27 @@ tree_type() {
 
 bootloader_install_device() {
     local device=$1
-    
+
     bootloader_install_device="${device}"
 }
 
 chroot_dir() {
     local dir=$1
-    
+
     chroot_dir="${dir}"
 }
 
 eselect_profile() {
     do_set_profile=yes
     local eprofile=$1
-    
+
     eselect_profile="${eprofile}"
 }
 
 extra_packages() {
     do_xpkg=yes
     local pkg=$@
-    
+
     if [ -n "${extra_packages}" ]; then
         extra_packages="${extra_packages} ${pkg}"
     else
@@ -345,13 +345,13 @@ extra_packages() {
 
 genkernel_kernel_opts() {
     local opts=$@
-    
+
     genkernel_kernel_opts="${opts}"
 }
 
 genkernel_initramfs_opts() {
     local opts=$@
-    
+
     genkernel_initramfs_opts="${opts}"
 }
 
@@ -404,14 +404,14 @@ kernel_builder() {
 kernel_config_uri() {
     do_kernel=yes
     local uri=$1
-    
+
     kernel_config_uri="${uri}"
 }
 
 kernel_config_file() {
     do_kernel=yes
     local file=$1
-    
+
     kernel_config_file="${file}"
 }
 
@@ -425,7 +425,7 @@ kernel_sources() {
 initramfs_builder() {
     do_irfs=yes
     local irfsb=$1
-    
+
     # defaults to genkernel
     [ -z "${irfsb}" ] && irfsb="genkernel"
 
@@ -440,13 +440,13 @@ grub2_install() {
     # FIXME only accepts a single option currently (--modules=)
     local key=$(echo $opts | cut -d'=' -f1)
     local value=$(echo $opts | cut -d'=' -f2)
-    grub2_install["$(basename ${device})"]="${key}=\"${value}\""  
+    grub2_install["$(basename ${device})"]="${key}=\"${value}\""
 }
 
 timezone() {
     do_tz=yes
     local tz=$1
-    
+
     timezone="${tz}"
 }
 
@@ -467,7 +467,7 @@ hostname() {
 domain() {
     do_domain="yes"
     local domain=$1
-    
+
     domain_name="${domain}"
 }
 
@@ -475,7 +475,7 @@ rcadd() {
     do_services=yes
     local service=$1
     local runlevel=$2
-    
+
     local tmprcadd="${service}|${runlevel}"
     if [ -n "${services_add}" ]; then
         services_add="${services_add} ${tmprcadd}"
@@ -487,7 +487,7 @@ rcadd() {
 rcdel() {
     local service=$1
     local runlevel=$2
-    
+
     local tmprcdel="${service}|${runlevel}"
     if [ -n "${services_del}" ]; then
         services_del="${services_del} ${tmprcdel}"
@@ -501,7 +501,7 @@ net() {
     local device=$1
     local ipdhcp=$2
     local gateway=$3
-    
+
     local tmpnet="${device}|${ipdhcp}|${gateway}"
     if [ -n "${net_devices}" ]; then
         net_devices="${net_devices} ${tmpnet}"
@@ -512,13 +512,13 @@ net() {
 
 logfile() {
     local file=$1
-    
+
     logfile=${file}
 }
 
 skip() {
     local func=$1
-    
+
     eval "skip_${func}=1"
 }
 

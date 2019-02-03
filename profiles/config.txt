@@ -5,7 +5,7 @@ mode - Set the mode for the profile
 
   Usage:
     mode [luks]
-  
+
   Parameters:
     luks - whether this profile shall encrypt partitions
            comment out if encrypted partitions are not required
@@ -15,7 +15,7 @@ key_on - If mode=luks, shall the key be stored on USB key?
 
   Usage:
     key_on [usb]
-  
+
   Parameters:
     usb - whether the key shall be stored on removable USB key
           comment out if using EFI partition instead
@@ -27,7 +27,7 @@ geometry - Set the disk geometry for the partitioning.
 
   Usage:
     geometry <heads> <sectors> <cylinders>
-  
+
   Parameters:
     heads - the number of heads
     sectors - the number of sectors
@@ -76,7 +76,7 @@ gptspart - Creates a GPT partition, defined using sectors
     minor - the partition number. these should be in order
     type  - the partition type used in sgdisk (such as 8200 or 8300)
     start - the partition start sector
-    end   - the partition end sector, '+' for remaining space, 
+    end   - the partition end sector, '+' for remaining space,
             or 'n%' for percentage of remaining (these should only
             be used after all specific partition sizes are specified),
 
@@ -153,7 +153,7 @@ format - Formats a partition
   Parameters:
     device  - the device to format (such as /dev/hda2 or /dev/sdb4)
     fs      - the filesystem to use (such as ext2, ext3, or swap)
-    options - the options to use (such as "-O dir_index,huge_file") 
+    options - the options to use (such as "-O dir_index,huge_file")
 
 =============================
 mountfs - Mounts a filesystem
@@ -218,7 +218,7 @@ stage_latest - Determines the latest stage3 uri. Setting this
            for instance amd64, i686 or armv6j.
 
 ===============================================================
-stage_uri - Specifies the URI to the stage tarball (required or 
+stage_uri - Specifies the URI to the stage tarball (required or
             use stage_latest)
 
   Usage:
@@ -247,7 +247,7 @@ tree_type - Specifies the portage tree type, including package snapshots
   Parameters:
     type - the method for fetching the portage tree (sync, webrsync, or
            snapshot). you can also use 'none' to skip this step, additionally
-           only the packages type can be specified with a previous type and 
+           only the packages type can be specified with a previous type and
            will fetch the portage packages directory
     uri  - URI to the location of the portage snapshot if you specified
            'snapshot' and/or 'packages' for the type
@@ -358,10 +358,10 @@ kernel_sources - Specifies the kernel sources to use (defaults to
 
   Parameters:
     source - kernel sources to emerge
-    
+
 ============================================================================
 kernel_builder - Specifies the program to build the kernel and the initramfs
-                 values can either be genkernel OR KIGen (my own genkernel 
+                 values can either be genkernel OR KIGen (my own genkernel
                  clone in python)
 
   Usage:
@@ -375,7 +375,7 @@ kernel_builder - Specifies the program to build the kernel and the initramfs
 =========================================================================
 kernel_binary - Specifies the file to a custom kernel binary
                 If called you should disable all kernel compiling options
-                such as kernel_config_file, kernel_sources, 
+                such as kernel_config_file, kernel_sources,
                 genkernel_kernel_opts, genkernel_initramfs_opts
 
   Usage:
@@ -389,7 +389,7 @@ kernel_uri - Specifies the URI to download a pre-compiled kernel tarball
              The kernel tarball shall have been built using for example:
              version="3.7.10-gentoo"
              tar cfj /usr/src/linux-${version}.tbz2 /boot/*-${version} /etc/kernels/*-${version} /lib/modules/${version}
-             
+
   Usage:
     kernel_uri <uri>
 
@@ -406,7 +406,7 @@ initramfs_source - Specifies if an initramfs should be built
     arg - can be trash args but must not be zero sized variable
 
 NOTE: makes no sense using this option with kbin  profiles
-      since a precompiled kernel has no modules the initramfs 
+      since a precompiled kernel has no modules the initramfs
       can feed from
 
 ==================================================================
@@ -522,7 +522,7 @@ use_linux32 - Enable the use of linux32 for doing 32ul installs on 64-bit boxes
 ==============================================================
 makeconf_line - Append a config line to /etc/portage/make.conf
 
-  Usage: 
+  Usage:
     makeconf_line <KEY>="<values>"
 
   Parameters:
@@ -534,7 +534,7 @@ locale_set - Set locales for /etc/env.d/02locale and /etc/locale.gen
 
   Usage:
   	locale_set "<locales>"
-  
+
   Parameters:
   	locale_set "en_US.UTF-8"
   	locale_set "en_US.UTF-8 nl_NL de"
@@ -544,7 +544,7 @@ eselect_profile - Select profile using "eselect profile set"
 
   Usage:
     eselect_profile <profile name>
-  
+
   Parameters:
   	eselect_profile default/linux/amd64/13.0
-  	
+

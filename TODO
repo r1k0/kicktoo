@@ -23,3 +23,5 @@
 
 - cleanup/remove notion of size suffix conversion: human_size_to_mb
     deprecated in sfdisk
+- remove all calls to stage_latest in profiles
+    let the user pick an up to date URL for the desired stage tarball
