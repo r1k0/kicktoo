@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 part sda 1 83 100M  # /boot
 part sda 2 83 +     # /
 
@@ -18,7 +20,7 @@ stage_uri               http://distfiles.gentoo.org/releases/x86/autobuilds/${la
 tree_type   snapshot    http://distfiles.gentoo.org/snapshots/portage-latest.tar.bz2
 
 # get kernel dotconfig from running kernel
-cat $(pwd)/kconfig/livedvd-x86-amd64-32ul-2012.1.kconfig > /dotconfig
+cat "$(pwd)"/kconfig/livedvd-x86-amd64-32ul-2012.1.kconfig > /dotconfig
 
 kernel_config_file      /dotconfig
 rootpw                  a
@@ -35,4 +37,4 @@ hostname                gentoo-luks
 #rcadd                  vixie-cron default
 
 # get kernel dotconfig from running kernel
-cat $(pwd)/kconfig/livedvd-x86-amd64-32ul-2012.1.kconfig > /dotconfig
+cat "$(pwd)"/kconfig/livedvd-x86-amd64-32ul-2012.1.kconfig > /dotconfig

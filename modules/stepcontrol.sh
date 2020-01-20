@@ -1,7 +1,9 @@
+#!/usr/bin/env bash
+
 isafunc() {
     local func=$1
 
-    declare -f ${func} > /dev/null
+    declare -f "${func}" >/dev/null
     local exitcode=$?
     debug isafunc "${func} with exitcode $exitcode"
     return ${exitcode}
@@ -14,9 +16,9 @@ autoresume_runstep() {
     local doskip="no"
     [ -n "${2}" ] && doskip="yes"
 
-    if ! [ -f "${autoresume_step_file}" ] && [ "${autoresume}" == "yes" ] ; then
-        [ ${doskip} == "yes" ] && \
-        debug autoresume_runstep "SKIPPING ${func}"
+    if ! [ -f "${autoresume_step_file}" ] && [ "${autoresume}" == "yes" ]; then
+        [ ${doskip} == "yes" ] &&
+            debug autoresume_runstep "SKIPPING ${func}"
 
         [ ${doskip} == "no" ] && ${func}
         # NOTE do not setup autoresume points for the following runsteps:
@@ -24,11 +26,11 @@ autoresume_runstep() {
         #    finishing_cleanup    (since it makes no sense resuming the last runstep)
         #    failure_cleanup      (since it makes no sense)
         #    get_latest_stage_uri (since this one sets stage_uri)
-        [ "${func}" != "finishing_cleanup" ]    && \
-        [ "${func}" != "starting_cleanup" ]     && \
-        [ "${func}" != "failure_cleanup" ]      && \
-        [ "${func}" != "get_latest_stage_uri" ] && \
-        touch ${autoresume_step_file}
+        [ "${func}" != "finishing_cleanup" ] &&
+            [ "${func}" != "starting_cleanup" ] &&
+            [ "${func}" != "failure_cleanup" ] &&
+            [ "${func}" != "get_latest_stage_uri" ] &&
+            touch "${autoresume_step_file}"
     else
         # NOTE we want to run these runsteps anyway, don't skip
         #   mount*
@@ -45,10 +47,10 @@ autoresume_runstep() {
         #   setup_lvm
         #   setup_luks
         #   format_devices (this is only for the swap, we re run mkswap on autoresume but that's all)
-        if [ "${func}" == "setup_mdraid" ]   || \
-           [ "${func}" == "setup_lvm" ]      || \
-           [ "${func}" == "format_devices" ] || \
-           [ "${func}" == "setup_luks" ]; then
+        if [ "${func}" == "setup_mdraid" ] ||
+            [ "${func}" == "setup_lvm" ] ||
+            [ "${func}" == "format_devices" ] ||
+            [ "${func}" == "setup_luks" ]; then
             ${func} # <<<
         else
             echo -e " >>>  ${BOLD}resuming${NORMAL}"
@@ -59,18 +61,15 @@ autoresume_runstep() {
 runstep() {
     local func=$1
     local descr=$2
-    local skipfunc=$(eval $(echo echo "\${skip_${func}}"))
+    local skipfunc
+    skipfunc=$(eval "\${skip_${func}}")
 
-    if [ "${skipfunc}" != "1" ]; then
-        if [ -n "${server}" ]; then
-            server_send_request "update_status" "func=${func}&descr=$(echo "${descr}" | sed -e 's: :+:g')"
-        fi
-    fi
-
-    if $(isafunc pre_${func}); then
+    if isafunc pre_"${func}"; then
         echo -e " >>>  ${BOLD}pre_${func}()${NORMAL}"
         debug runstep "executing pre-hook for ${func}"
-        [ ${autoresume} = "yes" ] && autoresume_runstep pre_${func} || pre_${func}
+        if [ "${autoresume}" = "yes" ]; then
+            autoresume_runstep pre_"${func}" || pre_"${func}"
+        fi
     fi
 
     if [ "${skipfunc}" != "1" ]; then
@@ -78,19 +77,22 @@ runstep() {
         log "${descr}"
 
         debug runstep "executing main for ${func}"
-        [ ${autoresume} = "yes" ] && autoresume_runstep ${func} || ${func} # <<<
-
+        if [ "${autoresume}" = "yes" ]; then
+            autoresume_runstep "${func}" || ${func} # <<<
+        fi
     else
         debug runstep "skipping step ${func}"
         echo -e " ${GOOD}>>>${NORMAL} ${BOLD}skipping${NORMAL} ${func}"
-        [ ${autoresume} = "yes" ] && autoresume_runstep ${func} skip
+        if [ "${autoresume}" = "yes" ]; then
+            autoresume_runstep "${func}" skip
+        fi
     fi
 
-    if $(isafunc post_${func}); then
+    if isafunc post_"${func}"; then
         echo -e " >>>  ${BOLD}post_${func}()${NORMAL}"
         debug runstep "executing post-hook for ${func}"
-        [ ${autoresume} = "yes" ] && autoresume_runstep post_${func} || post_${func}
+        if [ "${autoresume}" = "yes" ]; then
+            autoresume_runstep post_"${func}" || post_"${func}"
+        fi
     fi
 }
-
-

@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 part sda 1 83 100M
 part sda 2 82 4096M
 part sda 3 83 +
@@ -16,13 +18,13 @@ mountfs /dev/mapper/root ext4 / noatime
 
 # retrieve latest autobuild stage version for stage_uri
 if [ "${arch}" == "x86" ]; then
-    wget -q http://distfiles.gentoo.org/releases/${arch}/autobuilds/latest-stage3-$(uname -m).txt -O /tmp/stage3.version
+    wget -q http://distfiles.gentoo.org/releases/"${arch}"/autobuilds/latest-stage3-"$(uname -m)".txt -O /tmp/stage3.version
 elif [ "${arch}" == "amd64" ]; then
-    wget -q http://distfiles.gentoo.org/releases/${arch}/autobuilds/latest-stage3-${arch}.txt -O /tmp/stage3.version
+    wget -q http://distfiles.gentoo.org/releases/"${arch}"/autobuilds/latest-stage3-"${arch}".txt -O /tmp/stage3.version
 fi
-latest_stage_version=$(cat /tmp/stage3.version | grep tar.bz2)
+latest_stage_version=$(grep tar.bz2 /tmp/stage3.version)
 
-stage_uri               http://distfiles.gentoo.org/releases/${arch}/autobuilds/${latest_stage_version}
+stage_uri               http://distfiles.gentoo.org/releases/"${arch}"/autobuilds/"${latest_stage_version}"
 tree_type     snapshot  http://distfiles.gentoo.org/snapshots/portage-latest.tar.bz2
 #tree_type     sync
 
@@ -30,7 +32,7 @@ kernel_sources          gentoo-sources
 
 kernel_builder          kigen
 kigen_kernel_opts       --debug # --nocolor
-kernel_config_file      $(pwd)/kconfig/dedibox-SC-${arch}.kconfig
+kernel_config_file      "$(pwd)"/kconfig/dedibox-SC-"${arch}".kconfig
 
 initramfs_builder       kigen
 kigen_initramfs_opts    --debug --source-luks --bin-dropbear --dynlibs --source-ttyecho --source-strace --source-screen --rootpasswd=dedi
@@ -243,17 +245,17 @@ pre_install_bootloader() {
 # }
 # skip install_extra_packages
 post_install_extra_packages() {
-    cat >> ${chroot_dir}/etc/conf.d/network <<EOF
+    cat >> "${chroot_dir}/etc/conf.d/network" <<EOF
 ifconfig_eth0="88.191.122.122 netmask 255.255.255.0 brd 88.191.122.255"
 defaultroute="gw 88.191.122.1"
 EOF
     # this tells where to find the swap to encrypt
-    cat >> ${chroot_dir}/etc/conf.d/dmcrypt <<EOF
+    cat >> "${chroot_dir}/etc/conf.d/dmcrypt" <<EOF
 swap=swap
 source='/dev/sda2'
 EOF
     # this will activate the encrypted swap on boot
-    cat >> ${chroot_dir}/etc/conf.d/local <<EOF
+    cat >> "${chroot_dir}/etc/conf.d/local" <<EOF
 mkswap /dev/sda2
 swapon /dev/sda2
 EOF

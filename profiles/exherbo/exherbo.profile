@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 KV="3.16" # systemd wants 3.8 or more
 
 part sda 1 83 100M

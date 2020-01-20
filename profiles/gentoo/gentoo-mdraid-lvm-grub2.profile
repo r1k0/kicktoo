@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 part sda 1 83 128M
 part sda 2 8e +
 
@@ -31,7 +33,7 @@ mountfs tmpfs            tmpfs /tmp     nodev,size=40%
 mountfs tmpfs            tmpfs /var/tmp nodev
 
 # retrieve latest autobuild stage version for stage_uri
-[ "${arch}" == "x86" ]   && stage_latest $(uname -m)
+[ "${arch}" == "x86" ]   && stage_latest "$(uname -m)"
 [ "${arch}" == "amd64" ] && stage_latest amd64
 tree_type   snapshot    http://distfiles.gentoo.org/snapshots/portage-latest.tar.bz2
 
@@ -46,7 +48,7 @@ locale_set              "en en_US ISO-8859-1 en_US.UTF-8 UTF-8"
 timezone                UTC
 rootpw                  a
 bootloader              grub:2
-grub2_install           /dev/sda
+grub_install           /dev/sda
 bootloader_kernel_args  "vga=0x317 domdadm dolvm"
 keymap                  us
 hostname                gentoo-mdraid

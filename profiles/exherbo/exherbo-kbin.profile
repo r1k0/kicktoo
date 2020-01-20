@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 part sda 1 83 100M
 part sda 2 83 +
 
@@ -8,9 +10,9 @@ mountfs /dev/sda1 ext2 /boot
 mountfs /dev/sda2 ext4 / noatime
 
 # don't compile kernel # systemd wants 3.8 or more
-kernel_binary $(pwd)/kbin/kernel-genkernel-${arch}-3.7.10-gentoo
-initramfs_binary $(pwd)/kbin/initramfs-genkernel-${arch}-3.7.10-gentoo
-systemmap_binary $(pwd)/kbin/System.map-genkernel-${arch}-3.7.10-gentoo
+kernel_binary "$(pwd)"/kbin/kernel-genkernel-"${arch}"-3.7.10-gentoo
+initramfs_binary "$(pwd)"/kbin/initramfs-genkernel-"${arch}"-3.7.10-gentoo
+systemmap_binary "$(pwd)"/kbin/System.map-genkernel-"${arch}"-3.7.10-gentoo
 
 stage_uri http://dev.exherbo.org/stages/exherbo-x86-current.tar.xz
 rootpw    a

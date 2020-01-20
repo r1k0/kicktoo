@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 gptpart sda 1 8300 100M
 gptpart sda 2 ef02 32M # for GPT/GUID only
 gptpart sda 3 8200 2048M
@@ -11,7 +13,7 @@ mountfs /dev/sda1 ext2 /boot
 mountfs /dev/sda3 swap
 mountfs /dev/sda4 ext4 / noatime
 
-[ "${arch}" == "x86" ]   && stage_uri http://ftp.osuosl.org/pub/funtoo/funtoo-stable/x86-32bit/$(uname -m)/stage3-latest.tar.xz
+[ "${arch}" == "x86" ]   && stage_uri http://ftp.osuosl.org/pub/funtoo/funtoo-stable/x86-32bit/"$(uname -m)"/stage3-latest.tar.xz
 [ "${arch}" == "amd64" ] && stage_uri http://ftp.osuosl.org/pub/funtoo/funtoo-stable/x86-64bit/generic_64/stage3-latest.tar.xz
 tree_type   snapshot    http://ftp.osuosl.org/pub/funtoo/funtoo-stable/snapshots/portage-latest.tar.xz
 
@@ -37,7 +39,7 @@ post_unpack_repo_tree() {
 }
 post_install_bootloader() {
     # $(echo ${device} | cut -c1-8) is like /dev/sdx
-    spawn_chroot "grub-install $(echo ${device} | cut -c1-8)" || die "cannot grub-install $(echo ${device} | cut -c1-8)"
+    spawn_chroot "grub-install $(echo "${device}" | cut -c1-8)" || die "cannot grub-install $(echo "${device}" | cut -c1-8)"
     spawn_chroot "boot-update"                                || die "boot-update failed"
 }
 skip configure_bootloader

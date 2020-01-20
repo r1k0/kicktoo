@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 part sda 1 83 500M
 part sda 2 82 2G # swap
 part sda 3 83 2G
@@ -34,7 +36,7 @@ mountfs /dev/vg/var       ext4 /var  noatime
 mountfs /dev/vg/tmp       ext4 /tmp  noatime
 
 # retrieve latest autobuild stage version for stage_uri
-[ "${arch}" == "x86" ]   && stage_latest $(uname -m)
+[ "${arch}" == "x86" ]   && stage_latest "$(uname -m)"
 [ "${arch}" == "amd64" ] && stage_latest amd64
 tree_type   snapshot    http://distfiles.gentoo.org/snapshots/portage-latest.tar.bz2
 
@@ -45,7 +47,7 @@ initramfs_builder
 genkernel_kernel_opts    --loglevel=5
 genkernel_initramfs_opts --loglevel=5 --luks --lvm
 
-grub2_install /dev/sda
+grub_install /dev/sda
 
 timezone                UTC
 rootpw                  a
@@ -69,9 +71,8 @@ pre_build_kernel() {
 
 post_install_extra_packages() {
     # this tells luks where to find the swap
-    cat >> ${chroot_dir}/etc/conf.d/dmcrypt <<EOF
+    cat >> "${chroot_dir}"/etc/conf.d/dmcrypt <<EOF
 swap=swap
 source='/dev/sda2'
 EOF
 }
-

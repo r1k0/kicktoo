@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # Kicktoo base profile for Beaglebone, Pandaboard or some other creditcard-size
 # computer running from an SD/MMC and requiring a specific geometry.
 #
@@ -10,13 +12,13 @@
 
 # setting some variables
 DISK="mmcblk0"
-SIZE=`fdisk -l /dev/$DISK | grep Disk | awk '{print $5}'`
+SIZE=$(fdisk -l /dev/$DISK | grep Disk | awk '{print $5}')
 HEADS=255
 SECTORS=63
-CYLINDERS=`echo $SIZE/$HEADS/$SECTORS/512 | bc`
+CYLINDERS=$(echo "$SIZE"/$HEADS/$SECTORS/512 | bc)
 
 # setting kicktoo config
-geometry $HEADS $SECTORS $CYLINDERS
+geometry $HEADS $SECTORS "$CYLINDERS"
 
 part $DISK 1 b 100M boot
 part $DISK 2 83 +

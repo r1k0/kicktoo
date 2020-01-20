@@ -1,2 +1,0 @@
-built with: genkernel --lvm --luks --dmraid --mdadm --e2fsprogs all
-noinitramfs built with: kigen k --localyesconfig

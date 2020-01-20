@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 part sda 1 83 100M  # /boot
 part sda 2 82 2048M # swap
 part sda 3 83 +     # /
@@ -16,17 +18,17 @@ mountfs /dev/mapper/root ext4 / noatime
 
 # retrieve latest autobuild stage version for stage_uri
 if [ "${arch}" == "x86" ]; then
-    wget -q http://distfiles.gentoo.org/releases/${arch}/autobuilds/latest-stage3-$(uname -m).txt -O /tmp/stage3.version
+    wget -q http://distfiles.gentoo.org/releases/"${arch}"/autobuilds/latest-stage3-"$(uname -m)".txt -O /tmp/stage3.version
 elif [ "${arch}" == "amd64" ]; then
-    wget -q http://distfiles.gentoo.org/releases/${arch}/autobuilds/latest-stage3-${arch}.txt -O /tmp/stage3.version
+    wget -q http://distfiles.gentoo.org/releases/"${arch}"/autobuilds/latest-stage3-"${arch}".txt -O /tmp/stage3.version
 fi
-latest_stage_version=$(cat /tmp/stage3.version | grep tar.bz2)
+latest_stage_version=$(grep tar.bz2 /tmp/stage3.version)
 
-stage_uri               http://distfiles.gentoo.org/releases/${arch}/autobuilds/${latest_stage_version}
+stage_uri               http://distfiles.gentoo.org/releases/"${arch}"/autobuilds/"${latest_stage_version}"
 tree_type   snapshot    http://distfiles.gentoo.org/snapshots/portage-latest.tar.bz2
 
 # get kernel dotconfig from running kernel
-cat $(pwd)/kconfig/livedvd-x86-amd64-32ul-2012.1.kconfig > /dotconfig
+cat "$(pwd)"/kconfig/livedvd-x86-amd64-32ul-2012.1.kconfig > /dotconfig
 # get rid of Gentoo official firmware .config
 grep -v CONFIG_EXTRA_FIRMWARE /dotconfig > /dotconfig2 ; mv /dotconfig2 /dotconfig
 grep -v LZO                   /dotconfig > /dotconfig2 ; mv /dotconfig2 /dotconfig
@@ -34,9 +36,7 @@ grep -v CONFIG_CRYPTO_AES     /dotconfig > /dotconfig2 ; mv /dotconfig2 /dotconf
 grep -v CONFIG_CRYPTO_CBC     /dotconfig > /dotconfig2 ; mv /dotconfig2 /dotconfig
 grep -v CONFIG_CRYPTO_SHA256  /dotconfig > /dotconfig2 ; mv /dotconfig2 /dotconfig
 # enable the required ones
-echo "CONFIG_CRYPTO_AES=y"    >> /dotconfig
-echo "CONFIG_CRYPTO_CBC=y"    >> /dotconfig
-echo "CONFIG_CRYPTO_SHA256=y" >> /dotconfig
+echo "CONFIG_CRYPTO_AES=y";echo "CONFIG_CRYPTO_CBC=y";echo "CONFIG_CRYPTO_SHA256=y" >> /dotconfig
 
 kernel_config_file      /dotconfig
 kernel_sources          gentoo-sources
@@ -238,12 +238,12 @@ pre_build_kernel() {
 # skip install_extra_packages
 post_install_extra_packages() {
     # this tells where to find the swap to encrypt
-    cat >> ${chroot_dir}/etc/conf.d/dmcrypt <<EOF
+    cat >> "${chroot_dir}"/etc/conf.d/dmcrypt <<EOF
 swap=swap
 source='/dev/sda2'
 EOF
     # this will activate the encrypted swap on boot
-    cat >> ${chroot_dir}/etc/conf.d/local <<EOF
+    cat >> "${chroot_dir}"/etc/conf.d/local <<EOF
 mkswap /dev/sda2
 swapon /dev/sda2
 EOF

@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 part sda 1 82 2048M
 part sda 2 83 +
 

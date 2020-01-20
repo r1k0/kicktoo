@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 part sda 1 83 100M  # /boot
 part sda 2 82 2048M # swap
 part sda 3 83 +     # /
@@ -15,7 +17,7 @@ mountfs /dev/mapper/swap swap
 mountfs /dev/mapper/root ext4 / noatime
 
 # retrieve latest autobuild stage version for stage_uri
-[ "${arch}" == "x86" ]   && stage_latest $(uname -m)
+[ "${arch}" == "x86" ]   && stage_latest "$(uname -m)"
 [ "${arch}" == "amd64" ] && stage_latest amd64
 tree_type   snapshot    http://distfiles.gentoo.org/snapshots/portage-latest.tar.bz2
 
@@ -26,7 +28,7 @@ initramfs_builder
 genkernel_kernel_opts    --loglevel=5
 genkernel_initramfs_opts --loglevel=5 --luks
 
-grub2_install /dev/sda
+grub_install /dev/sda
 
 timezone                 UTC
 bootloader               grub
@@ -49,7 +51,7 @@ pre_build_kernel() {
 
 post_install_extra_packages() {
     # this tells where to find the swap to encrypt
-    cat >> ${chroot_dir}/etc/conf.d/dmcrypt <<EOF
+    cat >> "${chroot_dir}"/etc/conf.d/dmcrypt <<EOF
 swap=swap
 source='/dev/sda2'
 EOF

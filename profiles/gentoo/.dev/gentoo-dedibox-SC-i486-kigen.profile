@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 part sda 1 83 100M
 part sda 2 82 4096M
 part sda 3 83 +
@@ -12,14 +14,14 @@ mountfs /dev/sda3 ext4 / noatime
 
 # retrieve latest autobuild stage version for stage_uri
 wget -q http://distfiles.gentoo.org/releases/x86/autobuilds/latest-stage3-i486.txt -O /tmp/stage3.version
-latest_stage_version=$(cat /tmp/stage3.version | grep tar.bz2)
+latest_stage_version=$(grep tar.bz2 /tmp/stage3.version)
 
 stage_uri               http://distfiles.gentoo.org/releases/x86/autobuilds/${latest_stage_version}
 tree_type     snapshot  http://distfiles.gentoo.org/snapshots/portage-latest.tar.bz2
 #tree_type               sync
 
 # compile kernel from sources using the right .config
-kernel_config_file      $(pwd)/kconfig/dedibox-SC-x86.kconfig
+kernel_config_file      "$(pwd)/kconfig/dedibox-SC-x86.kconfig"
 kernel_sources          gentoo-sources
 kernel_builder          kigen
 kigen_kernel_opts       --nocolor --nooldconfig
@@ -38,7 +40,7 @@ rcadd                   sshd       default
 
 # MUST HAVE
 post_install_extra_packages() {
-    cat >> ${chroot_dir}/etc/conf.d/network <<EOF
+    cat >> "${chroot_dir}/etc/conf.d/network" <<EOF
 ifconfig_eth0="88.xxx.xxx.xxx netmask 255.255.255.0 brd 88.xxx.xxx.255"
 defaultroute="gw 88.xxx.xxx.1"
 EOF

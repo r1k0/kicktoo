@@ -14,11 +14,10 @@ nocolor="no"
 # SIGQUIT  3 Core Quit from keyboard
 # SIGILL   4 Core Illegal Instruction
 # SIGABRT  6 Core Abort signal from abort(3)
-# SIGKILL  9 Term Kill signal
 # SIGSEGV 11 Core Invalid memory reference
 # SIGPIPE 13 Term Broken pipe: write to pipe with no readers
 # don't trap SIGTERM or trap_cleanup will run on successful installs
-trap "trap_cleanup" SIGHUP SIGINT SIGQUIT SIGILL SIGABRT SIGKILL SIGSEGV SIGPIPE
+trap "trap_cleanup" SIGHUP SIGINT SIGQUIT SIGILL SIGABRT SIGSEGV SIGPIPE
 
 if [ "$(whoami)" != "root" ]; then
     echo "You must be root"
@@ -26,25 +25,27 @@ if [ "$(whoami)" != "root" ]; then
 fi
 
 has() {
-    if which $1 &>/dev/null; then
+    if hash "$1" &>/dev/null; then
         true
     else
         error "$1: core tool missing from livecd!"
         echo "use the package manager to install it"
-        echo "or use another livecd." ; exit 1
+        echo "or use another livecd."
+        exit 1
     fi
 }
 
 import() {
     local module=$1
-    if source modules/${module}.sh > /dev/null >&1 ; then
+    if source modules/"${module}".sh >/dev/null >&1; then
         sourcedir="$(pwd)/modules"
         true
-    elif source /usr/share/kicktoo/modules/${module}.sh > /dev/null >&1 ; then
+    elif source /usr/share/kicktoo/modules/"${module}".sh >/dev/null >&1; then
         sourcedir="/usr/share/kicktoo/modules"
         true
     else
-        echo "critical error - cannot load module ${module} - exiting!" ; exit 1
+        echo "critical error - cannot load module ${module} - exiting!"
+        exit 1
     fi
     debug import "imported module ${module} from ${sourcedir}"
 }
@@ -52,7 +53,7 @@ import() {
 usage() {
     msg=$1
     [ -n "${msg}" ] && echo -e "${msg}\n"
-    
+
     cat <<EOF
 Usage:
     $0 [options]
@@ -62,7 +63,6 @@ Options:
     -u, --dump            Dump config to stdout
     -e, --export  <file>  Export set config for import
     -i, --import  <file>  Import and run config from export
-    -c, --client  <host>  Act as a client and fetch profiles from a kicktood daemon
     -r, --removeresume    Clear any previously set resume points
     -n, --noautoresume    Turn off autoresume
     -h, --help            This
@@ -86,113 +86,114 @@ while [ ${#} -gt 0 ]; do
     a=${1}
     shift
     case "${a}" in
-        -h|--help)
-            usage
-            exit 0
-            ;;
-        -d|--debug)
-            debug="yes"
-            ;;
-        -v|--verbose)
-            verbose="yes"
-            ;;
-        -e|--export)
-            export_set="yes"
-            export_file=${1}
-            ;;
-        -i|--import)
-            import_set="yes"
-            import_file=${1}
-            [ -f "${import_file}" ] || { echo "'${import_file}' is not a file"; exit 1; }
-            ;;
-        -c|--client)
-            server=${1}
-            shift
-            ;;
-        -o|--chroot)
-            chrootme="yes"
-            ;;
-        --close)
-            closeme="yes"
-            ;;
-        -n|--noautoresume)
-            autoresume="no"
-            ;;
-        -r|--removeresume)
-            removeresume="yes"
-            ;;
-        --version)
-            echo "Kicktoo version ${VERSION} based on Quickstart modules from agaffney"
-            exit 0
-            ;;
-        --nocolor)
-            nocolor="yes" 
-            ;;
-        -p|--profile)
-            profile_set="yes"
-            profile=${1}
-            [ -f "${profile}" ] || { echo "'${profile}' is not a file"; exit 1; }
-            ;;
-        -u|--dump)
-            dump_conf="yes"
-            ;;
-        -*)
-            usage "You have specified an invalid option: ${a}"
+    -h | --help)
+        usage
+        exit 0
+        ;;
+    -d | --debug)
+        debug="yes"
+        ;;
+    -v | --verbose)
+        verbose="yes"
+        ;;
+    -e | --export)
+        export_set="yes"
+        export_file=${1}
+        ;;
+    -i | --import)
+        import_set="yes"
+        import_file=${1}
+        [ -f "${import_file}" ] || {
+            echo "'${import_file}' is not a file"
             exit 1
-            ;;
+        }
+        ;;
+    -o | --chroot)
+        chrootme="yes"
+        ;;
+    --close)
+        closeme="yes"
+        ;;
+    -n | --noautoresume)
+        autoresume="no"
+        ;;
+    -r | --removeresume)
+        removeresume="yes"
+        ;;
+    --version)
+        echo "Kicktoo version ${VERSION} based on Quickstart modules from agaffney"
+        exit 0
+        ;;
+    --nocolor)
+        nocolor="yes"
+        ;;
+    -p | --profile)
+        profile_set="yes"
+        profile=${1}
+        [ -f "${profile}" ] || {
+            echo "'${profile}' is not a file"
+            exit 1
+        }
+        ;;
+    -u | --dump)
+        dump_conf="yes"
+        ;;
+    -*)
+        usage "You have specified an invalid option: ${a}"
+        exit 1
+        ;;
     esac
     unset a
 done
 
 # import modules
-for i in output         \
-        misc            \
-        spawn           \
-        fetcher         \
-        bootloader      \
-        partition       \
-        runsteps        \
-        profile         \
-        stepcontrol     \
-        server
-do
+for i in output \
+    misc \
+    spawn \
+    fetcher \
+    bootloader \
+    partition \
+    runsteps \
+    profile \
+    stepcontrol; do
     import ${i}
 done
 unset i
 
-# nocolor overwrites output module 
+# nocolor overwrites output module
 if [ "${nocolor}" == "yes" ]; then
-    GOOD=;WARN=;BAD=;HILITE=;BRACKET=;NORMAL=
+    # shellcheck disable=SC2034
+    GOOD='' WARN='' BAD='' HILITE='' BRACKET='' NORMAL=''
 fi
 
 # check for required programs on livecd
-for a in bash       \
-        curl        \
-        parted      \
-        sfdisk      \
-        fdisk       \
-        grep        \
-        shred       \
-        egrep       \
-        mount       \
-        swapoff     \
-        swapon      \
-        mke2fs      \
-        wget        \
-        chroot      \
-        tar         \
-        whoami      \
-        hostname    \
-        hdparm      \
-        awk         \
-        blkid
-do  
+for a in bash \
+    curl \
+    parted \
+    sfdisk \
+    fdisk \
+    grep \
+    shred \
+    egrep \
+    mount \
+    swapoff \
+    swapon \
+    mke2fs \
+    wget \
+    chroot \
+    tar \
+    whoami \
+    hostname \
+    hdparm \
+    awk \
+    blkid; do
     has "${a}"
 done
 unset a
 
-# declare this array else configure_bootloader_grub2() will fail
-declare -A grub2_install
+# declare this array else configure_bootloader_grub() will fail
+# shellcheck disable=SC2034
+declare -A grub_install
 
 # load default vars
 source ${sourcedir}/defaults
@@ -202,23 +203,17 @@ source ${sourcedir}/defaults
 # import config file
 if [ "${import_set}" == "yes" ]; then
     notify "Importing '${import_file}' config variables"
-    source ${import_file}
+    source "${import_file}"
 fi
 
 # fallback if we can't log runsteps
 if ! spawn "mkdir -p ${autoresume_root_dir}"; then
-    warn   "Unable to create step point tracking directory"
+    warn "Unable to create step point tracking directory"
     notify "Switching AUTORESUME back off"
     autoresume="no"
 fi
 
-# fetch profile from a kicktood daemon
-if [ -n "${server}" ]; then
-    server_init
-    server_get_profile && { profile_set="yes"; profile="/tmp/kicktoo_profile"; }
-fi
-
-profile_name="$(get_filename_from_uri ${profile} | sed 's/.profile//g')" #> /dev/null 2>&1)"
+profile_name="$(get_filename_from_uri "${profile}" | sed 's/.profile//g')" #> /dev/null 2>&1)"
 debug main "profile_name is: '${profile_name}'"
 
 # set autoresume vars
@@ -236,22 +231,24 @@ if [ ${removeresume} == "yes" ]; then
 fi
 
 # what arch am I running on?
-arch=$(get_arch) ; [ -z "${arch}" ] && die "Could not determine system architecture!"
+arch=$(get_arch)
+[ -z "${arch}" ] && die "Could not determine system architecture!"
 
 # load profile
-[ "${profile_set}" == "yes"  ] && source "${profile}"
+[ "${profile_set}" == "yes" ] && source "${profile}"
 # profile variables are now accessible
 # export  variables are now accessible (i.e. do_luks) from profile.sh functions
 
 # now we know which distro we're running on
-# source distro specific modules to overwrite gentoo 
+# source distro specific modules to overwrite gentoo
 # here
 
 # dump config to screen
 if [ "${dump_conf}" == "yes" ]; then
-    set -o posix; set | grep ^[a-z] 
-    for i in $(declare -F | awk '$3 ~ /(^pre_)|(^post_)/ { print }' | cut -d' ' -f3 ); do
-        type ${i} | grep -v 'is a function'
+    set -o posix
+    set | grep "^[a-z]"
+    for i in $(declare -F | awk '$3 ~ /(^pre_)|(^post_)/ { print }' | cut -d' ' -f3); do
+        type "${i}" | grep -v 'is a function'
     done
     exit 0
 fi
@@ -261,45 +258,50 @@ if [ "${export_set}" == "yes" ]; then
     if [ -n "${export_file}" ]; then
         true
     else
-        error "specify a file"; exit 1
+        error "specify a file"
+        exit 1
     fi
-    echo '# === START VARIABLES ===' > ${export_file}
-    set -o posix; set                \
-      | grep ^[a-z]                  \
-      | sed 's/^export_.*/#&/g'      \
-      | sed 's/^profile_set.*/#&/g'  \
-      | sed 's/^autoresume.*/#&/g'   \
-      | sed 's/^removeresume.*/#&/g' \
-      | sed 's/^dump_conf.*/#&/g'    \
-      | sed 's/^verbose.*/#&/g'      \
-      | sed 's/^debug.*/#&/g'        \
-      >> ${export_file} &&           \
-    echo '# === END VARIABLES ==='   >> ${export_file} 
-    echo '# === START FUNCTIONS ===' >> ${export_file}
-#    typeset -f >> ${export_file} # this will dump all functions
-    # only export custom functions, namely ^pre_*|^post_* 
-    for i in $(declare -F | awk '$3 ~ /(^pre_)|(^post_)/ { print }' | cut -d' ' -f3 ); do
-        type ${i} | grep -v 'is a function' >> ${export_file}
+    echo '# === START VARIABLES ===' >"${export_file}"
+    set -o posix
+    set |
+        grep "^[a-z]" |
+        sed 's/^export_.*/#&/g' |
+        sed 's/^profile_set.*/#&/g' |
+        sed 's/^autoresume.*/#&/g' |
+        sed 's/^removeresume.*/#&/g' |
+        sed 's/^dump_conf.*/#&/g' |
+        sed 's/^verbose.*/#&/g' |
+        sed 's/^debug.*/#&/g' \
+            >>"${export_file}" &&
+        echo '# === END VARIABLES ===' >>"${export_file}"
+    echo '# === START FUNCTIONS ===' >>"${export_file}"
+    #typeset -f >> ${export_file} # this will dump all functions
+    # only export custom functions, namely ^pre_*|^post_*
+    for i in $(declare -F | awk '$3 ~ /(^pre_)|(^post_)/ { print }' | cut -d' ' -f3); do
+        type "${i}" | grep -v 'is a function' >>"${export_file}"
     done
-    echo '# === END FUNCTIONS ==='   >> ${export_file}
+    echo '# === END FUNCTIONS ===' >>"${export_file}"
     notify "Exporting kicktoo config to '${export_file}'"
     exit 0
 fi
 
-! touch ${logfile} 2>/dev/null && { error "Logfile is not writeable!" ; exit 1; }
+! touch "${logfile}" 2>/dev/null && {
+    error "Logfile is not writeable!"
+    exit 1
+}
 
 # if autoresume is set and the current profile's track  directory does not exist, create it
-if [ ${autoresume} == "yes" ] && ! [ -d ${autoresume_profile_dir} ]; then
+if [ ${autoresume} == "yes" ] && ! [ -d "${autoresume_profile_dir}" ]; then
     spawn "mkdir -p ${autoresume_profile_dir}" || die "Unable to create autoresume tracking directory"
 fi
 
 # check for programs needed for custom setups
-[ "${do_raid}" == "yes" ]           && has "mdadm"
-[ "${do_lvm}"  == "yes" ]           && has "pvcreate"
-[ "${do_luks}" == "yes" ]           && has "cryptsetup"
-if ! [ -z "${profile}" ]; then
-    [ -n "$(grep xz ${profile})" ]      && has "unxz"
-    [ -n "$(grep gptpart ${profile})" ] && has "sgdisk"
+[ "${do_raid}" == "yes" ] && has "mdadm"
+[ "${do_lvm}" == "yes" ] && has "pvcreate"
+[ "${do_luks}" == "yes" ] && has "cryptsetup"
+if [ -n "${profile}" ]; then
+    grep -q xz "${profile}" && has "unxz"
+    grep -q gptpart "${profile}" && has "sgdisk"
 fi
 
 # chroot into a broken profile run
@@ -316,9 +318,9 @@ if [ "${closeme}" == "yes" ]; then
 fi
 
 # match emerge's verbosity to kicktoo's
-[ "${verbose}" ==  "yes" ] && [ "${debug}"   ==  "no" ]  && emerge_global_opts+=" -qv"
-[ "${debug}"   ==  "yes" ] && [ "${verbose}" ==  "no" ]  && emerge_global_opts+=" -v"
-[ "${verbose}" ==  "yes" ] && [ "${debug}"   ==  "yes" ] && emerge_global_opts+=" -v"
+[ "${verbose}" == "yes" ] && [ "${debug}" == "no" ] && emerge_global_opts+=" -qv"
+[ "${debug}" == "yes" ] && [ "${verbose}" == "no" ] && emerge_global_opts+=" -v"
+[ "${verbose}" == "yes" ] && [ "${debug}" == "yes" ] && emerge_global_opts+=" -v"
 
 # don't run if the minimum is not set
 if [ -z "${profile}" ] && [ -z "${import_file}" ]; then
@@ -338,53 +340,53 @@ fi
 #########################################################################
 
 # make sure it's clean before
-runstep starting_cleanup                                                "Cleaning up system environment"
+runstep starting_cleanup "Cleaning up system environment"
 
-debug main                                                              "Pushing system for ${arch}"
+debug main "Pushing system for ${arch}"
 
-runstep run_pre_install_script                                          "Running pre-install script if any"
+runstep run_pre_install_script "Running pre-install script if any"
 
-[ "${do_part}"          == "yes" ] && runstep partition                 "Partitioning"
-[ "${do_raid}"          == "yes" ] && runstep setup_mdraid              "Setting up RAID arrays"
-[ "${do_luks}"          == "yes" ] && runstep setup_luks                "Setting up LUKS devices"
-[ "${do_lvm}"           == "yes" ] && runstep setup_lvm                 "Setting up LVM volumes"
-[ "${do_format}"        == "yes" ] && runstep format_devices            "Formatting devices"
-[ "${do_luks}"          == "yes" ] && runstep format_devices_luks       "Formatting LUKS devices"
-[ "${do_localmounts}"   == "yes" ] && runstep mount_local_partitions    "Mounting local partitions"
-[ "${do_netmounts}"     == "yes" ] && runstep mount_network_shares      "Mounting network shares"
-if [ "${do_stage_uri}"  == "yes" ] || [ "${do_stage_path}" == "yes" ]; then
-    runstep fetch_stage_tarball                                         "Fetching stage tarball"
-    runstep unpack_stage_tarball                                        "Unpacking stage tarball"
-    runstep prepare_chroot                                              "Preparing chroot"
-    runstep setup_fstab                                                 "Setting up /etc/fstab"
+[ "${do_part}" == "yes" ] && runstep partition "Partitioning"
+[ "${do_raid}" == "yes" ] && runstep setup_mdraid "Setting up RAID arrays"
+[ "${do_luks}" == "yes" ] && runstep setup_luks "Setting up LUKS devices"
+[ "${do_lvm}" == "yes" ] && runstep setup_lvm "Setting up LVM volumes"
+[ "${do_format}" == "yes" ] && runstep format_devices "Formatting devices"
+[ "${do_luks}" == "yes" ] && runstep format_devices_luks "Formatting LUKS devices"
+[ "${do_localmounts}" == "yes" ] && runstep mount_local_partitions "Mounting local partitions"
+[ "${do_netmounts}" == "yes" ] && runstep mount_network_shares "Mounting network shares"
+if [ "${do_stage_uri}" == "yes" ] || [ "${do_stage_path}" == "yes" ]; then
+    runstep fetch_stage_tarball "Fetching stage tarball"
+    runstep unpack_stage_tarball "Unpacking stage tarball"
+    runstep prepare_chroot "Preparing chroot"
+    runstep setup_fstab "Setting up /etc/fstab"
 fi
-[ "${do_raid}"          == "yes" ] && runstep create_mdadmconf          "Setting up /etc/mdadm.conf"
-[ "${do_luks}"          == "yes" ] && runstep create_dmcrypt            "Setting up /etc/conf.d/dmcrypt"
-[ "${do_makeconf}"      == "yes" ] && runstep create_makeconf           "Creating custom make.conf"
-[ "${do_locale}"        == "yes" ] && runstep set_locale                "Setting locale"
-[ "${do_tree}"          == "yes" ] && runstep fetch_repo_tree           "Fetching repository tree"
-[ "${do_tree}"          == "yes" ] && runstep unpack_repo_tree          "Unpacking repository tree"
-[ "${do_set_profile}"   == "yes" ] && runstep set_profile               "Setting up profile with eselect"
-[ "${do_kbin}"          == "yes" ] && runstep copy_kernel               "Copying pre compiled kernel"
-[ "${do_irfsbin}"       == "yes" ] && runstep copy_initramfs            "Copying pre packaged initramfs"
-[ "${do_kernel_uri}"    == "yes" ] && runstep fetch_kernel_tarball      "Fetching pre compiled kernel package"
-[ "${do_kernel}"        == "yes" ] && runstep install_kernel_builder    "Installing kernel builder"
-[ "${do_kernel}"        == "yes" ] && runstep build_kernel              "Building kernel"
-[ "${do_kernel_uri}"    == "yes" ] && runstep unpack_kernel_tarball     "Unpacking kernel tarball"
-[ "${do_irfs}"          == "yes" ] && runstep install_initramfs_builder "Installing initramfs builder"
-[ "${do_irfs}"          == "yes" ] && runstep build_initramfs           "Building initramfs"
-[ "${do_postnet}"       == "yes" ] && runstep setup_network_post        "Setting up post-install networking"
-[ "${do_password}"      == "yes" ] && runstep setup_root_password       "Setting up root password"
-[ "${do_tz}"            == "yes" ] && runstep setup_timezone            "Setting up timezone"
-[ "${do_keymap}"        == "yes" ] && runstep setup_keymap              "Setting up keymap"
-[ "${do_host}"          == "yes" ] && runstep setup_host                "Setting up hostname"
-[ "${do_domain}"        == "yes" ] && runstep setup_domain              "Setting up domain name"
-[ "${do_xpkg}"          == "yes" ] && runstep install_extra_packages    "Compiling extra packages"
-[ "${do_bootloader}"    == "yes" ] && runstep install_bootloader        "Compiling bootloader"
-[ "${do_bootloader}"    == "yes" ] && runstep configure_bootloader      "Configuring bootloader"
-[ "${do_services}"      == "yes" ] && runstep add_and_remove_services   "Adding and removing services"
+[ "${do_raid}" == "yes" ] && runstep create_mdadmconf "Setting up /etc/mdadm.conf"
+[ "${do_luks}" == "yes" ] && runstep create_dmcrypt "Setting up /etc/conf.d/dmcrypt"
+[ "${do_makeconf}" == "yes" ] && runstep create_makeconf "Creating custom make.conf"
+[ "${do_locale}" == "yes" ] && runstep set_locale "Setting locale"
+[ "${do_tree}" == "yes" ] && runstep fetch_repo_tree "Fetching repository tree"
+[ "${do_tree}" == "yes" ] && runstep unpack_repo_tree "Unpacking repository tree"
+[ "${do_set_profile}" == "yes" ] && runstep set_profile "Setting up profile with eselect"
+[ "${do_kbin}" == "yes" ] && runstep copy_kernel "Copying pre compiled kernel"
+[ "${do_irfsbin}" == "yes" ] && runstep copy_initramfs "Copying pre packaged initramfs"
+[ "${do_kernel_uri}" == "yes" ] && runstep fetch_kernel_tarball "Fetching pre compiled kernel package"
+[ "${do_kernel}" == "yes" ] && runstep install_kernel_builder "Installing kernel builder"
+[ "${do_kernel}" == "yes" ] && runstep build_kernel "Building kernel"
+[ "${do_kernel_uri}" == "yes" ] && runstep unpack_kernel_tarball "Unpacking kernel tarball"
+[ "${do_irfs}" == "yes" ] && runstep install_initramfs_builder "Installing initramfs builder"
+[ "${do_irfs}" == "yes" ] && runstep build_initramfs "Building initramfs"
+[ "${do_postnet}" == "yes" ] && runstep setup_network_post "Setting up post-install networking"
+[ "${do_password}" == "yes" ] && runstep setup_root_password "Setting up root password"
+[ "${do_tz}" == "yes" ] && runstep setup_timezone "Setting up timezone"
+[ "${do_keymap}" == "yes" ] && runstep setup_keymap "Setting up keymap"
+[ "${do_host}" == "yes" ] && runstep setup_host "Setting up hostname"
+[ "${do_domain}" == "yes" ] && runstep setup_domain "Setting up domain name"
+[ "${do_xpkg}" == "yes" ] && runstep install_extra_packages "Compiling extra packages"
+[ "${do_bootloader}" == "yes" ] && runstep install_bootloader "Compiling bootloader"
+[ "${do_bootloader}" == "yes" ] && runstep configure_bootloader "Configuring bootloader"
+[ "${do_services}" == "yes" ] && runstep add_and_remove_services "Adding and removing services"
 
-runstep run_post_install_script                                         "Running post-install script if any"
-runstep finishing_cleanup                                               "Cleaning up system environment"
+runstep run_post_install_script "Running post-install script if any"
+runstep finishing_cleanup "Cleaning up system environment"
 
 exit 0

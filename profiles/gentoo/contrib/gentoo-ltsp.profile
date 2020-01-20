@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # Reference Kicktoo profile implementation for LTSP
 # used to build a Gentoo LTSP thin client chroot
 # see also: https://launchpad.net/ltsp
@@ -19,8 +21,8 @@ kernel_builder genkernel
 genkernel_kernel_opts --makeopts="${MAKEOPTS}"
 genkernel_initramfs_opts --makeopts="${MAKEOPTS}"
 initramfs_builder "${INITRAMFS_BUILDER}"
-timezone ${TIMEZONE}
-extra_packages ldm ltsp-client ${PACKAGES}
+timezone "${TIMEZONE}"
+extra_packages ldm ltsp-client "${PACKAGES}"
 
 [ -n "${MIRRORS}" ] && makeconf_line GENTOO_MIRRORS="${MIRRORS}"
 [ -n "${INPUT_DEVICES}" ] && makeconf_line INPUT_DEVICES="${INPUT_DEVICES}"
@@ -41,8 +43,10 @@ mount_bind() {
 
 post_unpack_stage_tarball() {
     # setting server portage vars
-    local server_pkgdir=$(portageq pkgdir)
-    local server_distdir=$(portageq distdir)
+    local server_pkgdir
+    local server_distdir
+    server_pkgdir=$(portageq pkgdir)
+    server_distdir=$(portageq distdir)
 
     # bind mounting portage, layman and binary package dirs
     mount_bind "/usr/portage" "${chroot_dir}/usr/portage"
@@ -51,18 +55,18 @@ post_unpack_stage_tarball() {
 
     # mount distfiles if at non default location
     if [ "${server_distdir}" != "/usr/portage/distfiles" ]; then
-        mount_bind ${server_distdir} "${chroot_dir}/usr/portage/distfiles"
+        mount_bind "${server_distdir}" "${chroot_dir}/usr/portage/distfiles"
     fi
 
-    echo "source /var/lib/layman/make.conf" >> ${chroot_dir}/etc/portage/make.conf
-    echo "# DO NOT DELETE" >> ${chroot_dir}/etc/fstab
+    echo "source /var/lib/layman/make.conf" >> "${chroot_dir}"/etc/portage/make.conf
+    echo "# DO NOT DELETE" >> "${chroot_dir}"/etc/fstab
 
     # so ltsp-chroot knows which arch to package mount
-    mkdir ${chroot_dir}/etc/ltsp
-    echo "${ARCH}" > ${chroot_dir}/etc/ltsp/arch.conf
+    mkdir "${chroot_dir}"/etc/ltsp
+    echo "${ARCH}" > "${chroot_dir}"/etc/ltsp/arch.conf
 
     # linking ltsp profile from overlay
-    rm ${chroot_dir}/etc/portage/make.profile
+    rm "${chroot_dir}"/etc/portage/make.profile
     ln -s "/var/lib/layman/ltsp/profiles/default/linux/${MAIN_ARCH}/13.0/ltsp/" "${chroot_dir}/etc/portage/make.profile"
 }
 
@@ -85,10 +89,10 @@ pre_build_kernel() {
 
 pre_build_initramfs() {
     if [ "${initramfs_builder}" = "dracut" ]; then
-        moduledir=$(ls -1r ${chroot_dir}/lib/modules | head -n 1)
-        kernelversion=$(echo ${moduledir} | cut -d "-" -f 1)
+        moduledir=$(find "${chroot_dir}"/lib/modules/* -printf '%f\n' | head -n 1)
+        kernelversion=$(echo "${moduledir}" | cut -d "-" -f 1)
         name="initramfs-dracut-${MAIN_ARCH}-${kernelversion}-gentoo"
-        dracut_initramfs_opts -m \"kernel-modules nbd nfs network base\" --filesystems \"squashfs\" /boot/${name} ${moduledir}
+        dracut_initramfs_opts -m \"kernel-modules nbd nfs network base\" --filesystems \"squashfs\" /boot/"${name}" "${moduledir}"
     fi
 }
 
@@ -103,7 +107,7 @@ pre_install_extra_packages() {
 post_install_extra_packages() {
     # apply localepurge
     spawn_chroot "emerge localepurge"
-    cat ${chroot_dir}/etc/locale.gen | awk '{print $1}' > ${chroot_dir}/etc/locale.nopurge
+    awk '{print $1}' "${chroot_dir}"/etc/locale.gen > "${chroot_dir}"/etc/locale.nopurge
     spawn_chroot "localepurge"
     spawn_chroot "emerge --unmerge localepurge"
 
@@ -119,9 +123,9 @@ post_install_extra_packages() {
     spawn "ln -sf /proc/mounts ${chroot_dir}/etc/mtab"
 
     # make sure these exist
-    mkdir -p ${chroot_dir}/var/lib/nfs
-    mkdir -p ${chroot_dir}/var/lib/pulse
+    mkdir -p "${chroot_dir}"/var/lib/nfs
+    mkdir -p "${chroot_dir}"/var/lib/pulse
 
     # required for openrc's bootmisc
-    mkdir -p ${chroot_dir}/var/lib/misc
+    mkdir -p "${chroot_dir}"/var/lib/misc
 }

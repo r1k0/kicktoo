@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 part sda 1 83 100M  # /boot
 part sda 2 83 +     # /
 
