@@ -29,3 +29,5 @@
 - add erase* option to dd if=/dev/zero* of=/dev/sdx bs=1M (solves hdparm dev busy)
 - use same url for snapshot than distfiles
 - change default url to ovh
+- add daemon back (check fetchers)
+- test all profiles
