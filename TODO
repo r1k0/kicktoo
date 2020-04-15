@@ -25,3 +25,7 @@
     deprecated in sfdisk
 - remove all calls to stage_latest in profiles
     let the user pick an up to date URL for the desired stage tarball
+- add -q to cryptsetup
+- add erase* option to dd if=/dev/zero* of=/dev/sdx bs=1M (solves hdparm dev busy)
+- use same url for snapshot than distfiles
+- change default url to ovh
