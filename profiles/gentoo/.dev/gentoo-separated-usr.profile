@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 part sda 1 83 100M
 part sda 2 82 2048M
 part sda 3 83 2048M
@@ -15,13 +17,13 @@ mountfs /dev/sda4 ext4 / noatime
 
 # retrieve latest autobuild stage version for stage_uri
 wget -q http://distfiles.gentoo.org/releases/x86/autobuilds/latest-stage3-i686.txt -O /tmp/stage3.version
-latest_stage_version=$(cat /tmp/stage3.version | grep tar.bz2)
+latest_stage_version=$(grep tar.bz2 /tmp/stage3.version)
 
-stage_uri               http://distfiles.gentoo.org/releases/x86/autobuilds/${latest_stage_version}
+stage_uri               http://distfiles.gentoo.org/releases/x86/autobuilds/"${latest_stage_version}"
 tree_type   snapshot    http://distfiles.gentoo.org/snapshots/portage-latest.tar.bz2
 
 # get kernel dotconfig from running kernel
-cat $(pwd)/kconfig/livedvd-x86-amd64-32ul-2012.1.kconfig > /dotconfig
+cat "$(pwd)"/kconfig/livedvd-x86-amd64-32ul-2012.1.kconfig > /dotconfig
 
 kernel_config_file      /dotconfig
 kernel_sources	        gentoo-sources

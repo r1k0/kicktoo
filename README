@@ -37,7 +37,6 @@ Options:
     -u, --dump            Dump config to stdout
     -e, --export  <file>  Export set config for import
     -i, --import  <file>  Import and run config from export
-    -c, --client  <host>  Act as a client and fetch profiles from a kicktood daemon
     -r, --removeresume    Clear any previously set resume points
     -n, --noautoresume    Turn off autoresume
     -h, --help            This
@@ -54,22 +53,6 @@ OR
   # ./kicktoo --dump --profile profiles/gentoo/gentoo.profile
   # ./kicktoo --export /tmp/myconf --profile profiles/gentoo/gentoo.profile
   # ./kicktoo --import /tmp/myconf 
-
-3) Reboot
-
-######################
-# Use kicktoo remotely
-######################
-
-1) Run kicktood on the remote host serving remote profiles
-  # cd kicktoo/daemon
-  # vim kicktood.conf 
-  # emerge HTTP-Daemon
-  # ./kicktood --conf kicktood.conf
-
-2) Run kicktoo from the local host
-  # cd kicktoo
-  # ./kicktoo --client 192.168.1.69
 
 3) Reboot
 

@@ -1,0 +1,18 @@
+shell=bash
+external-sources=true
+disable=SC1090 # Can't follow non-constant source
+disable=SC2154 # Var referenced but not assigned
+
+# kicktoo
+source-path=SCRIPTDIR
+source-path=SCRIPTDIR/modules
+
+# modules
+source-path=SCRIPTDIR/..
+source-path=SCRIPTDIR/../profiles/gentoo
+source-path=SCRIPTDIR/../profiles/funtoo
+source-path=SCRIPTDIR/../profiles/exherbo
+
+# profiles
+source-path=SCRIPTDIR/../..
+source-path=SCRIPTDIR/../../modules

@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 part sda 1 83 100M
 part sda 2 82 2G
 part sda 3 83 8G
@@ -31,17 +33,17 @@ mountfs /dev/vg/tmp  ext4 /tmp  noatime
 
 # retrieve latest autobuild stage version for stage_uri
 if [ "${arch}" == "x86" ]; then
-    wget -q http://distfiles.gentoo.org/releases/${arch}/autobuilds/latest-stage3-$(uname -m).txt -O /tmp/stage3.version
+    wget -q http://distfiles.gentoo.org/releases/"${arch}"/autobuilds/latest-stage3-"$(uname -m)".txt -O /tmp/stage3.version
 elif [ "${arch}" == "amd64" ]; then
-    wget -q http://distfiles.gentoo.org/releases/${arch}/autobuilds/latest-stage3-${arch}.txt -O /tmp/stage3.version
+    wget -q http://distfiles.gentoo.org/releases/"${arch}"/autobuilds/latest-stage3-"${arch}".txt -O /tmp/stage3.version
 fi
-latest_stage_version=$(cat /tmp/stage3.version | grep tar.bz2)
+latest_stage_version=$(grep tar.bz2 /tmp/stage3.version)
 
-stage_uri               http://distfiles.gentoo.org/releases/${arch}/autobuilds/${latest_stage_version}
+stage_uri               http://distfiles.gentoo.org/releases/"${arch}"/autobuilds/"${latest_stage_version}"
 tree_type   snapshot    http://distfiles.gentoo.org/snapshots/portage-latest.tar.bz2
 
 # get kernel dotconfig from running kernel
-cat $(pwd)/kconfig/livedvd-x86-amd64-32ul-2012.1.kconfig > /dotconfig
+cat "$(pwd)"/kconfig/livedvd-x86-amd64-32ul-2012.1.kconfig > /dotconfig
 # get rid of Gentoo official firmware .config..
 grep -v CONFIG_EXTRA_FIRMWARE /dotconfig > /dotconfig2 ; mv /dotconfig2 /dotconfig
 # ..and lzo compression

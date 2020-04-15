@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 part sda 1 83 100M
 part sda 2 82 2048M
 part sda 3 83 +
@@ -13,7 +15,7 @@ mountfs /dev/sda3 ext4 / noatime
 stage_uri               http://ftp.osuosl.org/pub/funtoo/funtoo-stable/x86-32bit/i686/stage3-current.tar.xz
 tree_type   snapshot    http://ftp.osuosl.org/pub/funtoo/funtoo-stable/snapshots/portage-current.tar.xz
 
-cat $(pwd)/kconfig/livedvd-x86-amd64-32ul-2012.1.kconfig > /dotconfig
+cat "$(pwd)"/kconfig/livedvd-x86-amd64-32ul-2012.1.kconfig > /dotconfig
 kernel_config_file      /dotconfig
 kernel_sources          gentoo-sources
 

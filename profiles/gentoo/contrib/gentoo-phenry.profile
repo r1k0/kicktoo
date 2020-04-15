@@ -1,11 +1,13 @@
+#!/usr/bin/env bash
+
 # comment out if encrypted partitions are not required
 mode luks
 # if mode=luks, is the key stored on USB key? comment out if using EFI partition instead
 key_on usb
 
 # overriding defaults
-emerge_global_opts="--getbinpkgonly"
-distfiles_url="http://mirror.ovh.net/gentoo-distfiles"
+export emerge_global_opts="--getbinpkgonly"
+export distfiles_url="http://mirror.ovh.net/gentoo-distfiles"
 
 
 gptspart sda 1 ef02 2048 4095
@@ -115,8 +117,8 @@ extra_packages            linux-firmware lvm2 cryptsetup mdadm dhcpcd xfsprogs r
 #net                      eth0 dhcp
 
 bootloader                grub:2
-grub2_install  /dev/sda   --modules="part_gpt mdraid1x lvm ext2 xfs"
-grub2_install  /dev/sdb   --modules="part_gpt mdraid1x lvm ext2 xfs"
+grub_install  /dev/sda   --modules="part_gpt mdraid1x lvm ext2 xfs"
+grub_install  /dev/sdb   --modules="part_gpt mdraid1x lvm ext2 xfs"
  if [ "${mode}" == "luks" ]; then
 bootloader_kernel_args    "domdadm dolvm crypt_root=/dev/vg0/root root=/dev/mapper/root root_keydev=UUID={{root_keydev_uuid}} root_key={{root_key}} key_timeout=10"
  else

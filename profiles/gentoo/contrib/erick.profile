@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 part sdb 1 83 100M  # /boot
 part sdb 2 82 2048M # swap
 part sdb 3 83 +     # /
@@ -15,7 +17,7 @@ mountfs /dev/mapper/swap swap
 mountfs /dev/mapper/root ext4 / noatime
 
 # retrieve latest autobuild stage version for stage_uri
-[ "${arch}" == "x86" ]   && stage_latest $(uname -m)
+[ "${arch}" == "x86" ]   && stage_latest "$(uname -m)"
 [ "${arch}" == "amd64" ] && stage_latest amd64
 tree_type   snapshot    http://distfiles.gentoo.org/snapshots/portage-latest.tar.bz2
 
@@ -27,7 +29,7 @@ genkernel_kernel_opts    --loglevel=5
 genkernel_initramfs_opts --loglevel=5 --luks
 
 timezone                 UTC
-grub2_install            /dev/sda
+grub_install            /dev/sda
 bootloader               grub
 bootloader_kernel_args   crypt_root=/dev/sdb3 # should match root device in the $luks variable
 rootpw                   a # CHANGE ME
@@ -48,7 +50,7 @@ pre_build_kernel() {
 
 post_install_extra_packages() {
     # this tells where to find the swap to encrypt
-    cat >> ${chroot_dir}/etc/conf.d/dmcrypt <<EOF
+    cat >> "${chroot_dir}"/etc/conf.d/dmcrypt <<EOF
 swap=swap
 source='/dev/sdb2'
 EOF

@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 part sda 1 83 100M  # /boot
 part sda 2 82 2048M # swap
 part sda 3 83 +     # /
@@ -15,14 +17,14 @@ mountfs /dev/mapper/swap swap
 mountfs /dev/mapper/root ext4 / noatime
 
 # retrieve latest autobuild stage version for stage_uri
-[ "${arch}" == "x86" ]   && stage_latest $(uname -m)
+[ "${arch}" == "x86" ]   && stage_latest "$(uname -m)"
 [ "${arch}" == "amd64" ] && stage_latest amd64
 tree_type   snapshot    http://distfiles.gentoo.org/snapshots/portage-latest.tar.bz2
 
 # ship the binary kernel instead of compiling (faster)
-kernel_binary           $(pwd)/kbin/kernel-genkernel-${arch}-3.7.10-gentoo
-initramfs_binary        $(pwd)/kbin/initramfs-genkernel-${arch}-3.7.10-gentoo
-systemmap_binary        $(pwd)/kbin/System.map-genkernel-${arch}-3.7.10-gentoo
+kernel_binary           "$(pwd)"/kbin/kernel-genkernel-"${arch}"-3.7.10-gentoo
+initramfs_binary        "$(pwd)"/kbin/initramfs-genkernel-"${arch}"-3.7.10-gentoo
+systemmap_binary        "$(pwd)"/kbin/System.map-genkernel-"${arch}"-3.7.10-gentoo
 
 timezone                UTC
 bootloader              grub
@@ -36,7 +38,7 @@ rcadd                   dmcrypt default
 
 post_install_extra_packages() {
     # this tells luks where to find the swap 
-    cat >> ${chroot_dir}/etc/conf.d/dmcrypt <<EOF
+    cat >> "${chroot_dir}"/etc/conf.d/dmcrypt <<EOF
 swap=swap
 source='/dev/sda2'
 EOF

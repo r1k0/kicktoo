@@ -1,6 +1,6 @@
 chroot_dir="/mnt/gentoo"
 output_logfile="/tmp/installoutput.log"
-emerge_global_opts="--usepkg"
+emerge_global_opts="--usepkg --autounmask --autounmask-keep-masks --autounmask-unrestricted-atoms --autounmask-write --autounmask-continue=y"
 logfile="/tmp/install.log"
 kernel_builder="genkernel"
 autoresume_root_dir="/tmp/.kicktoo-autoresume"

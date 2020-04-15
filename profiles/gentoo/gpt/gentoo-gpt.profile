@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 gptpart sda 1 8300 100M
 gptpart sda 2 ef02 32M # for GPT/GUID only
 gptpart sda 3 8200 2048M
@@ -12,12 +14,12 @@ mountfs /dev/sda3 swap
 mountfs /dev/sda4 ext4 / noatime
 
 # retrieve latest autobuild stage version for stage_uri
-[ "${arch}" == "x86" ]   && stage_latest $(uname -m)
+[ "${arch}" == "x86" ]   && stage_latest "$(uname -m)"
 [ "${arch}" == "amd64" ] && stage_latest amd64
 tree_type   snapshot    http://distfiles.gentoo.org/snapshots/portage-latest.tar.bz2
 
 # get kernel dotconfig from the official running kernel
-cat /proc/config.gz | gzip -d > /dotconfig
+zcat /proc/config.gz > /dotconfig
 grep -v CONFIG_EXTRA_FIRMWARE /dotconfig > /dotconfig2 ; mv /dotconfig2 /dotconfig
 grep -v LZO                   /dotconfig > /dotconfig2 ; mv /dotconfig2 /dotconfig
 kernel_config_file       /dotconfig

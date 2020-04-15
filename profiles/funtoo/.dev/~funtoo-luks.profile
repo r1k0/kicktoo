@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 dist funtoo
 
@@ -43,12 +43,12 @@ post_unpack_repo_tree() {
 # MUST HAVE
 post_install_cryptsetup() {
 	# this tells where to find the swap to encrypt
-        cat >> ${chroot_dir}/etc/conf.d/dmcrypt <<EOF
+        cat >> "${chroot_dir}"/etc/conf.d/dmcrypt <<EOF
 swap=swap
 source='/dev/sda2'
 EOF
         # this will activate the encrypted swap on boot
-        cat >> ${chroot_dir}/etc/conf.d/local <<EOF
+        cat >> "${chroot_dir}"/etc/conf.d/local <<EOF
 swapon /dev/sda2
 EOF
 

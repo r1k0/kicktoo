@@ -186,7 +186,7 @@ bootloader - Specify the bootloader to use (defaults to grub)
     bootloader <bootloader>
 
   Parameters:
-    bootloader - grub, grub2, lilo
+    bootloader - grub, lilo
 
 ====================================================================
 rootpw - Sets the root password (required if not using rootpw_crypt)
@@ -263,18 +263,18 @@ bootloader_install_device - Specifies the device to install the bootloader to
     device - device to install bootloader to (such as /dev/hda, /dev/hda3, etc.)
 
 ================================================================================
-grub2_install - Specifies the device to install grub2 bootloader to, and options
+grub_install - Specifies the device to install grub bootloader to, and options
 
   Usage:
-    grub2_install <device> <options>
+    grub_install <device> <options>
 
   Parameters:
     device  - device to install bootloader to (such as /dev/sda, etc.)
-    options - options to be passed to grub2-install
+    options - options to be passed to grub-install
               note: only --modules options is currently supported
 
   Example:
-    grub2_install  /dev/sda   --modules="part_gpt mdraid1x lvm xfs"
+    grub_install  /dev/sda   --modules="part_gpt mdraid1x lvm xfs"
 
 =======================================================================
 chroot_dir - Specifies the directory to use for the chroot (defaults to
@@ -502,16 +502,6 @@ skip - Skips an install step
 
   Parameters:
     install step - name of step to skip
-
-=================================
-server - Specify a kicktoo daemon
-
-  Usage:
-    server <host>[:<port>]
-
-  Parameters:
-    host - hostname or IP address of the kicktoo daemon
-    port - port server is listening on (defaults to 8899)
 
 ===============================================================================
 use_linux32 - Enable the use of linux32 for doing 32ul installs on 64-bit boxes
