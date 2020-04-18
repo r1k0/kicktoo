@@ -4,8 +4,8 @@ VERSION=4
 
 start_time_in_secs=$(date +%s)
 
-debug="no"
-verbose="no"
+debug="yes"
+verbose="yes"
 autoresume="yes"
 removeresume="no"
 nocolor="no"
@@ -69,8 +69,7 @@ Options:
     -r, --removeresume    Clear any previously set resume points
     -n, --noautoresume    Turn off autoresume
     -h, --help            This
-    -v, --verbose         Be verbose (show command output)
-    -d, --debug           Output debugging messages
+    -q, --quiet           Disable verbose and debug
     --nocolor             No color
     --version             Print version
 
@@ -93,11 +92,15 @@ while [ ${#} -gt 0 ]; do
         usage
         exit 0
         ;;
-    -d | --debug)
-        debug="yes"
-        ;;
-    -v | --verbose)
-        verbose="yes"
+#    -d | --debug)
+#        debug="yes"
+#        ;;
+#    -v | --verbose)
+#        verbose="yes"
+#        ;;
+    -q | --quiet)
+        verbose="no"
+        debug="no"
         ;;
     -e | --export)
         export_set="yes"
