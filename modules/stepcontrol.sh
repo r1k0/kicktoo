@@ -1,16 +1,15 @@
-#!/usr/bin/env bash
-
 isafunc() {
     local func=$1
 
     declare -f "${func}" >/dev/null
     local exitcode=$?
     debug isafunc "${func} with exitcode $exitcode"
+
     return ${exitcode}
 }
 
 autoresume_runstep() {
-    local func="${1}"
+    local func=${1}
     local autoresume_step_file="${autoresume_profile_dir}/${func}"
 
     local doskip="no"
@@ -26,10 +25,10 @@ autoresume_runstep() {
         #    finishing_cleanup    (since it makes no sense resuming the last runstep)
         #    failure_cleanup      (since it makes no sense)
         #    get_latest_stage_uri (since this one sets stage_uri)
-        [ "${func}" != "finishing_cleanup" ] &&
-            [ "${func}" != "starting_cleanup" ] &&
-            [ "${func}" != "failure_cleanup" ] &&
-            [ "${func}" != "get_latest_stage_uri" ] &&
+        [ "${func}" != "finishing_cleanup"    ] &&
+        [ "${func}" != "starting_cleanup"     ] &&
+        [ "${func}" != "failure_cleanup"      ] &&
+        [ "${func}" != "get_latest_stage_uri" ] &&
             touch "${autoresume_step_file}"
     else
         # NOTE we want to run these runsteps anyway, don't skip
@@ -47,11 +46,11 @@ autoresume_runstep() {
         #   setup_lvm
         #   setup_luks
         #   format_devices (this is only for the swap, we re run mkswap on autoresume but that's all)
-        if [ "${func}" == "setup_mdraid" ] ||
-            [ "${func}" == "setup_lvm" ] ||
-            [ "${func}" == "format_devices" ] ||
-            [ "${func}" == "setup_luks" ]; then
-            ${func} # <<<
+        if [ "${func}" == "setup_mdraid"   ] ||
+           [ "${func}" == "setup_lvm"      ] ||
+           [ "${func}" == "format_devices" ] ||
+           [ "${func}" == "setup_luks"     ]; then
+              ${func} # <<<
         else
             echo -e " >>>  ${BOLD}resuming${NORMAL}"
         fi
@@ -65,7 +64,7 @@ runstep() {
     skipfunc=$(eval "\${skip_${func}}")
 
     if isafunc pre_"${func}"; then
-        echo -e " >>>  ${BOLD}pre_${func}()${NORMAL}"
+        echo -e " >>>  ${BOLD}pre_${func}${NORMAL} ($(secs_to_minutes_to_hours "$(($(date +%s) - ${start_time_in_secs}))"))"
         debug runstep "executing pre-hook for ${func}"
         if [ "${autoresume}" = "yes" ]; then
             autoresume_runstep pre_"${func}" || pre_"${func}"
@@ -73,7 +72,7 @@ runstep() {
     fi
 
     if [ "${skipfunc}" != "1" ]; then
-        echo -e " ${GOOD}>>>${NORMAL} ${descr}"
+        echo -e " ${GOOD}>>>${NORMAL} ${descr} ($(secs_to_minutes_to_hours "$(($(date +%s) - ${start_time_in_secs}))"))"
         log "${descr}"
 
         debug runstep "executing main for ${func}"

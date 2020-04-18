@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-VERSION=3
+VERSION=4
+
+start_time_in_secs=$(date +%s)
 
 debug="no"
 verbose="no"
@@ -63,6 +65,7 @@ Options:
     -u, --dump            Dump config to stdout
     -e, --export  <file>  Export set config for import
     -i, --import  <file>  Import and run config from export
+    -c, --client  <host>  Act as a client and fetch profiles from a kicktood daemon
     -r, --removeresume    Clear any previously set resume points
     -n, --noautoresume    Turn off autoresume
     -h, --help            This
@@ -108,6 +111,10 @@ while [ ${#} -gt 0 ]; do
             exit 1
         }
         ;;
+    -c|--client)
+        server=${1}
+        shift
+        ;;
     -o | --chroot)
         chrootme="yes"
         ;;
@@ -148,13 +155,14 @@ done
 
 # import modules
 for i in output \
-    misc \
-    spawn \
-    fetcher \
-    bootloader \
-    partition \
-    runsteps \
-    profile \
+    misc        \
+    spawn       \
+    fetcher     \
+    bootloader  \
+    partition   \
+    runsteps    \
+    profile     \
+    server      \
     stepcontrol; do
     import ${i}
 done
@@ -213,6 +221,12 @@ if ! spawn "mkdir -p ${autoresume_root_dir}"; then
     autoresume="no"
 fi
 
+# fetch profile from a kicktood daemon
+if [ -n "${server}" ]; then
+    server_init
+    server_get_profile && { profile_set="yes"; profile="/tmp/kicktoo_profile"; }
+fi
+
 profile_name="$(get_filename_from_uri "${profile}" | sed 's/.profile//g')" #> /dev/null 2>&1)"
 debug main "profile_name is: '${profile_name}'"
 
@@ -264,13 +278,13 @@ if [ "${export_set}" == "yes" ]; then
     echo '# === START VARIABLES ===' >"${export_file}"
     set -o posix
     set |
-        grep "^[a-z]" |
-        sed 's/^export_.*/#&/g' |
-        sed 's/^profile_set.*/#&/g' |
-        sed 's/^autoresume.*/#&/g' |
+        grep "^[a-z]"                |
+        sed 's/^export_.*/#&/g'      |
+        sed 's/^profile_set.*/#&/g'  |
+        sed 's/^autoresume.*/#&/g'   |
         sed 's/^removeresume.*/#&/g' |
-        sed 's/^dump_conf.*/#&/g' |
-        sed 's/^verbose.*/#&/g' |
+        sed 's/^dump_conf.*/#&/g'    |
+        sed 's/^verbose.*/#&/g'      |
         sed 's/^debug.*/#&/g' \
             >>"${export_file}" &&
         echo '# === END VARIABLES ===' >>"${export_file}"
@@ -297,7 +311,7 @@ fi
 
 # check for programs needed for custom setups
 [ "${do_raid}" == "yes" ] && has "mdadm"
-[ "${do_lvm}" == "yes" ] && has "pvcreate"
+[ "${do_lvm}"  == "yes" ] && has "pvcreate"
 [ "${do_luks}" == "yes" ] && has "cryptsetup"
 if [ -n "${profile}" ]; then
     grep -q xz "${profile}" && has "unxz"
@@ -318,9 +332,9 @@ if [ "${closeme}" == "yes" ]; then
 fi
 
 # match emerge's verbosity to kicktoo's
-[ "${verbose}" == "yes" ] && [ "${debug}" == "no" ] && emerge_global_opts+=" -qv"
-[ "${debug}" == "yes" ] && [ "${verbose}" == "no" ] && emerge_global_opts+=" -v"
-[ "${verbose}" == "yes" ] && [ "${debug}" == "yes" ] && emerge_global_opts+=" -v"
+[ "${verbose}" == "yes" ] && [ "${debug}"   == "no"  ] && emerge_global_opts+=" -qv"
+[ "${debug}"   == "yes" ] && [ "${verbose}" == "no"  ] && emerge_global_opts+=" -v"
+[ "${verbose}" == "yes" ] && [ "${debug}"   == "yes" ] && emerge_global_opts+=" -v"
 
 # don't run if the minimum is not set
 if [ -z "${profile}" ] && [ -z "${import_file}" ]; then
@@ -346,47 +360,47 @@ debug main "Pushing system for ${arch}"
 
 runstep run_pre_install_script "Running pre-install script if any"
 
-[ "${do_part}" == "yes" ] && runstep partition "Partitioning"
-[ "${do_raid}" == "yes" ] && runstep setup_mdraid "Setting up RAID arrays"
-[ "${do_luks}" == "yes" ] && runstep setup_luks "Setting up LUKS devices"
-[ "${do_lvm}" == "yes" ] && runstep setup_lvm "Setting up LVM volumes"
-[ "${do_format}" == "yes" ] && runstep format_devices "Formatting devices"
-[ "${do_luks}" == "yes" ] && runstep format_devices_luks "Formatting LUKS devices"
-[ "${do_localmounts}" == "yes" ] && runstep mount_local_partitions "Mounting local partitions"
-[ "${do_netmounts}" == "yes" ] && runstep mount_network_shares "Mounting network shares"
-if [ "${do_stage_uri}" == "yes" ] || [ "${do_stage_path}" == "yes" ]; then
-    runstep fetch_stage_tarball "Fetching stage tarball"
-    runstep unpack_stage_tarball "Unpacking stage tarball"
-    runstep prepare_chroot "Preparing chroot"
-    runstep setup_fstab "Setting up /etc/fstab"
+[ "${do_part}"         == "yes" ] && runstep partition                "Partitioning"
+[ "${do_raid}"         == "yes" ] && runstep setup_mdraid             "Setting up RAID arrays"
+[ "${do_luks}"         == "yes" ] && runstep setup_luks               "Setting up LUKS devices"
+[ "${do_lvm}"          == "yes" ] && runstep setup_lvm                "Setting up LVM volumes"
+[ "${do_format}"       == "yes" ] && runstep format_devices           "Formatting devices"
+[ "${do_luks}"         == "yes" ] && runstep format_devices_luks      "Formatting LUKS devices"
+[ "${do_localmounts}"  == "yes" ] && runstep mount_local_partitions   "Mounting local partitions"
+[ "${do_netmounts}"    == "yes" ] && runstep mount_network_shares     "Mounting network shares"
+if [ "${do_stage_uri}" == "yes" ] || [ "${do_stage_file}" == "yes" ]; then
+    runstep fetch_stage_tarball                                       "Fetching stage tarball"
+    runstep unpack_stage_tarball                                      "Unpacking stage tarball"
+    runstep prepare_chroot                                            "Preparing chroot"
+    runstep setup_fstab                                               "Setting up /etc/fstab"
 fi
-[ "${do_raid}" == "yes" ] && runstep create_mdadmconf "Setting up /etc/mdadm.conf"
-[ "${do_luks}" == "yes" ] && runstep create_dmcrypt "Setting up /etc/conf.d/dmcrypt"
-[ "${do_makeconf}" == "yes" ] && runstep create_makeconf "Creating custom make.conf"
-[ "${do_locale}" == "yes" ] && runstep set_locale "Setting locale"
-[ "${do_tree}" == "yes" ] && runstep fetch_repo_tree "Fetching repository tree"
-[ "${do_tree}" == "yes" ] && runstep unpack_repo_tree "Unpacking repository tree"
-[ "${do_set_profile}" == "yes" ] && runstep set_profile "Setting up profile with eselect"
-[ "${do_kbin}" == "yes" ] && runstep copy_kernel "Copying pre compiled kernel"
-[ "${do_irfsbin}" == "yes" ] && runstep copy_initramfs "Copying pre packaged initramfs"
-[ "${do_kernel_uri}" == "yes" ] && runstep fetch_kernel_tarball "Fetching pre compiled kernel package"
-[ "${do_kernel}" == "yes" ] && runstep install_kernel_builder "Installing kernel builder"
-[ "${do_kernel}" == "yes" ] && runstep build_kernel "Building kernel"
-[ "${do_kernel_uri}" == "yes" ] && runstep unpack_kernel_tarball "Unpacking kernel tarball"
-[ "${do_irfs}" == "yes" ] && runstep install_initramfs_builder "Installing initramfs builder"
-[ "${do_irfs}" == "yes" ] && runstep build_initramfs "Building initramfs"
-[ "${do_postnet}" == "yes" ] && runstep setup_network_post "Setting up post-install networking"
-[ "${do_password}" == "yes" ] && runstep setup_root_password "Setting up root password"
-[ "${do_tz}" == "yes" ] && runstep setup_timezone "Setting up timezone"
-[ "${do_keymap}" == "yes" ] && runstep setup_keymap "Setting up keymap"
-[ "${do_host}" == "yes" ] && runstep setup_host "Setting up hostname"
-[ "${do_domain}" == "yes" ] && runstep setup_domain "Setting up domain name"
-[ "${do_xpkg}" == "yes" ] && runstep install_extra_packages "Compiling extra packages"
-[ "${do_bootloader}" == "yes" ] && runstep install_bootloader "Compiling bootloader"
-[ "${do_bootloader}" == "yes" ] && runstep configure_bootloader "Configuring bootloader"
-[ "${do_services}" == "yes" ] && runstep add_and_remove_services "Adding and removing services"
+[ "${do_raid}"        == "yes" ] && runstep create_mdadmconf          "Setting up /etc/mdadm.conf"
+[ "${do_luks}"        == "yes" ] && runstep create_dmcrypt            "Setting up /etc/conf.d/dmcrypt"
+[ "${do_makeconf}"    == "yes" ] && runstep create_makeconf           "Creating custom make.conf"
+[ "${do_locale}"      == "yes" ] && runstep set_locale                "Setting locale"
+[ "${do_tree}"        == "yes" ] && runstep fetch_repo_tree           "Fetching repository tree"
+[ "${do_tree}"        == "yes" ] && runstep unpack_repo_tree          "Unpacking repository tree"
+[ "${do_set_profile}" == "yes" ] && runstep set_profile               "Setting up profile with eselect"
+[ "${do_kbin}"        == "yes" ] && runstep copy_kernel               "Copying pre compiled kernel"
+[ "${do_irfsbin}"     == "yes" ] && runstep copy_initramfs            "Copying pre packaged initramfs"
+[ "${do_kernel_uri}"  == "yes" ] && runstep fetch_kernel_tarball      "Fetching pre compiled kernel package"
+[ "${do_kernel}"      == "yes" ] && runstep install_kernel_builder    "Installing kernel builder"
+[ "${do_kernel}"      == "yes" ] && runstep build_kernel              "Building kernel"
+[ "${do_kernel_uri}"  == "yes" ] && runstep unpack_kernel_tarball     "Unpacking kernel tarball"
+[ "${do_irfs}"        == "yes" ] && runstep install_initramfs_builder "Installing initramfs builder"
+[ "${do_irfs}"        == "yes" ] && runstep build_initramfs           "Building initramfs"
+[ "${do_postnet}"     == "yes" ] && runstep setup_network_post        "Setting up post-install networking"
+[ "${do_password}"    == "yes" ] && runstep setup_root_password       "Setting up root password"
+[ "${do_tz}"          == "yes" ] && runstep setup_timezone            "Setting up timezone"
+[ "${do_keymap}"      == "yes" ] && runstep setup_keymap              "Setting up keymap"
+[ "${do_host}"        == "yes" ] && runstep setup_host                "Setting up hostname"
+[ "${do_domain}"      == "yes" ] && runstep setup_domain              "Setting up domain name"
+[ "${do_xpkg}"        == "yes" ] && runstep install_extra_packages    "Compiling extra packages"
+[ "${do_bootloader}"  == "yes" ] && runstep install_bootloader        "Compiling bootloader"
+[ "${do_bootloader}"  == "yes" ] && runstep configure_bootloader      "Configuring bootloader"
+[ "${do_services}"    == "yes" ] && runstep add_and_remove_services   "Adding and removing services"
 
-runstep run_post_install_script "Running post-install script if any"
-runstep finishing_cleanup "Cleaning up system environment"
+runstep run_post_install_script                                       "Running post-install script if any"
+runstep finishing_cleanup                                             "Cleaning up system environment"
 
 exit 0

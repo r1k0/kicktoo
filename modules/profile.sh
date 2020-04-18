@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 # shellcheck disable=SC2034
 # The whole purpose of this file is to translate the profile to
 # do_* steps for kicktoo and variables for runsteps
@@ -28,10 +27,10 @@ geometry() {
 # Creates a partition
 part() {
     do_part=yes
-    local drive=$1 # the drive to add this partition (such as hda, sdb, etc.)
-    local minor=$2 # the partition number
-    local type=$3 # type used in fdisk (such as 82/S or 83/L) or 85/E/5 for extended
-    local size=$4 # the size of the partition in whole numbers, '+' or 'n%' for remaining
+    local drive=$1    # the drive to add this partition (such as hda, sdb, etc.)
+    local minor=$2    # the partition number
+    local type=$3     # type used in fdisk (such as 82/S or 83/L) or 85/E/5 for extended
+    local size=$4     # the size of the partition in whole numbers, '+' or 'n%' for remaining
     local bootable=$5 # set to "boot" if the partition should be bootable, leave blank for non-bootable
 
     drive=$(echo "${drive}" | sed -e 's:^/dev/::' -e 's:/:_:g')
@@ -48,10 +47,10 @@ part() {
 # Creates a GPT partition
 gptpart() {
     do_part=yes
-    local drive=$1 # the drive to add this partition (such as hda, sdb, etc.)
-    local minor=$2 # the partition number. these should be in order
-    local type=$3 # the partition type used in sgdisk (such as 8200 or 8300)
-    local size=$4 # the size of the partition in whole numbers, '+' or 'n%' for remaining
+    local drive=$1    # the drive to add this partition (such as hda, sdb, etc.)
+    local minor=$2    # the partition number. these should be in order
+    local type=$3     # the partition type used in sgdisk (such as 8200 or 8300)
+    local size=$4     # the size of the partition in whole numbers, '+' or 'n%' for remaining
     local bootable=$5 # set to "boot" if the partition should be bootable, leave blank for non-bootable
 
     drive=$(echo "${drive}" | sed -e 's:^/dev/::' -e 's:/:_:g')
@@ -70,9 +69,9 @@ gptspart() {
     do_part=yes
     local drive=$1 # the drive to add this partition (such as hda, sdb, etc.)
     local minor=$2 # the partition number. these should be in order
-    local type=$3 # the partition type used in sgdisk (such as 8200 or 8300)
+    local type=$3  # the partition type used in sgdisk (such as 8200 or 8300)
     local start=$4 # the partition start sector
-    local end=$5 # the partition end sector, '+' or 'n%' for remaining
+    local end=$5   # the partition end sector, '+' or 'n%' for remaining
 
     drive=$(echo "${drive}" | sed -e 's:^/dev/::' -e 's:/:_:g')
     local drive_temp="gptspartitions_${drive}"
@@ -88,7 +87,7 @@ gptspart() {
 # Creates an md raid array
 mdraid() {
     do_raid=yes
-    local array=$1 # name of the array (such as md0, md1, etc.)
+    local array=$1     # name of the array (such as md0, md1, etc.)
     shift
     local arrayopts=$* # arguments after create: '-l 1 -n 2 /dev/sda2 /dev/sdb2'
 
@@ -98,7 +97,7 @@ mdraid() {
 # Force the UUID on an md raid array
 mduuid() {
     local array=$1 # name of the array (such as md0, md1, etc.)
-    local uuid=$2 # uuid to be forced on the array
+    local uuid=$2  # uuid to be forced on the array
 
     eval "mduuid_${array}=${uuid}"
 }
@@ -108,7 +107,7 @@ lvm_volgroup() {
     do_lvm=yes
     local volgroup=$1 # name of the volume group to create
     shift
-    local devices=$* # list of block devices to include in the volume group
+    local devices=$*  # list of block devices to include in the volume group
 
     eval "lvm_volgroup_${volgroup}=\"${devices}\""
 }
@@ -117,8 +116,8 @@ lvm_volgroup() {
 lvm_logvol() {
     do_lvm=yes
     local volgroup=$1 # name of a volume group created with 'lvm_volgroup'
-    local size=$2 # size of logical volume to pass to 'lvcreate'
-    local name=$3 # name of logical volume to pass to 'lvcreate'
+    local size=$2     # size of logical volume to pass to 'lvcreate'
+    local name=$3     # name of logical volume to pass to 'lvcreate'
 
     local tmplogvol="${volgroup}|${size}|${name}"
     if [ -n "${lvm_logvols}" ]; then
@@ -138,27 +137,27 @@ luks() {
         luks_remdev="$2"
         luks_key="$3"
     else
-        local device luks_mapper cipher hash
-        device=$1
-        luks_mapper=$2 # root, swap
-        cipher=$3 # aes or serpent or blowfish
-        hash=$4 # sha1 or sha256
+        local device="$1"
+        local luks_mapper="$2" # root, swap
+        local cipher_name="$3" # aes or serpent or blowfish
+        local cipher_mode="$4" # cbc-essiv or cbc-plain (or else?)
+        local hash="$5"        # sha1 or sha256 (or sha512?)
 
-        local tmpluks="${device}:${luks_mapper}:${cipher}:${hash}"
+        local tmpluks="${device}:${luks_mapper}:${cipher_name}:${cipher_mode}:${hash}"
         if [ -n "${luks}" ]; then
             luks="${luks} ${tmpluks}"
         else
             luks="${tmpluks}"
         fi
-        debug luks "device mapper hash/encryption: ${device} ${luks_mapper} ${hash}/${cipher}"
+        debug luks "device mapper hash/encryption: ${device} ${luks_mapper} ${cipher_name}/${cipher_mode}/${hash}"
     fi
 }
 
 # Formats a partition
 format() {
     do_format=yes
-    local device=$1 # the device to format (such as /dev/hda2 or /dev/sdb4)
-    local fs=$2 # the filesystem to use (such as ext2, ext3, or swap)
+    local device="$1" # the device to format (such as /dev/hda2 or /dev/sdb4)
+    local fs="$2"     # the filesystem to use (such as ext2, ext3, or swap)
     shift 2
     local options="${*//\ /__}" # the options to use (such as "-O dir_index,huge_file")
 
@@ -183,11 +182,11 @@ format() {
 mountfs() {
     do_localmounts=yes
     local device=$1 # the device to mount (such as /dev/hda2 or /dev/sdb4)
-    local type=$2 # filesystem of device (use auto if you're not sure)
+    local type=$2   # filesystem of device (use auto if you're not sure)
     local mountpoint=$3
     local mountopts=$4
 
-    [ -z "${mountopts}" ] && mountopts="defaults"
+    [ -z "${mountopts}" ]  && mountopts="defaults"
     [ -z "${mountpoint}" ] && mountpoint="none"
     local tmpmount="${device}:${type}:${mountpoint}:${mountopts}"
     if [ -n "${localmounts}" ]; then
@@ -201,7 +200,7 @@ mountfs() {
 netmount() {
     do_netmounts=yes
     local export=$1 # path to the network filesystem (such as 1.2.3.4:/some/export)
-    local type=$2 # network filesystem type (such as nfs, smbfs, cifs, etc.)
+    local type=$2   # network filesystem type (such as nfs, smbfs, cifs, etc.)
     local mountpoint=$3
     local mountopts=$4
 
@@ -337,7 +336,7 @@ locale_set() {
 # Specifies the portage tree type, including package snapshots
 tree_type() {
     local type=$1 # sync (default), webrsync, or snapshot
-    local uri=$2 # location if snapshot and/or packages is type
+    local uri=$2  # location if snapshot and/or packages is type
 
     if [ "${type}" == "packages" ]; then
         do_packages=yes

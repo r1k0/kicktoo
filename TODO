@@ -1,33 +1,29 @@
--------------
-= Wish list =
--------------
-
-- make a sabayon profile for fun
+- add systemd profile
+- add sabayon profile for fun
 - support syslinux boot
 - support lilo for mdraid
 - have a dialog layer that would translate to a working kicktoo import
     have dialogs/ output same as ./kicktoo -u
-- make profiles:
-    gentoo-noboot-noinitramfs.profile
-    gentoo-noboot-noinitramfs-kbin.profile
-- make chroot.sh more usable
-- port all working gentoo profiles to funtoo
-- find an elegant way to split the kicktoo file for readability and design
-- find a way to fix profile structure (source kbin|gpt|etc?)
+- add gentoo-noboot-noinitramfs.profile
+- make chroot.sh better
+- support local file portage tree (like stage_file)
+- dont mount devpts by default
+  - it screws up running system terminals when running from an installed sda system
+- port working gentoo profiles to funtoo
 - what if lvm over luks?
-- add option to erase disk to luks profiles
-
---------------------------
-= FIXME for next release =
---------------------------
-
+- what if luks over lvm over md?
 - cleanup/remove notion of size suffix conversion: human_size_to_mb
     deprecated in sfdisk
-- remove all calls to stage_latest in profiles
-    let the user pick an up to date URL for the desired stage tarball
-- add -q to cryptsetup
-- add erase* option to dd if=/dev/zero* of=/dev/sdx bs=1M (solves hdparm dev busy)
-- use same url for snapshot than distfiles
-- change default url to ovh
-- add daemon back (check fetchers)
-- test all profiles
+- luks: test ciphers: aes-cbc-plain aes-cbc-essiv:sha256 aes-xts-plain64
+- test profiles
+  profiles/gentoo/gentoo-extended_part.profile
+X profiles/gentoo/gentoo-luks-lvm.profile
+X profiles/gentoo/gentoo-luks-noswap.profile
+X profiles/gentoo/gentoo-luks.profile
+X profiles/gentoo/gentoo-lvm.profile
+X profiles/gentoo/gentoo-mdraid-lvm.profile
+BUG profiles/gentoo/gentoo-noboot-noswap.profile
+X profiles/gentoo/gentoo-noboot.profile
+X profiles/gentoo/gentoo-noswap.profile
+X profiles/gentoo/gentoo.profile
+  profiles/gentoo/gpt*

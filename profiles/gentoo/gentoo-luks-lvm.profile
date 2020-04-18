@@ -1,13 +1,11 @@
-#!/usr/bin/env bash
-
 part sda 1 83 500M
 part sda 2 82 2G # swap
 part sda 3 83 2G
 part sda 4 8e +  # linux lvm type
 
 luks bootpw a
-luks /dev/sda2 swap aes sha256
-luks /dev/sda4 root aes sha256
+luks /dev/sda2 swap aes cbc-plain sha256
+luks /dev/sda4 root aes cbc-plain sha256
 
 lvm_volgroup vg /dev/mapper/root
 
@@ -38,7 +36,7 @@ mountfs /dev/vg/tmp       ext4 /tmp  noatime
 # retrieve latest autobuild stage version for stage_uri
 [ "${arch}" == "x86" ]   && stage_latest "$(uname -m)"
 [ "${arch}" == "amd64" ] && stage_latest amd64
-tree_type   snapshot    http://distfiles.gentoo.org/snapshots/portage-latest.tar.bz2
+tree_type   snapshot    http://gentoo.mirrors.ovh.net/gentoo-distfiles/snapshots/portage-latest.tar.bz2
 
 #cat /proc/config.gz | gzip -d > /dotconfig
 #kernel_config_file       /dotconfig
@@ -55,11 +53,16 @@ bootloader              grub
 bootloader_kernel_args  dolvm crypt_root=/dev/sda4
 keymap                  us # fr be-latin1
 hostname                luks-lvm
-extra_packages          cryptsetup lvm2 dhcpcd gentoo-sources genkernel # vim openssh vixie-cron syslog-ng
+extra_packages          cryptsetup lvm2 net-misc/dhcpcd gentoo-sources genkernel # vim openssh vixie-cron syslog-ng
 
 rcadd                   dmcrypt        default
 rcadd                   lvm            default
 rcadd                   lvm-monitoring default
+
+pre_install_kernel_builder() {
+    # NOTE distfiles.gentoo.org is overloaded
+    spawn_chroot "echo GENTOO_MIRRORS=\"http://gentoo.mirrors.ovh.net/gentoo-distfiles/\" >> /etc/portage/make.conf"
+}
 
 pre_build_kernel() {
     # NOTE we need cryptsetup *before* the kernel

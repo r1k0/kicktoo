@@ -1,13 +1,11 @@
-Kicktoo is meant to automate the manual steps required to build any Portage based distro.
+Kicktoo is meant to automate the manual steps required to build a Portage based distro.
 
 #################
 # Install kicktoo
 #################
 
-1) Download an official Gentoo livedvd (though you may use other livecds):
-   http://distfiles.gentoo.org/releases/
-   i.e.
-   http://distfiles.gentoo.org/releases/amd64/12.1/livedvd-x86-amd64-32ul-2012.1.iso
+1) Download an official Gentoo livedvd (or livecd/liveusb):
+   https://www.gentoo.org/downloads/
 
 2) Boot the livedvd
 
@@ -16,7 +14,7 @@ Kicktoo is meant to automate the manual steps required to build any Portage base
 4) Download Kicktoo from github.com
    # git clone git://github.com/r1k0/kicktoo.git
    or
-   # wget github.com/r1k0/kicktoo/archive/master.zip  
+   # wget github.com/r1k0/kicktoo/archive/master.zip
 
 #####################
 # Use kicktoo locally
@@ -52,17 +50,21 @@ Tip:
 OR
   # ./kicktoo --dump --profile profiles/gentoo/gentoo.profile
   # ./kicktoo --export /tmp/myconf --profile profiles/gentoo/gentoo.profile
-  # ./kicktoo --import /tmp/myconf 
+  # ./kicktoo --import /tmp/myconf
 
 3) Reboot
 
-#################################
-# Contribute your custom profiles
-#################################
+######################
+# Use kicktoo remotely
+######################
 
-1) Customize your specific profile to do what you need
-   You might need to change code inside modules/, you should not.
-   Instead, use pre_ post_ functions (take example on other profiles) and rewrite if you need the relevant runsteps.
-   
-2) Send it back as a single profile file and I'll merge it in profiles/${distro}/contrib/.
-   Make sure kicktoo can always run the default profiles. Don't break what already works.
+1) Run kicktood on the remote host serving profiles (livedvd supports perl HTTP-Daemon)
+  # cd kicktoo/daemon
+  # vim kicktood.conf
+  # perl kicktood --conf kicktood.conf
+
+2) Run kicktoo from the local host
+  # cd kicktoo
+  # ./kicktoo --client 192.168.1.69
+
+3) Reboot

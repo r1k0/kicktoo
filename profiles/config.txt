@@ -128,21 +128,22 @@ luks - Sets and creates /dev/mapper/ encrypted devices
   Usage:
     luks bootpw <passwd>
     luks key <device> <path-to-key>
-    luks <device> <mapping> <cipher> <hash>
+    luks <device> <mapping> <cipher-name> <cipher-mode> <hash>
 
   Parameters:
-    bootpw    - defines boot password
-    key       - defines boot key
-    password  - actual password
-    mapping   - root, swap
-    cipher    - aes or serpent or blowfish
-    hash      - sha1 or sha256
+    bootpw      - defines boot password
+    key         - defines boot key
+    password    - actual password
+    mapping     - root, swap
+    cipher_name - aes or serpent or blowfish
+    cipher_mode - cbc-essiv or cbc-plain
+    hash        - sha1 or sha256
 
   Example:
     luks bootpw PASS01
     luks key /dev/sda2 /key
-    luks /dev/sda2 swap aes sha256
-    luks /dev/sda3 root aes sha256
+    luks /dev/sda2 swap aes cbc-plain sha256
+    luks /dev/sda3 root aes cbc-plain sha256
 
 ============================
 format - Formats a partition
@@ -229,13 +230,13 @@ stage_uri - Specifies the URI to the stage tarball (required or
           ftp, or file
 
 ====================================================
-stage_path - Specifies the path to the stage tarball
+stage_file - Specifies the file to the stage tarball
 
   Usage:
-    stage_path <path>
+    stage_file <path>
 
   Parameters:
-    path - Path to the location of the stage tarball.
+    file - Path to the location of the stage tarball.
 
 ========================================================================
 tree_type - Specifies the portage tree type, including package snapshots

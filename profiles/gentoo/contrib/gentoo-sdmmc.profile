@@ -29,6 +29,6 @@ format "/dev/${DISK}p2" ext3 "-T small"
 mountfs /dev/${DISK}p2 ext3 /
 mountfs /dev/${DISK}p1 vfat /boot
 
-tree_type snapshot http://distfiles.gentoo.org/snapshots/portage-latest.tar.bz2
+tree_type snapshot http://gentoo.mirrors.ovh.net/gentoo-distfiles/snapshots/portage-latest.tar.bz2
 locale_set en_US.UTF-8
 timezone UTC

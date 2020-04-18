@@ -15,15 +15,11 @@ mountfs /dev/sda3 ext4 / noatime
 [ "${arch}" == "amd64" ] && stage_latest amd64
 tree_type   snapshot    http://gentoo.mirrors.ovh.net/gentoo-distfiles/snapshots/portage-latest.tar.bz2
 
-# get kernel dotconfig from the official running kernel
 #cat /proc/config.gz | gzip -d > /dotconfig
-#kernel_config_file       /dotconfig
-kernel_sources	         gentoo-sources
-initramfs_builder
-genkernel_kernel_opts    --loglevel=5
-genkernel_initramfs_opts --loglevel=5
-
-grub_install /dev/sda
+#kernel_config_file      /dotconfig
+kernel_sources	        gentoo-sources
+kernel_builder          kigen
+kigen_kernel_opts       -d --localyesconfig -x
 
 timezone                UTC
 rootpw                  a
@@ -38,4 +34,17 @@ extra_packages          net-misc/dhcpcd # syslog-ng vim openssh
 pre_install_kernel_builder() {
     # NOTE distfiles.gentoo.org is overloaded
     spawn_chroot "echo GENTOO_MIRRORS=\"http://gentoo.mirrors.ovh.net/gentoo-distfiles/\" >> /etc/portage/make.conf"
+    # install kigen ebuild
+    spawn_chroot "mkdir -p /usr/local/portage/sys-kernel/kigen /etc/portage"
+    spawn_chroot "wget -q https://github.com/downloads/r1k0/kigen/kigen-9999.ebuild -O /usr/local/portage/sys-kernel/kigen/kigen-9999.ebuild"
+    spawn_chroot "echo PORTDIR_OVERLAY=\"/usr/local/portage\" >> /etc/portage/make.conf"
+    spawn_chroot "ebuild /usr/local/portage/sys-kernel/kigen/kigen-9999.ebuild digest"
+    spawn_chroot "echo \>=sys-kernel/kigen-9999 ~x86 >> /etc/portage/package.accept_keywords"
+
+    # install git
+    spawn_chroot "emerge git -q"
+}
+pre_configure_bootloader() {
+    # this is needed since kigen mounts/umounts automatically
+    spawn_chroot "mount /boot"
 }

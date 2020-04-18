@@ -4,4 +4,5 @@ emerge_global_opts="--usepkg --autounmask --autounmask-keep-masks --autounmask-u
 logfile="/tmp/install.log"
 kernel_builder="genkernel"
 autoresume_root_dir="/tmp/.kicktoo-autoresume"
-distfiles_url="http://distfiles.gentoo.org"
+#distfiles_url="http://distfiles.gentoo.org"
+distfiles_url="http://gentoo.mirrors.ovh.net/gentoo-distfiles/"

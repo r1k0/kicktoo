@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 chroot_dir="/mnt/chroot"
 
 chroot_into() {
@@ -33,6 +31,7 @@ is_luks() {
 is_lvm() {
     # FIXME do more regex checks on profile
     local lvm
+
     lvm=$(grep ^lvm_volgroup "${profile}")
     [ -z "$lvm" ] && return 1
     return 0

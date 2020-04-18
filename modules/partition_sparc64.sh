@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 create_disklabel() {
     local device=$1
 

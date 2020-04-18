@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 configure_bootloader_grub() {
     debug configure_bootloader_grub "configuring and deploying grub"
 

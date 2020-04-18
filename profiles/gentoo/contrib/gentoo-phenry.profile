@@ -42,11 +42,11 @@ luks key /dev/sdc1 /k1
   else
 luks key /dev/sda2 /k1
   fi
-luks /dev/vg0/root   root   aes sha256
-luks /dev/vg0/home   home   aes sha256
-luks /dev/vg0/var    var    aes sha256
-luks /dev/vg0/log    log    aes sha256
-luks /dev/vg0/swap   swap   aes sha256
+luks /dev/vg0/root   root   aes cbc-plain sha256
+luks /dev/vg0/home   home   aes cbc-plain sha256
+luks /dev/vg0/var    var    aes cbc-plain sha256
+luks /dev/vg0/log    log    aes cbc-plain sha256
+luks /dev/vg0/swap   swap   aes cbc-plain sha256
  fi
 
 format /dev/sda2            fat32
@@ -112,7 +112,7 @@ timezone                  UTC
 rootpw_crypt              LJLyqAh6aHkyo
 #keymap                   us
 hostname                  localhost
-extra_packages            linux-firmware lvm2 cryptsetup mdadm dhcpcd xfsprogs rsyslog openssh vixie-cron
+extra_packages            linux-firmware lvm2 cryptsetup mdadm net-misc/dhcpcd xfsprogs rsyslog openssh vixie-cron
 
 #net                      eth0 dhcp
 
@@ -129,7 +129,7 @@ rcadd                     mdraid           boot
 rcadd                     lvm              boot
 rcadd                     dmcrypt          boot
 rcadd                     rsyslog          default
-rcadd                     dhcpcd           default
+rcadd                     net-misc/dhcpcd           default
 rcadd                     sshd             default
 rcadd                     vixie-cron       default
 

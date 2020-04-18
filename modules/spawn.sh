@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 spawn() {
     local cmd=$1
 

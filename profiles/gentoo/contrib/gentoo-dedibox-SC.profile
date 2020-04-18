@@ -15,7 +15,7 @@ mountfs /dev/sda3 ext4 / noatime
 # retrieve latest autobuild stage version for stage_uri
 [ "${arch}" == "x86" ]   && stage_latest "$(uname -m)"
 [ "${arch}" == "amd64" ] && stage_latest amd64
-tree_type     snapshot  http://distfiles.gentoo.org/snapshots/portage-latest.tar.bz2
+tree_type     snapshot  http://gentoo.mirrors.ovh.net/gentoo-distfiles/snapshots/portage-latest.tar.bz2
 #tree_type               sync
 
 # compile kernel from sources using the right .config
@@ -29,7 +29,7 @@ rootpw                  a
 bootloader              grub
 keymap                  fr
 hostname                gentoo
-extra_packages          openssh # dhcpcd syslog-ng vim
+extra_packages          openssh # net-misc/dhcpcd syslog-ng vim
 
 rcadd                   network     default
 rcadd                   sshd       default

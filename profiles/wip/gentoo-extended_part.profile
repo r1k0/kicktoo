@@ -1,10 +1,15 @@
-part sda 1 83 100M
-part sda 2 82 2048M
-part sda 3 83 +
+part sda 1 L 500M
+part sda 2 S 2048M
+part sda 3 L 30G
+part sda 4 E
+part sda 5 L 2G
+part sda 6 L 2G
 
 format /dev/sda1 ext2
 format /dev/sda2 swap
 format /dev/sda3 ext4
+format /dev/sda5 ext4
+format /dev/sda6 ext4
 
 mountfs /dev/sda1 ext2 /boot
 mountfs /dev/sda2 swap
@@ -15,15 +20,12 @@ mountfs /dev/sda3 ext4 / noatime
 [ "${arch}" == "amd64" ] && stage_latest amd64
 tree_type   snapshot    http://gentoo.mirrors.ovh.net/gentoo-distfiles/snapshots/portage-latest.tar.bz2
 
-# get kernel dotconfig from the official running kernel
 #cat /proc/config.gz | gzip -d > /dotconfig
 #kernel_config_file       /dotconfig
 kernel_sources	         gentoo-sources
 initramfs_builder
 genkernel_kernel_opts    --loglevel=5
 genkernel_initramfs_opts --loglevel=5
-
-grub_install /dev/sda
 
 timezone                UTC
 rootpw                  a
@@ -39,3 +41,4 @@ pre_install_kernel_builder() {
     # NOTE distfiles.gentoo.org is overloaded
     spawn_chroot "echo GENTOO_MIRRORS=\"http://gentoo.mirrors.ovh.net/gentoo-distfiles/\" >> /etc/portage/make.conf"
 }
+

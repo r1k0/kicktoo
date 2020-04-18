@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 run_pre_install_script() {
     if [ -n "${pre_install_script_uri}" ]; then
         fetch "${pre_install_script_uri}" "${chroot_dir}/var/tmp/pre_install_script" || die "Could not fetch pre-install script"
@@ -66,9 +64,9 @@ partition() {
         spawn "sgdisk -og ${device}" || die "Cannot sgdisk -og ${device}"
         for partition in $(eval "echo \${${device_temp}}"); do
             debug partition "partition is ${partition}"
-            minor=$(echo "${partition}" | cut -d: -f1)
-            ptype=$(echo "${partition}" | cut -d: -f2)
-            size=$(echo "${partition}" | cut -d: -f3)
+            minor=$(echo "${partition}"    | cut -d: -f1)
+            ptype=$(echo "${partition}"    | cut -d: -f2)
+            size=$(echo "${partition}"     | cut -d: -f3)
             bootable=$(echo "${partition}" | cut -d: -f4)
             devnode=$(format_devnode "${device}" "${minor}")
             debug partition "devnode is ${devnode}"
@@ -96,7 +94,7 @@ partition() {
             minor=$(echo "${partition}" | cut -d: -f1)
             ptype=$(echo "${partition}" | cut -d: -f2)
             start=$(echo "${partition}" | cut -d: -f3)
-            end=$(echo "${partition}" | cut -d: -f4)
+            end=$(echo "${partition}"   | cut -d: -f4)
             devnode=$(format_devnode "${device}" "${minor}")
             debug partition "devnode is ${devnode}"
 
@@ -161,8 +159,8 @@ setup_lvm() {
             debug setup_lvm "creating LVM volume ${logvol}"
             sleep 1
             volgroup="$(echo "${logvol}" | cut -d '|' -f1)"
-            size="$(echo "${logvol}" | cut -d '|' -f2)"
-            name="$(echo "${logvol}" | cut -d '|' -f3)"
+            size="$(echo "${logvol}"     | cut -d '|' -f2)"
+            name="$(echo "${logvol}"     | cut -d '|' -f3)"
             spawn "lvcreate -L${size} -n${name} ${volgroup}" || die "Could not create logical volume '${name}' with size ${size} in volume group '${volgroup}'"
         done
     elif [ "${autoresume}" == "yes" ] && [ -f "$autoresume_profile_dir/setup_lvm" ]; then
@@ -174,8 +172,8 @@ setup_lvm() {
 }
 
 setup_luks() {
-    local devicetmp luks_mapper cipher lhash lukscmd=""
-    if ! [ -f "$autoresume_profile_dir/setup_luks" ]; then
+    local devicetmp luks_mapper cipher_name cipher_mode lhash lukscmd=""
+    if ! [ -f "${autoresume_profile_dir}/setup_luks" ]; then
         if [ -n "${luks_key}" ]; then
             debug setup_luks "generating encryption key ${luks_key} on ${luks_remdev}"
             mkdir -p /mnt/"$(basename "${luks_remdev}")"
@@ -185,20 +183,24 @@ setup_luks() {
         for device in ${luks}; do
             debug setup_luks "LUKSifying ${device}"
 
-            devicetmp=$(echo "${device}" | cut -d: -f1)
+            devicetmp=$(echo "${device}"   | cut -d: -f1)
             luks_mapper=$(echo "${device}" | cut -d: -f2)
-            cipher=$(echo "${device}" | cut -d: -f3)
-            lhash=$(echo "${device}" | cut -d: -f4)
+            cipher_name=$(echo "${device}" | cut -d: -f3)
+            cipher_mode=$(echo "${device}" | cut -d: -f4)
+            lhash=$(echo "${device}"       | cut -d: -f5)
             case ${luks_mapper} in
             swap)
-                lukscmd="cryptsetup -c ${cipher} -h ${lhash} -d /dev/urandom create ${luks_mapper} ${devicetmp}"
+                lukscmd="cryptsetup -q -c ${cipher_name} -h ${lhash} -d /dev/urandom create ${luks_mapper} ${devicetmp}"
                 ;;
             *)
                 if [ -n "${luks_key}" ]; then
-                    lukscmd="cryptsetup -q -c ${cipher}-cbc-essiv:${lhash} luksFormat ${devicetmp} /mnt/$(basename "${luks_remdev}")${luks_key} && \
+#                    lukscmd="cryptsetup -c ${cipher_name}-cbc-essiv:${lhash} luksFormat ${devicetmp} /mnt/$(basename "${luks_remdev}")${luks_key} && \
+                    lukscmd="cryptsetup -c ${cipher_name}-${cipher_mode}:${lhash} luksFormat ${devicetmp} /mnt/$(basename "${luks_remdev}")${luks_key} && \
                         cryptsetup --key-file /mnt/$(basename "${luks_remdev}")${luks_key} luksOpen ${devicetmp} ${luks_mapper}"
                 else
-                    lukscmd="echo ${boot_password} | cryptsetup -c ${cipher}-cbc-essiv:${lhash} luksFormat ${devicetmp} && echo ${boot_password} | cryptsetup luksOpen ${devicetmp} ${luks_mapper}"
+#                    lukscmd="echo ${boot_password} | cryptsetup -c ${cipher}-cbc-essiv:${lhash} luksFormat ${devicetmp} && echo ${boot_password} | cryptsetup luksOpen ${devicetmp} ${luks_mapper}"
+#                    lukscmd="echo ${boot_password} | cryptsetup -c ${cipher}-cbc-plain:${lhash} luksFormat ${devicetmp} && echo ${boot_password} | cryptsetup luksOpen ${devicetmp} ${luks_mapper}"
+                    lukscmd="echo ${boot_password} | cryptsetup -c ${cipher_name}-${cipher_mode}:${lhash} luksFormat ${devicetmp} && echo ${boot_password} | cryptsetup luksOpen ${devicetmp} ${luks_mapper}"
                 fi
                 ;;
             esac
@@ -206,16 +208,18 @@ setup_luks() {
                 spawn "${lukscmd}" || die "Could not luks: ${lukscmd}"
             fi
         done
-    elif [ "${autoresume}" == "yes" ] && [ -f "$autoresume_profile_dir/setup_luks" ]; then
+    elif [ "${autoresume}" == "yes" ] && [ -f "${autoresume_profile_dir}/setup_luks" ]; then
         for device in ${luks}; do
             debug setup_luks "LUKSifying ${device}"
-            devicetmp=$(echo "${device}" | cut -d: -f1)
+
+            devicetmp=$(echo "${device}"   | cut -d: -f1)
             luks_mapper=$(echo "${device}" | cut -d: -f2)
-            cipher=$(echo "${device}" | cut -d: -f3)
-            lhash=$(echo "${device}" | cut -d: -f4)
+            cipher_name=$(echo "${device}" | cut -d: -f3)
+            cipher_mode=$(echo "${device}" | cut -d: -f4)
+            lhash=$(echo "${device}"       | cut -d: -f5)
             case ${luks_mapper} in
             swap)
-                lukscmd="cryptsetup -c ${cipher} -h ${lhash} -d /dev/urandom create ${luks_mapper} ${devicetmp}"
+                lukscmd="cryptsetup -q -c ${cipher_name} -h ${lhash} -d /dev/urandom create ${luks_mapper} ${devicetmp}"
                 ;;
             *)
                 if [ -n "${luks_key}" ]; then
@@ -396,8 +400,6 @@ unpack_stage_tarball() {
         elif [ "$extension" == "lzma" ]; then
             spawn "tar --lzma -xpf ${chroot_dir}/${tarball} -C ${chroot_dir}" || die "Could not untar stage tarball"
         fi
-    # ${stage_file} is a dangerous option
-    # it can screw things up if it's too big
     elif [ -n "${stage_file}" ]; then
         spawn "cp ${stage_file} ${chroot_dir}" || die "Could not copy stage tarball"
         stage_name="$(basename "${stage_file}")"
@@ -437,10 +439,10 @@ create_dmcrypt() {
     debug create_dmcrypt "writing to /etc/conf.d/dmcrypt"
     for device in ${luks}; do
         debug setup_luks "LUKSifying ${device}"
-        local devicetmp luks_mapper cipher lukscmd=""
-        devicetmp=$(echo "${device}" | cut -d: -f1)
+        local devicetmp luks_mapper cipher_name lukscmd=""
+        devicetmp=$(echo "${device}"   | cut -d: -f1)
         luks_mapper=$(echo "${device}" | cut -d: -f2)
-        cipher=$(echo "${device}" | cut -d: -f3)
+        cipher_name=$(echo "${device}" | cut -d: -f3)
         case ${luks_mapper} in
         swap)
             cat >>"${chroot_dir}"/etc/conf.d/dmcrypt <<EOF
@@ -586,7 +588,7 @@ unpack_repo_tree() {
         debug unpack_repo_tree "extracting packages tree"
         notify "Unpacking package repository tree"
         tarball=$(get_filename_from_uri "${portage_packages_uri}")
-        extension=${portage_packages_uri##*.}
+        local extension=${portage_packages_uri##*.}
 
         spawn "mkdir ${chroot_dir}/usr/portage/packages" || die "Could not create '/usr/portage/packages'"
         if [ "$extension" == "bz2" ]; then
@@ -705,8 +707,8 @@ setup_network_post() {
     if [ -n "${net_devices}" ]; then
         for net_device in ${net_devices}; do
             local device ipdhcp gateway
-            device="$(echo "${net_device}" | cut -d '|' -f1)"
-            ipdhcp="$(echo "${net_device}" | cut -d '|' -f2 | tr '[:upper:]' '[:lower:]')"
+            device="$(echo "${net_device}"  | cut -d '|' -f1)"
+            ipdhcp="$(echo "${net_device}"  | cut -d '|' -f2 | tr '[:upper:]' '[:lower:]')"
             gateway="$(echo "${net_device}" | cut -d '|' -f3)"
             case "${ipdhcp}" in
             "dhcp" | "noop" | "null" | "apipa")
@@ -735,7 +737,7 @@ setup_root_password() {
         #spawn_chroot "echo 'root:${root_password_hash}' | chpasswd -e"  || die "Could not set root password"
         spawn_chroot "usermod -p '${root_password_hash}' root" || die "Could not set root password"
     elif [ -n "${root_password}" ]; then
-        spawn_chroot "echo 'root:${root_password}'      | chpasswd" || die "Could not set root password"
+        spawn_chroot "echo 'root:${root_password}' | chpasswd" || die "Could not set root password"
     fi
 }
 
@@ -808,14 +810,14 @@ add_and_remove_services() {
     local service runlevel
     if [ -n "${services_add}" ]; then
         for service_add in ${services_add}; do
-            service="$(echo "${service_add}" | cut -d '|' -f1)"
+            service="$(echo "${service_add}"  | cut -d '|' -f1)"
             runlevel="$(echo "${service_add}" | cut -d '|' -f2)"
             spawn_chroot "rc-update add ${service} ${runlevel}" || die "Could not add service ${service} to the ${runlevel} runlevel"
         done
     fi
     if [ -n "${services_del}" ]; then
         for service_del in ${services_del}; do
-            service="$(echo "${service_del}" | cut -d '|' -f1)"
+            service="$(echo "${service_del}"  | cut -d '|' -f1)"
             runlevel="$(echo "${service_del}" | cut -d '|' -f2)"
             spawn_chroot "rc-update del ${service} ${runlevel}"
         done
@@ -843,22 +845,40 @@ cleanup() {
     for swap in ${swapoffs}; do
         spawn "swapoff ${swap}" || warn "Could not deactivate swap on ${swap}"
     done
+
     if [ -f "/proc/mounts" ]; then
-        grep "${chroot_dir}" </proc/mounts | while read -ra mnt; do
-            spawn "umount ${mnt[1]}" || warn "Could not unmount ${mnt[1]}, will retry"
-            sleep 0.2
+        # FIXME issue here is that we need to sort -udr the output
+        #       or we end up trying unmounting chroot_dir first which will fail
+        #       therefore leaving zombie mount points after cleanup
+ #        grep "${chroot_dir}" </proc/mounts | while read -ra mnt; do
+ #            spawn "echo umount ${mnt[1]} || warn Could not unmount ${mnt[1]}"
+ #            spawn "umount ${mnt[1]}" || warn "Could not unmount ${mnt[1]}"
+ #            sleep 0.2
+ #        done
+
+        # FIXED? this sorts the output of grep chroot_dir /proc/mounts
+        #        so that hopefully /mnt/gentoo comes last
+        mapfile -t l <<< $(grep ${chroot_dir} </proc/mounts | cut -d' ' -f2)
+        readarray -t sorted < <(for a in "${l[@]}"; do echo "$a"; done | sort -udr)
+        for a in "${sorted[@]}"; do
+            if [ -d "${a}" ]; then
+                spawn "umount ${a}" || warn "Could not unmount ${a}"
+            fi
         done
     fi
-    # NOTE let luks cleanup before lvm
+
+    # NOTE let lvm cleanup before luks
+    # FIXME what about luks inside lvm??
+    for volgroup in $(set | grep '^lvm_volgroup_' | cut -d= -f1 | sed -e 's:^lvm_volgroup_::' | sort); do
+        spawn "vgchange -a n ${volgroup}" || warn "Could not remove vg ${volgroup}"
+        sleep 0.2
+    done
     for luksdev in $(set | grep '^luks=' | cut -d= -f2); do
         luksdev=$(echo "${luksdev}" | cut -d: -f2)
         spawn "cryptsetup remove ${luksdev}" || warn "Could not remove luks device /dev/mapper/${luksdev}"
         sleep 0.2
     done
-    for volgroup in $(set | grep '^lvm_volgroup_' | cut -d= -f1 | sed -e 's:^lvm_volgroup_::' | sort); do
-        spawn "vgchange -a n ${volgroup}" || warn "Could not remove vg ${volgroup}"
-        sleep 0.2
-    done
+
     # NOTE possible leftovers like /mnt/gentoo/boot that gets mounted twice, not needed anymore but does no harm
     #if [ -f "/proc/mounts" ]; then
     #    for mnt in $(awk '{ print $2; }' /proc/mounts | grep ^${chroot_dir} | sort -ur); do
@@ -872,9 +892,9 @@ cleanup() {
         sleep 0.2
     done
 
-    # NOTE this is warn() as defined in modules/output.sh
+    # NOTE  this is warn() as defined in modules/output.sh
     # FIXME find another way, dont overwrite here, it's not its place
-    # rather pass skip extra param to cleanup and let warn read skip, if yes then let warn cancel its verbosity
+    #       rather pass skip extra param to cleanup and let warn read skip, if yes then let warn cancel its verbosity
     [ -n "$1" ] && function warn() {
         local msg=$1
         [ "${verbose}" == "yes" ] && echo -e " ${WARN}***${NORMAL} ${msg}" >&2
@@ -895,7 +915,7 @@ finishing_cleanup() {
         spawn "cp ${logfile} ${chroot_dir}/root/$(basename "${logfile}")" || warn "Could not copy install logfile into chroot"
     fi
     cleanup
-    notify "Install complete!"
+    notify "Install completed!"
     [ "${reboot}" == "yes" ] && notify "Rebooting..." && reboot
     exit 0
 }

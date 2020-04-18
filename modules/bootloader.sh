@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 map_device_to_grub_device() {
     local device=$1
     if [ ! -f "${chroot_dir}/boot/grub/device.map" ]; then

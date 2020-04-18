@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 # if [ -z "${bootloader}" ]; then
 #     warn "bootloader not set...assuming silo"
 #     bootloader="silo"
