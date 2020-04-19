@@ -139,7 +139,7 @@ while [ ${#} -gt 0 ]; do
         ;;
     -p | --profile)
         profile_set="yes"
-        profile=${1}
+        profile="${1}"
         [ -f "${profile}" ] || {
             echo "'${profile}' is not a file"
             exit 1
@@ -179,24 +179,24 @@ fi
 
 # check for required programs on livecd
 for a in bash \
-    curl \
-    parted \
-    sfdisk \
-    fdisk \
-    grep \
-    shred \
-    egrep \
-    mount \
-    swapoff \
-    swapon \
-    mke2fs \
-    wget \
-    chroot \
-    tar \
-    whoami \
-    hostname \
-    hdparm \
-    awk \
+    curl      \
+    parted    \
+    sfdisk    \
+    fdisk     \
+    grep      \
+    shred     \
+    egrep     \
+    mount     \
+    swapoff   \
+    swapon    \
+    mke2fs    \
+    wget      \
+    chroot    \
+    tar       \
+    whoami    \
+    hostname  \
+    hdparm    \
+    awk       \
     blkid; do
     has "${a}"
 done
@@ -405,5 +405,7 @@ fi
 
 runstep run_post_install_script                                       "Running post-install script if any"
 runstep finishing_cleanup                                             "Cleaning up system environment"
+
+notify "Install completed in $(secs_to_minutes_to_hours "$(($(date +%s) - ${start_time_in_secs}))")!"
 
 exit 0

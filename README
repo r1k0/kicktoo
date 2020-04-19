@@ -38,8 +38,7 @@ Options:
     -r, --removeresume    Clear any previously set resume points
     -n, --noautoresume    Turn off autoresume
     -h, --help            This
-    -v, --verbose         Be verbose (show command output)
-    -d, --debug           Output debugging messages
+    -q, --quiet           Disable verbose and debug
     --nocolor             No color
     --version             Print version
 

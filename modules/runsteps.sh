@@ -57,7 +57,7 @@ partition() {
     for device in $(set | grep '^gptpartitions_' | cut -d= -f1 | sed -e 's:^gptpartitions_::'); do
         debug partition "device is ${device}"
         local device_temp="gptpartitions_${device}"
-        local device device_size minor ptype size bootable devnode
+        local device_size minor ptype size bootable devnode
         device="/dev/${device/_/\/}"
         device_size="$(get_device_size_in_mb "${device}")"
         # clean part table and convert to GPT
@@ -194,12 +194,9 @@ setup_luks() {
                 ;;
             *)
                 if [ -n "${luks_key}" ]; then
-#                    lukscmd="cryptsetup -c ${cipher_name}-cbc-essiv:${lhash} luksFormat ${devicetmp} /mnt/$(basename "${luks_remdev}")${luks_key} && \
                     lukscmd="cryptsetup -c ${cipher_name}-${cipher_mode}:${lhash} luksFormat ${devicetmp} /mnt/$(basename "${luks_remdev}")${luks_key} && \
                         cryptsetup --key-file /mnt/$(basename "${luks_remdev}")${luks_key} luksOpen ${devicetmp} ${luks_mapper}"
                 else
-#                    lukscmd="echo ${boot_password} | cryptsetup -c ${cipher}-cbc-essiv:${lhash} luksFormat ${devicetmp} && echo ${boot_password} | cryptsetup luksOpen ${devicetmp} ${luks_mapper}"
-#                    lukscmd="echo ${boot_password} | cryptsetup -c ${cipher}-cbc-plain:${lhash} luksFormat ${devicetmp} && echo ${boot_password} | cryptsetup luksOpen ${devicetmp} ${luks_mapper}"
                     lukscmd="echo ${boot_password} | cryptsetup -c ${cipher_name}-${cipher_mode}:${lhash} luksFormat ${devicetmp} && echo ${boot_password} | cryptsetup luksOpen ${devicetmp} ${luks_mapper}"
                 fi
                 ;;
@@ -915,7 +912,6 @@ finishing_cleanup() {
         spawn "cp ${logfile} ${chroot_dir}/root/$(basename "${logfile}")" || warn "Could not copy install logfile into chroot"
     fi
     cleanup
-    notify "Install completed!"
     [ "${reboot}" == "yes" ] && notify "Rebooting..." && reboot
     exit 0
 }

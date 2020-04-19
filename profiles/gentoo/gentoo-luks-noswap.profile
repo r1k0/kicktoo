@@ -20,7 +20,7 @@ tree_type   snapshot    http://gentoo.mirrors.ovh.net/gentoo-distfiles/snapshots
 kernel_sources           gentoo-sources
 initramfs_builder
 genkernel_kernel_opts    --loglevel=5
-genkernel_initramfs_opts --luks
+genkernel_initramfs_opts --loglevel=5 --luks
 
 grub_install /dev/sda
 

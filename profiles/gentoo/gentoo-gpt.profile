@@ -16,15 +16,12 @@ mountfs /dev/sda4 ext4 / noatime
 [ "${arch}" == "amd64" ] && stage_latest amd64
 tree_type   snapshot    http://gentoo.mirrors.ovh.net/gentoo-distfiles/snapshots/portage-latest.tar.bz2
 
-# get kernel dotconfig from the official running kernel
-zcat /proc/config.gz > /dotconfig
-grep -v CONFIG_EXTRA_FIRMWARE /dotconfig > /dotconfig2 ; mv /dotconfig2 /dotconfig
-grep -v LZO                   /dotconfig > /dotconfig2 ; mv /dotconfig2 /dotconfig
-kernel_config_file       /dotconfig
 kernel_sources	         gentoo-sources
-initramfs_builder               
+initramfs_builder
 genkernel_kernel_opts    --loglevel=5
 genkernel_initramfs_opts --loglevel=5
+
+grub_install /dev/sda
 
 timezone                UTC
 rootpw                  a
@@ -35,3 +32,8 @@ extra_packages          net-misc/dhcpcd # syslog-ng vim openssh
 
 #rcadd                   sshd       default
 #rcadd                   syslog-ng  default
+
+pre_install_kernel_builder() {
+    # NOTE distfiles.gentoo.org is overloaded
+    spawn_chroot "echo GENTOO_MIRRORS=\"http://gentoo.mirrors.ovh.net/gentoo-distfiles/\" >> /etc/portage/make.conf"
+}

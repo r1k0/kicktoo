@@ -64,7 +64,8 @@ runstep() {
     skipfunc=$(eval "\${skip_${func}}")
 
     if isafunc pre_"${func}"; then
-        echo -e " >>>  ${BOLD}pre_${func}${NORMAL} ($(secs_to_minutes_to_hours "$(($(date +%s) - ${start_time_in_secs}))"))"
+#        echo -e " >>>  ${BOLD}pre_${func}${NORMAL} ($(secs_to_minutes_to_hours "$(($(date +%s) - ${start_time_in_secs}))"))"
+        echo -e " >>>  ${BOLD}pre_${func}${NORMAL}"
         debug runstep "executing pre-hook for ${func}"
         if [ "${autoresume}" = "yes" ]; then
             autoresume_runstep pre_"${func}" || pre_"${func}"
@@ -72,7 +73,8 @@ runstep() {
     fi
 
     if [ "${skipfunc}" != "1" ]; then
-        echo -e " ${GOOD}>>>${NORMAL} ${descr} ($(secs_to_minutes_to_hours "$(($(date +%s) - ${start_time_in_secs}))"))"
+#        echo -e " ${GOOD}>>>${NORMAL} ${descr} ($(secs_to_minutes_to_hours "$(($(date +%s) - ${start_time_in_secs}))"))"
+        echo -e " ${GOOD}>>>${NORMAL} ${descr}"
         log "${descr}"
 
         debug runstep "executing main for ${func}"
