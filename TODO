@@ -15,6 +15,8 @@
 - cleanup/remove notion of size suffix conversion: human_size_to_mb
     deprecated in sfdisk
 - luks: test ciphers: aes-cbc-plain aes-cbc-essiv:sha256 aes-xts-plain64
+- review runstep logic with portage and arch in mind
+  - review skip functions (an empty profile should not exit 1)
 - test profiles
   profiles/gentoo/gentoo-extended_part.profile
 X profiles/gentoo/gentoo-luks-lvm.profile
@@ -26,4 +28,4 @@ BUG profiles/gentoo/gentoo-noboot-noswap.profile
 X profiles/gentoo/gentoo-noboot.profile
 X profiles/gentoo/gentoo-noswap.profile
 X profiles/gentoo/gentoo.profile
-  profiles/gentoo/gpt*
+X profiles/gentoo/gentoo-gpt.profile
