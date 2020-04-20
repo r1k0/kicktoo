@@ -28,11 +28,7 @@ hostname		funtoo
 #rcadd			syslog-ng default
 #rcadd			sshd default
 
-#############################################################################
-# 1. commented skip runsteps are actually running!                          #
-# 2. put your custom code if any in pre_ or post_ functions                 #
-#   (if you use skip too, you overwrite with your code the one from Kicktoo)#
-#############################################################################
+#do_tree=yes # fixme move do_vars into runsteps functions
 
 # pre_partition() {
 # }
@@ -160,13 +156,13 @@ pre_setup_root_password() {
 
 
       spawn_chroot "install -d /var/git -o 250 -g 250"
-      spawn_chroot "ego sync"
-      spawn_chroot "emerge linux-firmware"
-      spawn_chroot "emerge grub"
-      spawn_chroot "grub-install /dev/sda"
-      spawn_chroot "ego boot update"
-      spawn_chroot "emerge world -uDNq"
-      spawn_chroot "emerge networkmanager -q"
+      spawn_chroot "ego sync" || die
+      spawn_chroot "emerge linux-firmware" || die
+      spawn_chroot "emerge grub" || die
+      spawn_chroot "grub-install /dev/sda" || die
+      spawn_chroot "ego boot update" || die
+      spawn_chroot "emerge world -uDNq" || die
+      spawn_chroot "emerge networkmanager -q" || die
 }
 #skip setup_root_password
 # post_setup_root_password() {
