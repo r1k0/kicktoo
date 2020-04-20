@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 part sda 1 83 100M
 part sda 2 82 2048M
 part sda 3 83 +
@@ -12,17 +10,18 @@ mountfs /dev/sda1 ext2 /boot
 mountfs /dev/sda2 swap
 mountfs /dev/sda3 ext4 / noatime
 
-stage_uri               http://ftp.osuosl.org/pub/funtoo/funtoo-stable/x86-32bit/i686/stage3-current.tar.xz
-tree_type   snapshot    http://ftp.osuosl.org/pub/funtoo/funtoo-stable/snapshots/portage-current.tar.xz
+# NOTE find what arch is your CPU and get the relevant stage at https://www.funtoo.org/Subarches
+stage_uri          https://build.funtoo.org/1.4-release-std/x86-64bit/intel64-haswell/stage3-latest.tar.xz
+#tree_type snapshot https://build.funtoo.org/1.4-release-std/snapshots/portage-2020-04-14.tar.xz
 
-cat "$(pwd)"/kconfig/livedvd-x86-amd64-32ul-2012.1.kconfig > /dotconfig
-kernel_config_file      /dotconfig
-kernel_sources          gentoo-sources
+#cat "$(pwd)"/kconfig/livedvd-x86-amd64-32ul-2012.1.kconfig > /dotconfig
+#kernel_config_file      /dotconfig
+#kernel_sources          gentoo-sources
 
 timezone		UTC
 rootpw 			a
-bootloader 		grub
-keymap			fr # be-latin1 en
+#bootloader 		grub
+keymap			us # be-latin1 en
 hostname		funtoo
 #extra_packages         vixie-cron syslog-ng openssh
 #rcadd			vixie-cron default
@@ -92,29 +91,34 @@ hostname		funtoo
 # pre_prepare_chroot() {
 # }
 # skip prepare_chroot
-# post_prepare_chroot() { 
+# post_prepare_chroot() {
 # }
 
 # pre_setup_fstab() {
 # }
 # skip setup_fstab
-# post_setup_fstab() { 
+# post_setup_fstab() {
 # }
 
-# pre_fetch_repo_tree() {
-# }
-# skip fetch_repo_tree
+#pre_fetch_repo_tree() {
+#      spawn_chroot "install -d /var/git -o 250 -g 250"
+#      spawn_chroot "ego sync"
+#      spawn_chroot "emerge linux-firmware"
+#      spawn_chroot "emerge grub"
+#      spawn_chroot "grub-install /dev/sda"
+#      spawn_chroot "ego boot update"
+#}
+skip fetch_repo_tree
 # post_fetch_repo_tree() {
 # }
 
 # pre_unpack_repo_tree() {
 # }
-# skip unpack_repo_tree
-post_unpack_repo_tree() {
-    # git style Funtoo portage
-    spawn_chroot "cd /usr/portage && git checkout funtoo.org" || die "could not checkout funtoo git repo"
-
-}
+skip unpack_repo_tree
+#post_unpack_repo_tree() {
+#    # git style Funtoo portage
+#    spawn_chroot "cd /usr/portage && git checkout funtoo.org" || die "could not checkout funtoo git repo"
+#}
 
 # pre_install_cryptsetup() {
 # }
@@ -130,12 +134,12 @@ post_unpack_repo_tree() {
 
 # pre_build_kernel() {
 # }
-# skip build_kernel
-post_build_kernel() {
-    spawn_chroot "cat /etc/pam.d/chpasswd | grep -v password > /etc/pam.d/chpasswd.tmp"
-    spawn_chroot "echo password include system-auth >> /etc/pam.d/chpasswd.tmp"
-    spawn_chroot "mv /etc/pam.d/chpasswd.tmp /etc/pam.d/chpasswd"
-}
+skip build_kernel
+#post_build_kernel() {
+#    spawn_chroot "cat /etc/pam.d/chpasswd | grep -v password > /etc/pam.d/chpasswd.tmp"
+#    spawn_chroot "echo password include system-auth >> /etc/pam.d/chpasswd.tmp"
+#    spawn_chroot "mv /etc/pam.d/chpasswd.tmp /etc/pam.d/chpasswd"
+#}
 
 # pre_setup_network_post() {
 # }
@@ -143,9 +147,28 @@ post_build_kernel() {
 # post_setup_network_post() {
 # }
 
-# pre_setup_root_password() {
-# }
-skip setup_root_password
+pre_setup_root_password() {
+
+
+
+#    spawn_chroot "cat /etc/pam.d/chpasswd | grep -v password > /etc/pam.d/chpasswd.tmp"
+#    spawn_chroot "echo password include system-auth >> /etc/pam.d/chpasswd.tmp"
+#    spawn_chroot "mv /etc/pam.d/chpasswd.tmp /etc/pam.d/chpasswd"
+
+
+
+
+
+      spawn_chroot "install -d /var/git -o 250 -g 250"
+      spawn_chroot "ego sync"
+      spawn_chroot "emerge linux-firmware"
+      spawn_chroot "emerge grub"
+      spawn_chroot "grub-install /dev/sda"
+      spawn_chroot "ego boot update"
+      spawn_chroot "emerge world -uDNq"
+      spawn_chroot "emerge networkmanager -q"
+}
+#skip setup_root_password
 # post_setup_root_password() {
 # }
 
@@ -169,13 +192,13 @@ skip setup_root_password
 
 # pre_install_bootloader() {
 # }
-# skip install_bootloader
+skip install_bootloader
 # post_install_bootloader() {
 # }
 
-# pre_configure_bootloader() {
-# }
-# skip configure_bootloader
+#pre_configure_bootloader() {
+#}
+skip configure_bootloader
 # post_configure_bootloader() {
 # }
 
@@ -191,7 +214,7 @@ skip setup_root_password
 # post_add_and_remove_services() {
 # }
 
-# pre_run_post_install_script() { 
+# pre_run_post_install_script() {
 # }
 # skip run_post_install_script
 # post_run_post_install_script() {

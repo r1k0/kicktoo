@@ -1,25 +1,5 @@
 The following is a list of all the valid configuration options with description and valid parameters.
 
-===================================
-mode - Set the mode for the profile
-
-  Usage:
-    mode [luks]
-
-  Parameters:
-    luks - whether this profile shall encrypt partitions
-           comment out if encrypted partitions are not required
-
-==========================================================
-key_on - If mode=luks, shall the key be stored on USB key?
-
-  Usage:
-    key_on [usb]
-
-  Parameters:
-    usb - whether the key shall be stored on removable USB key
-          comment out if using EFI partition instead
-
 =====================================================
 geometry - Set the disk geometry for the partitioning.
            Use only if necessary; the kernel provides
