@@ -329,7 +329,7 @@ if [ "${chrootme}" == "yes" ]; then
 fi
 # close devices setup by --chroot
 if [ "${closeme}" == "yes" ]; then
-    cleanup
+    chroot_dir="/mnt/chroot" cleanup
     exit $?
 fi
 
