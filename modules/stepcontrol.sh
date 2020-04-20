@@ -37,6 +37,10 @@ autoresume_runstep() {
         if [ "${func}" == "format_devices" ]; then
             spawn "rm -f ${autoresume_profile_dir}/mount*" || warn "Cannot remove ${autoresume_profile_dir}/mount* resume points, should not autoresume"
         fi
+
+# FIXME shouldnt we add format_devices_luks too?
+# FIXME2 seems not according to comment below: but shouldnt add format_devices_luks too??
+
         if [ "${func}" == "unpack_stage_tarball" ]; then
             spawn "rm -f ${autoresume_profile_dir}/prepare_chroot" || warn "Cannot remove ${autoresume_profile_dir}/prepare_chroot resume points, should not autoresume"
         fi
@@ -46,9 +50,10 @@ autoresume_runstep() {
         #   setup_lvm
         #   setup_luks
         #   format_devices (this is only for the swap, we re run mkswap on autoresume but that's all)
-        if [ "${func}" == "setup_mdraid"   ] ||
-           [ "${func}" == "setup_lvm"      ] ||
-           [ "${func}" == "format_devices" ] ||
+        if [ "${func}" == "setup_mdraid"        ] ||
+           [ "${func}" == "setup_lvm"           ] ||
+           [ "${func}" == "format_devices"      ] ||
+           [ "${func}" == "format_devices_luks" ] ||
            [ "${func}" == "setup_luks"     ]; then
               ${func} # <<<
         else
@@ -78,7 +83,8 @@ runstep() {
     fi
 
     if [ "${skipfunc}" != "1" ]; then
-        echo -e " ${GOOD}>>>${NORMAL} ${descr}"
+#        echo -e " ${GOOD}>>>${NORMAL} ${descr}"
+        echo -e " ${GOOD}>>>${NORMAL} ${func}"
         log "${descr}"
 
         debug runstep "executing main for ${func}"
@@ -86,8 +92,8 @@ runstep() {
             autoresume_runstep "${func}" || ${func} # <<<
         fi
     else
-        debug runstep "skipping step ${func}"
-        echo -e " ${GOOD}>>>${NORMAL} ${BOLD}skipping${NORMAL} ${func}"
+        debug runstep "SKIPPING step ${func}"
+        echo -e " ${WARN}>>>${NORMAL} ${BOLD}SKIPPING${NORMAL} ${func}"
         if [ "${autoresume}" = "yes" ]; then
             autoresume_runstep "${func}" skip
         fi
