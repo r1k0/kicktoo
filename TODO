@@ -17,6 +17,7 @@
 - luks: test ciphers: aes-cbc-plain aes-cbc-essiv:sha256 aes-xts-plain64
 - review runstep logic with portage and arch in mind
   - review skip functions (an empty profile should not exit 1)
+    - review do_vars == yes, maybe should be put inside the runstep function
 - test profiles
   profiles/gentoo/gentoo-extended_part.profile
 X profiles/gentoo/gentoo-luks-lvm.profile
@@ -29,3 +30,4 @@ X profiles/gentoo/gentoo-noboot.profile
 X profiles/gentoo/gentoo-noswap.profile
 X profiles/gentoo/gentoo.profile
 X profiles/gentoo/gentoo-gpt.profile
+  profiles/funtoo/funtoo.profile -> build kernel
