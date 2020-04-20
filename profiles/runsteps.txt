@@ -5,7 +5,7 @@
 
 # pre_run_pre_install_script() {
 # }
-# skip run_pre_install_script 
+# skip run_pre_install_script
 # post_run_pre_install_script() {
 # }
 
@@ -21,16 +21,16 @@
 # post_setup_mdraid() {
 # }
 
-# pre_setup_lvm() {
-# }
-# skip setup_lvm
-# post_setup_lvm() {
-# }
-
 # pre_setup_luks() {
 # }
 # skip setup_luks
 # post_setup_luks() {
+# }
+
+# pre_setup_lvm() {
+# }
+# skip setup_lvm
+# post_setup_lvm() {
 # }
 
 # pre_format_devices() {
@@ -66,13 +66,37 @@
 # pre_prepare_chroot() {
 # }
 # skip prepare_chroot
-# post_prepare_chroot() { 
+# post_prepare_chroot() {
 # }
 
 # pre_setup_fstab() {
 # }
 # skip setup_fstab
-# post_setup_fstab() { 
+# post_setup_fstab() {
+# }
+
+# pre_create_mdadmconf() {
+# }
+# skip create_mdadmconf
+# post_create_mdadmconf() {
+# }
+
+# pre_create_dmcrypt() {
+# }
+# skip create_dmcrypt
+# post_create_dmcrypt() {
+# }
+
+# pre_create_makeconf() {
+# }
+# skip create_makeconf
+# post_create_makeconf() {
+# }
+
+# pre_set_locale() {
+# }
+# skip set_locale
+# post_set_locale() {
 # }
 
 # pre_fetch_repo_tree() {
@@ -87,6 +111,12 @@
 # post_unpack_repo_tree() {
 # }
 
+# pre_set_profile() {
+# }
+# skip set_profile
+# post_set_profile() {
+# }
+
 # pre_copy_kernel() {
 # }
 # skip copy_kernel
@@ -99,10 +129,34 @@
 # post_copy_initramfs() {
 # }
 
+# pre_fetch_kernel_tarball() {
+# }
+# skip fetch_kernel_tarball
+# post_fetch_kernel_tarball() {
+# }
+
+# pre_install_kernel_builder() {
+# }
+# skip install_kernel_builder
+# post_install_kernel_builder() {
+# }
+
 # pre_build_kernel() {
 # }
 # skip build_kernel
 # post_build_kernel() {
+# }
+
+# pre_unpack_kernel_tarball() {
+# }
+# skip unpack_kernel_tarball
+# post_unpack_kernel_tarball() {
+# }
+
+# pre_install_initramfs_builder() {
+# }
+# skip install_initramfs_builder
+# post_install_initramfs_builder() {
 # }
 
 # pre_build_initramfs() {
@@ -141,6 +195,18 @@
 # post_setup_host() {
 # }
 
+# pre_setup_domain() {
+# }
+# skip setup_domain
+# post_setup_domain() {
+# }
+
+# pre_install_extra_packages() {
+# }
+# skip install_extra_packages
+# post_install_extra_packages() {
+# }
+
 # pre_install_bootloader() {
 # }
 # skip install_bootloader
@@ -153,19 +219,13 @@
 # post_configure_bootloader() {
 # }
 
-# pre_install_extra_packages() {
-# }
-# skip install_extra_packages
-# post_install_extra_packages() {
-# }
-
 # pre_add_and_remove_services() {
 # }
 # skip add_and_remove_services
 # post_add_and_remove_services() {
 # }
 
-# pre_run_post_install_script() { 
+# pre_run_post_install_script() {
 # }
 # skip run_post_install_script
 # post_run_post_install_script() {
