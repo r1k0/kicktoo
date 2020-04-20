@@ -855,6 +855,7 @@ cleanup() {
 
         # FIXED? this sorts the output of grep chroot_dir /proc/mounts
         #        so that hopefully /mnt/gentoo comes last
+        # FIXME2 can I do the same with umount -lR $mountpoint?
         mapfile -t l <<< $(grep ${chroot_dir} </proc/mounts | cut -d' ' -f2)
         readarray -t sorted < <(for a in "${l[@]}"; do echo "$a"; done | sort -udr)
         for a in "${sorted[@]}"; do

@@ -2,16 +2,6 @@
 # The whole purpose of this file is to translate the profile to
 # do_* steps for kicktoo and variables for runsteps
 
-# Set the mode for the profile
-mode() {
-    mode=$1 # luks - whether this profile shall encrypt partitions
-}
-
-# If mode=luks, the key shall be stored on removable USB key
-key_on() {
-    key_on=$1
-}
-
 # Set the disk geometry for the partitioning.
 geometry() {
     local heads=$1

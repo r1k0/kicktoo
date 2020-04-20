@@ -60,11 +60,16 @@ autoresume_runstep() {
 runstep() {
     local func=$1
     local descr=$2
-    local skipfunc
-    skipfunc=$(eval "\${skip_${func}}")
+#    local skipfunc=$(eval "\${skip_${func}}")
+    local skipfunc=$(eval $(echo echo "\${skip_${func}}"))
+
+    if [ "${skipfunc}" != "1" ]; then
+        if [ -n "${server}" ]; then
+            server_send_request "update_status" "func=${func}&descr=$(echo "${descr}" | sed -e 's: :+:g')"
+        fi
+    fi
 
     if isafunc pre_"${func}"; then
-#        echo -e " >>>  ${BOLD}pre_${func}${NORMAL} ($(secs_to_minutes_to_hours "$(($(date +%s) - ${start_time_in_secs}))"))"
         echo -e " >>>  ${BOLD}pre_${func}${NORMAL}"
         debug runstep "executing pre-hook for ${func}"
         if [ "${autoresume}" = "yes" ]; then
@@ -73,7 +78,6 @@ runstep() {
     fi
 
     if [ "${skipfunc}" != "1" ]; then
-#        echo -e " ${GOOD}>>>${NORMAL} ${descr} ($(secs_to_minutes_to_hours "$(($(date +%s) - ${start_time_in_secs}))"))"
         echo -e " ${GOOD}>>>${NORMAL} ${descr}"
         log "${descr}"
 
