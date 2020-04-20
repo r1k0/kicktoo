@@ -329,8 +329,7 @@ if [ "${chrootme}" == "yes" ]; then
 fi
 # close devices setup by --chroot
 if [ "${closeme}" == "yes" ]; then
-    import chroot
-    chroot_close
+    cleanup
     exit $?
 fi
 

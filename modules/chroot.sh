@@ -90,27 +90,3 @@ chroot_lvm() {
 # FIXME where is chroot_luks_lvm()?
 
 # FIXME where is chroot_mdraid_lvm()?
-
-chroot_close() {
-    for i in /dev /sys /proc /boot; do
-        if umount -l -f ${chroot_dir}${i} &>/dev/null; then
-            echo "${chroot_dir}${i} umounted"
-        fi
-    done
-    if umount -l -f ${chroot_dir} &>/dev/null; then
-        echo "${chroot_dir} umounted"
-    fi
-    if vgchange -a n vg &>/dev/null; then
-        echo "lvm volumes closed"
-    fi
-    if cryptsetup luksClose root &>/dev/null; then
-        echo "/dev/mapper/root closed"
-    fi
-    # clean up current profile's autoresume mount related step points to force them to be remouted next run
-    [ -d "${autoresume_profile_dir}" ] && rm "${autoresume_profile_dir}"/{startup_cleanup,mount_*,prepare_chroot,setup_fstab}
-    if test -b /dev/mapper/root; then
-        echo "Your box is still opened!"
-        echo "Rerun 'kicktoo --close <profile>' or reboot"
-        exit 1
-    fi
-}
