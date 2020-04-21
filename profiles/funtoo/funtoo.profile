@@ -96,14 +96,16 @@ hostname		funtoo
 # post_setup_fstab() {
 # }
 
-#pre_fetch_repo_tree() {
-#      spawn_chroot "install -d /var/git -o 250 -g 250"
-#      spawn_chroot "ego sync"
-#      spawn_chroot "emerge linux-firmware"
-#      spawn_chroot "emerge grub"
-#      spawn_chroot "grub-install /dev/sda"
-#      spawn_chroot "ego boot update"
-#}
+pre_fetch_repo_tree() {
+    spawn_chroot "install -d /var/git -o 250 -g 250" || die
+    spawn_chroot "ego sync" || die
+    spawn_chroot "emerge linux-firmware" || die
+    spawn_chroot "emerge grub" || die
+    spawn_chroot "grub-install /dev/sda" || die
+    spawn_chroot "ego boot update" || die
+    spawn_chroot "emerge world -uDNq" || die
+    spawn_chroot "emerge networkmanager -q" || die
+}
 skip fetch_repo_tree
 # post_fetch_repo_tree() {
 # }
@@ -112,8 +114,6 @@ skip fetch_repo_tree
 # }
 skip unpack_repo_tree
 #post_unpack_repo_tree() {
-#    # git style Funtoo portage
-#    spawn_chroot "cd /usr/portage && git checkout funtoo.org" || die "could not checkout funtoo git repo"
 #}
 
 # pre_install_cryptsetup() {
@@ -132,9 +132,6 @@ skip unpack_repo_tree
 # }
 skip build_kernel
 #post_build_kernel() {
-#    spawn_chroot "cat /etc/pam.d/chpasswd | grep -v password > /etc/pam.d/chpasswd.tmp"
-#    spawn_chroot "echo password include system-auth >> /etc/pam.d/chpasswd.tmp"
-#    spawn_chroot "mv /etc/pam.d/chpasswd.tmp /etc/pam.d/chpasswd"
 #}
 
 # pre_setup_network_post() {
@@ -143,27 +140,16 @@ skip build_kernel
 # post_setup_network_post() {
 # }
 
-pre_setup_root_password() {
-
-
-
-#    spawn_chroot "cat /etc/pam.d/chpasswd | grep -v password > /etc/pam.d/chpasswd.tmp"
-#    spawn_chroot "echo password include system-auth >> /etc/pam.d/chpasswd.tmp"
-#    spawn_chroot "mv /etc/pam.d/chpasswd.tmp /etc/pam.d/chpasswd"
-
-
-
-
-
-      spawn_chroot "install -d /var/git -o 250 -g 250"
-      spawn_chroot "ego sync" || die
-      spawn_chroot "emerge linux-firmware" || die
-      spawn_chroot "emerge grub" || die
-      spawn_chroot "grub-install /dev/sda" || die
-      spawn_chroot "ego boot update" || die
-      spawn_chroot "emerge world -uDNq" || die
-      spawn_chroot "emerge networkmanager -q" || die
-}
+#pre_setup_root_password() {
+#      spawn_chroot "install -d /var/git -o 250 -g 250" || die
+#      spawn_chroot "ego sync" || die
+#      spawn_chroot "emerge linux-firmware" || die
+#      spawn_chroot "emerge grub" || die
+#      spawn_chroot "grub-install /dev/sda" || die
+#      spawn_chroot "ego boot update" || die
+#      spawn_chroot "emerge world -uDNq" || die
+#      spawn_chroot "emerge networkmanager -q" || die
+#}
 #skip setup_root_password
 # post_setup_root_password() {
 # }
