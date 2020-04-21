@@ -34,6 +34,12 @@ skip format_devices
 # post_format_devices() {
 # }
 
+# pre_format_devices_luks() {
+# }
+skip format_devices_luks
+# post_format_devices_luks() {
+# }
+
 # pre_mount_local_partitions() {
 # }
 skip mount_local_partitions
