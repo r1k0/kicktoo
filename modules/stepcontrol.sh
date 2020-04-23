@@ -57,7 +57,10 @@ autoresume_runstep() {
            [ "${func}" == "setup_luks"     ]; then
               ${func} # <<<
         else
-            echo -e " >>>  ${BOLD}resuming${NORMAL}"
+            local dofunc=$(eval $(echo echo "\${do_${func}}"))
+            if [ "${dofunc}" != "no" ]; then
+                echo -ne " -> ${BOLD}resumed${NORMAL}"
+            fi
         fi
     fi
 }
@@ -65,7 +68,6 @@ autoresume_runstep() {
 runstep() {
     local func=$1
     local descr=$2
-#    local skipfunc=$(eval "\${skip_${func}}")
     local skipfunc=$(eval $(echo echo "\${skip_${func}}"))
 
     if [ "${skipfunc}" != "1" ]; then
@@ -75,32 +77,33 @@ runstep() {
     fi
 
     if isafunc pre_"${func}"; then
-        echo -e " >>>  ${BOLD}pre_${func}${NORMAL}"
+        echo -e " >>>   pre_${func}"
         debug runstep "executing pre-hook for ${func}"
         if [ "${autoresume}" = "yes" ]; then
             autoresume_runstep pre_"${func}" || pre_"${func}"
         fi
     fi
 
-    if [ "${skipfunc}" != "1" ]; then
+    local dofunc=$(eval $(echo echo "\${do_${func}}"))
+    if [ "${skipfunc}" != "yes" ] || [ "${skipfunc}" == "no" ] && [ "${dofunc}"  != "no" ]; then
 #        echo -e " ${GOOD}>>>${NORMAL} ${descr}"
-        echo -e " ${GOOD}>>>${NORMAL} ${func}"
+        echo -en " ${GOOD}>>>${NORMAL} ${BOLD}${func}${NORMAL}"
         log "${descr}"
 
         debug runstep "executing main for ${func}"
         if [ "${autoresume}" = "yes" ]; then
-            autoresume_runstep "${func}" || ${func} # <<<
+            autoresume_runstep "${func}" || ${func} && echo # <<<
         fi
     else
         debug runstep "SKIPPING step ${func}"
-        echo -e " ${WARN}>>>${NORMAL} ${BOLD}SKIPPING${NORMAL} ${func}"
+        echo -e " ${WARN}>>>${NORMAL} ${func} -> skipped"
         if [ "${autoresume}" = "yes" ]; then
             autoresume_runstep "${func}" skip
         fi
     fi
 
     if isafunc post_"${func}"; then
-        echo -e " >>>  ${BOLD}post_${func}()${NORMAL}"
+        echo -e " >>>   post_${func}"
         debug runstep "executing post-hook for ${func}"
         if [ "${autoresume}" = "yes" ]; then
             autoresume_runstep post_"${func}" || post_"${func}"

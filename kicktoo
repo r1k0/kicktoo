@@ -63,7 +63,6 @@ Usage:
 Options:
     -p, --profile <file>  Run the profile
     -u, --dump            Dump config to stdout
-    -e, --export  <file>  Export set config for import
     -i, --import  <file>  Import and run config from export
     -c, --client  <host>  Act as a client and fetch profiles from a kicktood daemon
     -r, --removeresume    Clear any previously set resume points
@@ -78,6 +77,32 @@ Tip:
 
 EOF
 }
+
+dump_config() {
+    echo '# === START VARIABLES ==='
+    set -o posix
+    set |
+        grep "^[a-z]"                |
+        sed 's/^export_.*/#&/g'      |
+        sed 's/^profile_set.*/#&/g'  |
+        sed 's/^autoresume.*/#&/g'   |
+        sed 's/^removeresume.*/#&/g' |
+        sed 's/^dump_conf.*/#&/g'    |
+        sed 's/^verbose.*/#&/g'      |
+        sed 's/^debug.*/#&/g' &&
+        echo '# === END VARIABLES ==='
+    echo '# === START FUNCTIONS ==='
+    # only export custom functions, namely ^pre_*|^post_*
+    for i in $(declare -F | awk '$3 ~ /(^pre_)|(^post_)/ { print }' | cut -d' ' -f3); do
+        type "${i}" | grep -v 'is a function'
+    done
+    echo '# === END FUNCTIONS ==='
+    exit 0
+}
+
+#########################################################################
+# main
+#########################################################################
 
 if [ ${#} -lt 1 ]; then
     usage
@@ -101,10 +126,6 @@ while [ ${#} -gt 0 ]; do
     -q | --quiet)
         verbose="no"
         debug="no"
-        ;;
-    -e | --export)
-        export_set="yes"
-        export_file=${1}
         ;;
     -i | --import)
         import_set="yes"
@@ -146,6 +167,8 @@ while [ ${#} -gt 0 ]; do
         }
         ;;
     -u | --dump)
+        verbose="no"
+        debug="no"
         dump_conf="yes"
         ;;
     -*)
@@ -209,8 +232,6 @@ declare -A grub_install
 # load default vars
 source ${sourcedir}/defaults
 
-# FIXME which one should be first? defaults or config import?
-
 # import config file
 if [ "${import_set}" == "yes" ]; then
     notify "Importing '${import_file}' config variables"
@@ -230,6 +251,7 @@ if [ -n "${server}" ]; then
     server_get_profile && { profile_set="yes"; profile="/tmp/kicktoo_profile"; }
 fi
 
+# set profile name
 profile_name="$(get_filename_from_uri "${profile}" | sed 's/.profile//g')" #> /dev/null 2>&1)"
 debug main "profile_name is: '${profile_name}'"
 
@@ -262,52 +284,19 @@ arch=$(get_arch)
 
 # dump config to screen
 if [ "${dump_conf}" == "yes" ]; then
-    set -o posix
-    set | grep "^[a-z]"
-    for i in $(declare -F | awk '$3 ~ /(^pre_)|(^post_)/ { print }' | cut -d' ' -f3); do
-        type "${i}" | grep -v 'is a function'
-    done
-    exit 0
+    dump_config
 fi
 
-# export profile config to file and exit
-if [ "${export_set}" == "yes" ]; then
-    if [ -n "${export_file}" ]; then
-        true
-    else
-        error "specify a file"
-        exit 1
-    fi
-    echo '# === START VARIABLES ===' >"${export_file}"
-    set -o posix
-    set |
-        grep "^[a-z]"                |
-        sed 's/^export_.*/#&/g'      |
-        sed 's/^profile_set.*/#&/g'  |
-        sed 's/^autoresume.*/#&/g'   |
-        sed 's/^removeresume.*/#&/g' |
-        sed 's/^dump_conf.*/#&/g'    |
-        sed 's/^verbose.*/#&/g'      |
-        sed 's/^debug.*/#&/g' \
-            >>"${export_file}" &&
-        echo '# === END VARIABLES ===' >>"${export_file}"
-    echo '# === START FUNCTIONS ===' >>"${export_file}"
-    #typeset -f >> ${export_file} # this will dump all functions
-    # only export custom functions, namely ^pre_*|^post_*
-    for i in $(declare -F | awk '$3 ~ /(^pre_)|(^post_)/ { print }' | cut -d' ' -f3); do
-        type "${i}" | grep -v 'is a function' >>"${export_file}"
-    done
-    echo '# === END FUNCTIONS ===' >>"${export_file}"
-    notify "Exporting kicktoo config to '${export_file}'"
-    exit 0
-fi
+#if [ "${export_set}" == "yes" ]; then
+#    export_profile
+#fi
 
 ! touch "${logfile}" 2>/dev/null && {
     error "Logfile is not writeable!"
     exit 1
 }
 
-# if autoresume is set and the current profile's track  directory does not exist, create it
+# if autoresume is set and the current profile's track directory does not exist, create it
 if [ ${autoresume} == "yes" ] && ! [ -d "${autoresume_profile_dir}" ]; then
     spawn "mkdir -p ${autoresume_profile_dir}" || die "Unable to create autoresume tracking directory"
 fi
@@ -317,7 +306,7 @@ fi
 [ "${do_lvm}"  == "yes" ] && has "pvcreate"
 [ "${do_luks}" == "yes" ] && has "cryptsetup"
 if [ -n "${profile}" ]; then
-    grep -q xz "${profile}" && has "unxz"
+    grep -q xz "${profile}"      && has "unxz"
     grep -q gptpart "${profile}" && has "sgdisk"
 fi
 
@@ -344,9 +333,9 @@ if [ -z "${profile}" ] && [ -z "${import_file}" ]; then
     usage
     exit 1
 fi
-# don't run if both are non null
+# don't run if both are set
 if [ "${profile_set}" == "yes" ] && [ -n "${import_file}" ]; then
-    error "Which one is it? Import config or profile? Why do you want to run both?"
+    error "Which one is it? Import config or profile? You lose, try again"
     usage
     exit 1
 fi
@@ -356,55 +345,55 @@ fi
 #########################################################################
 
 # make sure it's clean before
-runstep starting_cleanup "Cleaning up system environment"
+runstep starting_cleanup          "Cleaning up system environment"
 
 debug main "Pushing system for ${arch}"
 
-runstep run_pre_install_script "Running pre-install script if any"
+runstep run_pre_install_script    "Running pre-install script if any"
 
-[ "${do_part}"         == "yes" ] && runstep partition                "Partitioning"
-[ "${do_raid}"         == "yes" ] && runstep setup_mdraid             "Setting up RAID arrays"
-[ "${do_luks}"         == "yes" ] && runstep setup_luks               "Setting up LUKS devices"
-[ "${do_lvm}"          == "yes" ] && runstep setup_lvm                "Setting up LVM volumes"
-[ "${do_format}"       == "yes" ] && runstep format_devices           "Formatting devices"
-[ "${do_luks}"         == "yes" ] && runstep format_devices_luks      "Formatting LUKS devices"
-[ "${do_localmounts}"  == "yes" ] && runstep mount_local_partitions   "Mounting local partitions"
-[ "${do_netmounts}"    == "yes" ] && runstep mount_network_shares     "Mounting network shares"
-if [ "${do_stage_uri}" == "yes" ] || [ "${do_stage_file}" == "yes" ]; then
-    runstep fetch_stage_tarball                                       "Fetching stage tarball"
-    runstep unpack_stage_tarball                                      "Unpacking stage tarball"
-    runstep prepare_chroot                                            "Preparing chroot"
-    runstep setup_fstab                                               "Setting up /etc/fstab"
-fi
-[ "${do_raid}"        == "yes" ] && runstep create_mdadmconf          "Setting up /etc/mdadm.conf"
-[ "${do_luks}"        == "yes" ] && runstep create_dmcrypt            "Setting up /etc/conf.d/dmcrypt"
-[ "${do_makeconf}"    == "yes" ] && runstep create_makeconf           "Creating custom make.conf"
-[ "${do_locale}"      == "yes" ] && runstep set_locale                "Setting locale"
-[ "${do_tree}"        == "yes" ] && runstep fetch_repo_tree           "Fetching repository tree"
-[ "${do_tree}"        == "yes" ] && runstep unpack_repo_tree          "Unpacking repository tree"
-[ "${do_set_profile}" == "yes" ] && runstep set_profile               "Setting up profile with eselect"
-[ "${do_kbin}"        == "yes" ] && runstep copy_kernel               "Copying pre compiled kernel"
-[ "${do_irfsbin}"     == "yes" ] && runstep copy_initramfs            "Copying pre packaged initramfs"
-[ "${do_kernel_uri}"  == "yes" ] && runstep fetch_kernel_tarball      "Fetching pre compiled kernel package"
-[ "${do_kernel}"      == "yes" ] && runstep install_kernel_builder    "Installing kernel builder"
-[ "${do_kernel}"      == "yes" ] && runstep build_kernel              "Building kernel"
-[ "${do_kernel_uri}"  == "yes" ] && runstep unpack_kernel_tarball     "Unpacking kernel tarball"
-[ "${do_irfs}"        == "yes" ] && runstep install_initramfs_builder "Installing initramfs builder"
-[ "${do_irfs}"        == "yes" ] && runstep build_initramfs           "Building initramfs"
-[ "${do_postnet}"     == "yes" ] && runstep setup_network_post        "Setting up post-install networking"
-[ "${do_password}"    == "yes" ] && runstep setup_root_password       "Setting up root password"
-[ "${do_tz}"          == "yes" ] && runstep setup_timezone            "Setting up timezone"
-[ "${do_keymap}"      == "yes" ] && runstep setup_keymap              "Setting up keymap"
-[ "${do_host}"        == "yes" ] && runstep setup_host                "Setting up hostname"
-[ "${do_domain}"      == "yes" ] && runstep setup_domain              "Setting up domain name"
-[ "${do_xpkg}"        == "yes" ] && runstep install_extra_packages    "Compiling extra packages"
-[ "${do_bootloader}"  == "yes" ] && runstep install_bootloader        "Compiling bootloader"
-[ "${do_bootloader}"  == "yes" ] && runstep configure_bootloader      "Configuring bootloader"
-[ "${do_services}"    == "yes" ] && runstep add_and_remove_services   "Adding and removing services"
+runstep partition                 "Partitioning"
+runstep setup_mdraid              "Setting up RAID arrays"
+runstep setup_luks                "Setting up LUKS devices"
+runstep setup_lvm                 "Setting up LVM volumes"
+runstep format_devices            "Formatting devices"
+runstep format_devices_luks       "Formatting LUKS devices"
+runstep mount_local_partitions    "Mounting local partitions"
+runstep mount_network_shares      "Mounting network shares"
+runstep fetch_stage_tarball       "Fetching stage tarball"
+runstep unpack_stage_tarball      "Unpacking stage tarball"
+runstep prepare_chroot            "Preparing chroot"
+runstep setup_fstab               "Setting up /etc/fstab"
+runstep create_mdadmconf          "Setting up /etc/mdadm.conf"
+runstep create_dmcrypt            "Setting up /etc/conf.d/dmcrypt"
+runstep create_makeconf           "Creating custom make.conf"
+runstep set_locale                "Setting locale"
+runstep fetch_repo_tree           "Fetching repository tree"
+runstep unpack_repo_tree          "Unpacking repository tree"
+runstep set_profile               "Setting up profile with eselect"
+runstep copy_kernel               "Copying pre compiled kernel"
+runstep copy_initramfs            "Copying pre packaged initramfs"
+runstep fetch_kernel_tarball      "Fetching pre compiled kernel package"
+runstep unpack_kernel_tarball     "Unpacking kernel tarball"
+runstep install_kernel_builder    "Installing kernel builder"
+runstep build_kernel              "Building kernel"
+runstep install_initramfs_builder "Installing initramfs builder"
+runstep build_initramfs           "Building initramfs"
+runstep setup_network_post        "Setting up post-install networking"
+runstep setup_root_password       "Setting up root password"
+runstep setup_timezone            "Setting up timezone"
+runstep setup_keymap              "Setting up keymap"
+runstep setup_host                "Setting up hostname"
+runstep setup_domain              "Setting up domain name"
+runstep install_extra_packages    "Compiling extra packages"
+runstep install_bootloader        "Compiling bootloader"
+runstep configure_bootloader      "Configuring bootloader"
+runstep add_and_remove_services   "Adding and removing services"
 
-runstep run_post_install_script                                       "Running post-install script if any"
-runstep finishing_cleanup                                             "Cleaning up system environment"
+runstep run_post_install_script   "Running post-install script if any"
+runstep finishing_cleanup         "Cleaning up system environment"
 
-notify "Install completed in $(secs_to_minutes_to_hours "$(($(date +%s) - ${start_time_in_secs}))")!"
+notify "Install completed in $(secs_to_minutes_to_hours "$(($(date +%s) - ${start_time_in_secs}))")"
+
+[ "${reboot}" == "yes" ] && notify "Rebooting..." && reboot
 
 exit 0

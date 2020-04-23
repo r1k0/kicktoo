@@ -16,7 +16,7 @@ geometry() {
 
 # Creates a partition
 part() {
-    do_part=yes
+    do_partition=yes
     local drive=$1    # the drive to add this partition (such as hda, sdb, etc.)
     local minor=$2    # the partition number
     local type=$3     # type used in fdisk (such as 82/S or 83/L) or 85/E/5 for extended
@@ -36,7 +36,7 @@ part() {
 
 # Creates a GPT partition
 gptpart() {
-    do_part=yes
+    do_partition=yes
     local drive=$1    # the drive to add this partition (such as hda, sdb, etc.)
     local minor=$2    # the partition number. these should be in order
     local type=$3     # the partition type used in sgdisk (such as 8200 or 8300)
@@ -56,7 +56,7 @@ gptpart() {
 
 # Creates a GPT partition, defined using sectors
 gptspart() {
-    do_part=yes
+    do_partition=yes
     local drive=$1 # the drive to add this partition (such as hda, sdb, etc.)
     local minor=$2 # the partition number. these should be in order
     local type=$3  # the partition type used in sgdisk (such as 8200 or 8300)
@@ -76,7 +76,8 @@ gptspart() {
 
 # Creates an md raid array
 mdraid() {
-    do_raid=yes
+    do_setup_mdraid=yes
+    do_create_mdadmconf=yes
     local array=$1     # name of the array (such as md0, md1, etc.)
     shift
     local arrayopts=$* # arguments after create: '-l 1 -n 2 /dev/sda2 /dev/sdb2'
@@ -94,7 +95,7 @@ mduuid() {
 
 # Creates an LVM volume group
 lvm_volgroup() {
-    do_lvm=yes
+    do_setup_lvm=yes
     local volgroup=$1 # name of the volume group to create
     shift
     local devices=$*  # list of block devices to include in the volume group
@@ -104,7 +105,7 @@ lvm_volgroup() {
 
 # Create an LVM logical volume
 lvm_logvol() {
-    do_lvm=yes
+    do_setup_lvm=yes
     local volgroup=$1 # name of a volume group created with 'lvm_volgroup'
     local size=$2     # size of logical volume to pass to 'lvcreate'
     local name=$3     # name of logical volume to pass to 'lvcreate'
@@ -119,7 +120,9 @@ lvm_logvol() {
 
 #  Sets and creates /dev/mapper/ encrypted devices
 luks() {
-    do_luks=yes
+    do_setup_luks=yes
+    do_format_devices_luks=yes
+    do_create_dmcrypt=yes
     if [ "$1" == "bootpw" ]; then
         boot_password="$2"
         debug luks "Password parsing: $boot_password"
@@ -145,7 +148,8 @@ luks() {
 
 # Formats a partition
 format() {
-    do_format=yes
+    do_format_devices=yes
+    do_format_devices_luks=yes
     local device="$1" # the device to format (such as /dev/hda2 or /dev/sdb4)
     local fs="$2"     # the filesystem to use (such as ext2, ext3, or swap)
     shift 2
@@ -170,7 +174,7 @@ format() {
 
 # Mounts a filesystem
 mountfs() {
-    do_localmounts=yes
+    do_mount_local_partitions=yes
     local device=$1 # the device to mount (such as /dev/hda2 or /dev/sdb4)
     local type=$2   # filesystem of device (use auto if you're not sure)
     local mountpoint=$3
@@ -188,7 +192,7 @@ mountfs() {
 
 # Mounts a network filesystem
 netmount() {
-    do_netmounts=yes
+    do_local_network_partitions=yes
     local export=$1 # path to the network filesystem (such as 1.2.3.4:/some/export)
     local type=$2   # network filesystem type (such as nfs, smbfs, cifs, etc.)
     local mountpoint=$3
@@ -205,7 +209,8 @@ netmount() {
 
 # Specify the bootloader to use (defaults to grub)
 bootloader() {
-    do_bootloader=yes
+    do_install_bootloader=yes
+    do_configure_bootloader=yes
     local pkg=$1
 
     bootloader="${pkg}"
@@ -220,7 +225,7 @@ bootloader_kernel_args() {
 
 # Sets the root password (required if not using rootpw_crypt)
 rootpw() {
-    do_password=yes
+    do_setup_root_password=yes
     local pass=$1
 
     root_password="${pass}"
@@ -228,7 +233,7 @@ rootpw() {
 
 # Sets the root password (required if not using rootpw)
 rootpw_crypt() {
-    do_password=yes
+    do_root_password=yes
     local pass=$1
 
     root_password_hash="${pass}"
@@ -277,7 +282,10 @@ stage_latest() {
         [ -z "${latest_stage}" ] && die "Cannot find the relevant stage tarball, use stage_uri in your profile instead"
         if [ -n "${latest_stage}" ]; then
             stage_uri="${distfiles_base}/${latest_stage}"
-            do_stage_uri=yes
+            do_fetch_stage_tarball=yes
+            do_unpack_stage_tarball=yes
+            do_prepare_chroot=yes
+            do_setup_fstab=yes
             debug stage_latest "latest stage uri is ${stage_uri}"
         fi
     fi
@@ -285,7 +293,10 @@ stage_latest() {
 
 # Specifies the URI to the stage tarball (required or use stage_latest)
 stage_uri() {
-    do_stage_uri=yes
+    do_fetch_stage_tarball=yes
+    do_unpack_stage_tarball=yes
+    do_prepare_chroot=yes
+    do_setup_fstab=yes
     local uri=$1 # URI to the location of the stage tarball. protocol can be http, https, ftp, or file
 
     stage_uri="${uri}"
@@ -301,7 +312,8 @@ stage_file() {
 # Specifies the URI to download a pre-compiled kernel tarball
 # tar cfj /usr/src/linux-${version}.tbz2 /boot/*-${version} /etc/kernels/*-${version} /lib/modules/${version}
 kernel_uri() {
-    do_kernel_uri=yes
+    do_fetch_kernel_tarball=yes
+    do_unpack_kernel_tarball=yes
     local uri=$1
 
     kernel_uri="${uri}"
@@ -309,7 +321,8 @@ kernel_uri() {
 
 # Append a config line to /etc/portage/make.conf
 makeconf_line() {
-    do_makeconf=yes
+#    do_makeconf=yes
+    do_create_makeconf=yes
     local key val
     key=$(echo "$@" | cut -d= -f1)
     val=$(echo "$@" | cut -d= -f2)
@@ -319,7 +332,7 @@ makeconf_line() {
 
 # Set locales for /etc/env.d/02locale and /etc/locale.gen
 locale_set() {
-    do_locale=yes
+    do_set_locale=yes
     locales=$1 # "en_US.UTF-8 nl_NL de"
 }
 
@@ -332,41 +345,25 @@ tree_type() {
         do_packages=yes
         portage_packages_uri="${uri}"
     else
-        do_tree=yes
+        do_fetch_repo_tree=yes
+        do_unpack_repo_tree=yes
         tree_type="${type}"
         portage_snapshot_uri="${uri}"
     fi
 }
 
-# bootloader_install_device - Specifies the device to install the bootloader to
-#                             (defaults to MBR of device /boot is on)
-#   Parameters:
-#     device - device to install bootloader to (such as /dev/hda, /dev/hda3, etc.)
 bootloader_install_device() {
     local device=$1
 
     bootloader_install_device="${device}"
 }
 
-# chroot_dir - Specifies the directory to use for the chroot (defaults to
-#              /mnt/gentoo)
-
-#   Usage:
-#     chroot_dir <dir>
-
-#   Parameters:
-#     dir - directory to use for the chroot
 chroot_dir() {
     local dir=$1
 
     chroot_dir="${dir}"
 }
 
-# eselect_profile - Select profile using "eselect profile set"
-#   Usage:
-#     eselect_profile <profile name>
-#   Parameters:
-#   	eselect_profile default/linux/amd64/13.0
 eselect_profile() {
     do_set_profile=yes
     local eprofile=$1
@@ -374,11 +371,8 @@ eselect_profile() {
     eselect_profile="${eprofile}"
 }
 
-# extra_packages - Specifies extra packages to emerge
-#   Parameters:
-#     pkg - package (or packages, space-separated) to emerge
 extra_packages() {
-    do_xpkg=yes
+    do_install_extra_packages=yes
     local pkg=$*
 
     if [ -n "${extra_packages}" ]; then
@@ -388,39 +382,18 @@ extra_packages() {
     fi
 }
 
-# genkernel_kernel_opts - Specifies extra options to pass to genkernel
-
-#   Usage:
-#     genkernel_kernel_opts <opts>
-
-#   Parameters:
-#     opts - the extra options to pass to 'genkernel kernel'
 genkernel_kernel_opts() {
     local opts=$*
 
     genkernel_kernel_opts="${opts}"
 }
 
-# genkernel_initramfs_opts - Specifies extra options to pass to genkernel
-
-#   Usage:
-#     genkernel_initramfs_opts <opts>
-
-#   Parameters:
-#     opts - the extra options to pass to 'genkernel initramfs'
 genkernel_initramfs_opts() {
     local opts=$*
 
     genkernel_initramfs_opts="${opts}"
 }
 
-# kigen_kernel_opts - Specifies extra options to pass to KIGen kernel
-
-#   Usage:
-#     kigen_kernel_opts <opts>
-
-#   Parameters:
-#     opts - the extra options to pass to KIGen kernel
 kigen_kernel_opts() {
     local opts=$*
 
@@ -439,100 +412,63 @@ dracut_initramfs_opts() {
     dracut_initramfs_opts="${opts}"
 }
 
-# kernel_binary - Specifies the file to a custom kernel binary
-#                 If called you should disable all kernel compiling options
-#                 such as kernel_config_file, kernel_sources,
-#                 genkernel_kernel_opts, genkernel_initramfs_opts
-
-#   Usage:
-#     kernel_binary <path>
-
-#   Parameters:
-#     path - path to the location of the custom kernel binary
 kernel_binary() {
-    do_kbin=yes
+    do_copy_kernel=yes
     local path=$1
 
     kernel_binary="${path}"
 }
 
-# systemmap_binary - Specifies the file to a custom System.map binary
-
-#   Usage:
-#     systemmap_binary <path>
-
-#   Parameters:
-#     path - path to the location of the custom System.map binary
 systemmap_binary() {
-    do_kbin=yes
+    do_copy_kernel=yes
     local path=$1
 
     systemmap_binary="${path}"
 }
 
 initramfs_binary() {
-    do_irfsbin=yes
+    do_copy_initramfs=yes
+    do_build_initramfs=yes
     local path=$1
 
     initramfs_binary="${path}"
 }
 
-# kernel_builder - Specifies the program to build the kernel and the initramfs
-#                  values can either be genkernel OR KIGen (my own genkernel
-#                  clone in python)
-
-#   Usage:
-#     kernel_builder <app>
-
-#   Parameters:
-#     genkernel - use genkernel to build the kernel and its initramfs
-#     kigen     - use KIGen to build the kernel and its initramfs (this is
-#                 required for LUKS enabled systems and genkernel won't work)
 kernel_builder() {
-    do_kernel=yes
+    do_install_kernel_builder=yes
+    do_build_kernel=yes
     local kb=$1
 
     kernel_builder="${kb}"
 }
 
-# kernel_config_uri - Specifies the URI to a custom kernel config
-
-#   Usage:
-#     kernel_config_uri <uri>
-
-#   Parameters:
-#     uri - URI to the location of the custom kernel config
 kernel_config_uri() {
-    do_kernel=yes
+    do_install_kernel_builder=yes
+    do_build_kernel=yes
     local uri=$1
 
     kernel_config_uri="${uri}"
 }
 
 kernel_config_file() {
-    do_kernel=yes
+    do_install_kernel_builder=yes
+    do_build_kernel=yes
     local file=$1
 
     kernel_config_file="${file}"
 }
 
-# kernel_sources - Specifies the kernel sources to use (defaults to
-#                  gentoo-sources)
-
-#   Usage:
-#     kernel_sources <source>
-
-#   Parameters:
-#     source - kernel sources to emerge
 kernel_sources() {
-    do_kernel=yes
+    do_install_kernel_builder=yes
+    do_build_kernel=yes
     local pkg=$1
 
     kernel_sources="${pkg}"
 }
 
 initramfs_builder() {
-    do_irfs=yes
+    do_install_initramfs_builder=yes
+    do_build_initramfs=yes
     local irfsb=$1
 
     # defaults to genkernel
@@ -541,20 +477,9 @@ initramfs_builder() {
     initramfs_builder="${irfsb}"
 }
 
-# grub_install - Specifies the device to install grub bootloader to, and options
-
-#   Usage:
-#     grub_install <device> <options>
-
-#   Parameters:
-#     device  - device to install bootloader to (such as /dev/sda, etc.)
-#     options - options to be passed to grub-install
-#               note: only --modules options is currently supported
-
-#   Example:
-#     grub_install  /dev/sda   --modules="part_gpt mdraid1x lvm xfs"
 grub_install() {
-    do_bootloader=yes
+    do_install_bootloader=yes
+    do_configure_bootloader=yes
     local device=$1
     shift
     local opts=$*
@@ -566,51 +491,36 @@ grub_install() {
     grub_install["$(basename "${device}")"]="${key}=\"${value}\""
 }
 
-# timezone - Specifies the timezone
-
-#   Usage:
-#     timezone <tz>
-
-#   Parameters:
-#     tz - timezone to use (relative to /usr/share/zoneinfo/)
 timezone() {
-    do_tz=yes
+    do_setup_timezone=yes
     local tz=$1
 
     timezone="${tz}"
 }
 
 keymap() {
-    do_keymap=yes
+    do_setup_keymap=yes
     local kbd=$1
 
     keymap="${kbd}"
 }
 
 hostname() {
-    do_host=yes
+    do_setup_host=yes
     local host=$1
 
     hostname="${host}"
 }
 
 domain() {
-    do_domain="yes"
+    do_setup_domain="yes"
     local domain=$1
 
     domain_name="${domain}"
 }
 
-# rcadd - Adds the specified service to the specified runlevel
-
-#   Usage:
-#     rcadd <service> <runlevel>
-
-#   Parameters:
-#     service  - name of service to add
-#     runlevel - runlevel to add service to
 rcadd() {
-    do_services=yes
+    do_add_and_remove_services=yes
     local service=$1
     local runlevel=$2
 
@@ -634,17 +544,8 @@ rcdel() {
     fi
 }
 
-# net - Sets up networking
-
-#   Usage:
-#     net <device> <ip/dhcp> [gateway]
-
-#   Parameters:
-#     device  - network device (such as eth0)
-#     ip/dhcp - static IP address or "dhcp"
-#     gateway - gateway IP if using a static IP
 net() {
-    do_postnet=yes
+    do_setup_network_post=yes
     local device=$1
     local ipdhcp=$2
     local gateway=$3
@@ -663,23 +564,13 @@ logfile() {
     logfile=${file}
 }
 
-# skip - Skips an install step
-
-#   Usage:
-#     skip <install step>
-
-#   Parameters:
-#     install step - name of step to skip
 skip() {
     local func=$1
 
-    eval "skip_${func}=1"
+    eval "skip_${func}=yes"
 }
 
-# use_linux32 - Enable the use of linux32 for doing 32ul installs on 64-bit boxes
-
-#   Usage:
-#     use_linux32
+# Enable the use of linux32 for doing 32ul installs on 64-bit boxes
 use_linux32() {
     linux32="linux32"
 }

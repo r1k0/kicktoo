@@ -1,5 +1,3 @@
-# FIXME all local
-
 get_filename_from_uri() {
     local uri=$1
 
@@ -46,8 +44,7 @@ fetch_http_https_ftp() {
     local localfile=$2
 
     debug fetch_http_https_ftp "Fetching URL ${uri} to ${2}"
-#    spawn "wget -c -O ${localfile} ${uri}"
-    spawn "curl -L -S \"${uri}\" -o ${localfile} -C -"
+    spawn "curl -L -S \"${uri}\" -o ${localfile}"
     local wget_exitcode=$?
     debug fetch_http_https_ftp "exit code from curl was ${wget_exitcode}"
     return "${wget_exitcode}"
@@ -73,7 +70,7 @@ fetch_tftp() {
 }
 
 fetch() {
-	  local uri localfile protocol
+    local uri localfile protocol
     uri="$1"
     localfile="$2"
 

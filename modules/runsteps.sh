@@ -12,8 +12,11 @@ run_pre_install_script() {
 }
 
 partition() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
     for device in $(set | grep '^partitions_' | cut -d= -f1 | sed -e 's:^partitions_::'); do
         debug partition "device is ${device}"
+        [ -e "/dev/${device}" ] || die "/dev/${device} does not exist"
         local device_temp="partitions_${device}"
         local device_size minor ptype size
         device="/dev/${device/_/\/}"
@@ -56,6 +59,7 @@ partition() {
     # http://www.funtoo.org/wiki/Funtoo_Linux_Installation#Prepare_Hard_Disk
     for device in $(set | grep '^gptpartitions_' | cut -d= -f1 | sed -e 's:^gptpartitions_::'); do
         debug partition "device is ${device}"
+        [ -e "/dev/${device}" ] || die "/dev/${device} does not exist"
         local device_temp="gptpartitions_${device}"
         local device_size minor ptype size bootable devnode
         device="/dev/${device/_/\/}"
@@ -107,6 +111,8 @@ partition() {
 }
 
 setup_mdraid() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
     if ! [ -f "${autoresume_profile_dir}/setup_mdraid" ]; then
         for array in $(set | grep '^mdraid_' | cut -d= -f1 | sed -e 's:^mdraid_::' | sort); do
             debug setup_mdraid "creating RAID array ${array}"
@@ -143,6 +149,8 @@ setup_mdraid() {
 }
 
 setup_lvm() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
     if ! [ -f "$autoresume_profile_dir/setup_lvm" ]; then
         local volgroup_devices size name
         for volgroup in $(set | grep '^lvm_volgroup_' | cut -d= -f1 | sed -e 's:^lvm_volgroup_::' | sort); do
@@ -172,6 +180,8 @@ setup_lvm() {
 }
 
 setup_luks() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
     local devicetmp luks_mapper cipher_name cipher_mode lhash lukscmd=""
     if ! [ -f "${autoresume_profile_dir}/setup_luks" ]; then
         if [ -n "${luks_key}" ]; then
@@ -310,14 +320,20 @@ format_devices_generic() {
 }
 
 format_devices() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
     format_devices_generic 'format_devices' "${format}"
 }
 
 format_devices_luks() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
     format_devices_generic 'format_devices_luks' "${format_luks}"
 }
 
 mount_local_partitions() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
     if [ -z "${localmounts}" ]; then
         warn "no local mounts specified. this is a bit unusual, but you're the boss"
     else
@@ -349,6 +365,8 @@ mount_local_partitions() {
 }
 
 mount_network_shares() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
     if [ -n "${netmounts}" ]; then
         for mount in ${netmounts}; do
             debug mount_network_shares "mount is ${mount}"
@@ -373,6 +391,8 @@ mount_network_shares() {
 }
 
 fetch_stage_tarball() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
     debug fetch_stage_tarball "fetching stage tarball"
     if [ -n "${stage_uri}" ]; then
         local filename
@@ -382,6 +402,8 @@ fetch_stage_tarball() {
 }
 
 unpack_stage_tarball() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
     debug unpack_stage_tarball "unpacking stage tarball"
     local tarball stage_name
     if [[ -n ${stage_uri} ]]; then
@@ -414,14 +436,52 @@ unpack_stage_tarball() {
     fi
 }
 
-set_profile() {
-    debug set_profile "setting profile with eselect to ${eselect_profile}"
-    if [ -n "${eselect_profile}" ]; then
-        spawn_chroot "eselect profile set ${eselect_profile}" || die "Could not set profile with eselect"
-    fi
+prepare_chroot() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
+    debug prepare_chroot "copying /etc/resolv.conf into chroot"
+    spawn "cp /etc/resolv.conf ${chroot_dir}/etc/resolv.conf" || die "Could not copy /etc/resolv.conf into chroot"
+    debug prepare_chroot "mounting proc"
+    spawn "mount -t proc none ${chroot_dir}/proc" || die "Could not mount proc"
+    debug prepare_chroot "bind-mounting /dev"
+    spawn "mount -o rbind /dev ${chroot_dir}/dev/" || die "Could not rbind-mount /dev"
+    debug prepare_chroot "bind-mounting /sys"
+    [ -d "${chroot_dir}"/sys ] || mkdir "${chroot_dir}"/sys
+    spawn "mount -o bind /sys ${chroot_dir}/sys" || die "Could not bind-mount /sys"
+}
+
+setup_fstab() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
+    echo -e "none\t/proc\tproc\tdefaults\t0 0\nnone\t/dev/shm\ttmpfs\tdefaults\t0 0" >"${chroot_dir}"/etc/fstab
+    local devnode mtype mountpoint mountopts exportfs dump_pass="0 0"
+    for mount in ${localmounts}; do
+        debug setup_fstab "mount is ${mount}"
+        devnode=$(echo "${mount}" | cut -d ':' -f1)
+        mtype=$(echo "${mount}" | cut -d ':' -f2)
+        mountpoint=$(echo "${mount}" | cut -d ':' -f3)
+        mountopts=$(echo "${mount}" | cut -d ':' -f4)
+        if [ "${mountpoint}" == "/" ]; then
+            dump_pass="0 1"
+        elif [ "${mountpoint}" == "/boot" ] || [ "${mountpoint}" == "/boot/" ]; then
+            dump_pass="1 2"
+        else
+            dump_pass="0 0"
+        fi
+        echo -e "${devnode}\t${mountpoint}\t${mtype}\t${mountopts}\t${dump_pass}" >>"${chroot_dir}"/etc/fstab
+    done
+    for mount in ${netmounts}; do
+        exportfs=$(echo "${mount}" | cut -d '|' -f1)
+        mtype=$(echo "${mount}" | cut -d '|' -f2)
+        mountpoint=$(echo "${mount}" | cut -d '|' -f3)
+        mountopts=$(echo "${mount}" | cut -d '|' -f4)
+        echo -e "${exportfs}\t${mountpoint}\t${mtype}\t${mountopts}\t0 0" >>"${chroot_dir}"/etc/fstab
+    done
 }
 
 create_mdadmconf() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
     debug create_mdadmconf "writing to /etc/mdadm.conf"
     for array in $(set | grep '^mdraid_' | cut -d= -f1 | sed -e 's:^mdraid_::' | sort); do
         if [ -n "${array}" ]; then
@@ -433,6 +493,8 @@ create_mdadmconf() {
 }
 
 create_dmcrypt() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
     debug create_dmcrypt "writing to /etc/conf.d/dmcrypt"
     for device in ${luks}; do
         debug setup_luks "LUKSifying ${device}"
@@ -464,6 +526,8 @@ EOF
 }
 
 create_makeconf() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
     debug create_makeconf "writing to /etc/portage/make.conf"
     O=$IFS
     IFS=$(echo -en "\n\b")
@@ -482,6 +546,8 @@ EOF
 }
 
 set_locale() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
     debug set_locale "configuring supported locales"
     # retrieve first locale in the list, and
     # match with first in supported locales to format the LANG
@@ -502,46 +568,9 @@ set_locale() {
     export CONFIG_PROTECT="/etc/locale.gen"
 }
 
-prepare_chroot() {
-    debug prepare_chroot "copying /etc/resolv.conf into chroot"
-    spawn "cp /etc/resolv.conf ${chroot_dir}/etc/resolv.conf" || die "Could not copy /etc/resolv.conf into chroot"
-    debug prepare_chroot "mounting proc"
-    spawn "mount -t proc none ${chroot_dir}/proc" || die "Could not mount proc"
-    debug prepare_chroot "bind-mounting /dev"
-    spawn "mount -o rbind /dev ${chroot_dir}/dev/" || die "Could not rbind-mount /dev"
-    debug prepare_chroot "bind-mounting /sys"
-    [ -d "${chroot_dir}"/sys ] || mkdir "${chroot_dir}"/sys
-    spawn "mount -o bind /sys ${chroot_dir}/sys" || die "Could not bind-mount /sys"
-}
-
-setup_fstab() {
-    echo -e "none\t/proc\tproc\tdefaults\t0 0\nnone\t/dev/shm\ttmpfs\tdefaults\t0 0" >"${chroot_dir}"/etc/fstab
-    local devnode mtype mountpoint mountopts exportfs dump_pass="0 0"
-    for mount in ${localmounts}; do
-        debug setup_fstab "mount is ${mount}"
-        devnode=$(echo "${mount}" | cut -d ':' -f1)
-        mtype=$(echo "${mount}" | cut -d ':' -f2)
-        mountpoint=$(echo "${mount}" | cut -d ':' -f3)
-        mountopts=$(echo "${mount}" | cut -d ':' -f4)
-        if [ "${mountpoint}" == "/" ]; then
-            dump_pass="0 1"
-        elif [ "${mountpoint}" == "/boot" ] || [ "${mountpoint}" == "/boot/" ]; then
-            dump_pass="1 2"
-        else
-            dump_pass="0 0"
-        fi
-        echo -e "${devnode}\t${mountpoint}\t${mtype}\t${mountopts}\t${dump_pass}" >>"${chroot_dir}"/etc/fstab
-    done
-    for mount in ${netmounts}; do
-        exportfs=$(echo "${mount}" | cut -d '|' -f1)
-        mtype=$(echo "${mount}" | cut -d '|' -f2)
-        mountpoint=$(echo "${mount}" | cut -d '|' -f3)
-        mountopts=$(echo "${mount}" | cut -d '|' -f4)
-        echo -e "${exportfs}\t${mountpoint}\t${mtype}\t${mountopts}\t0 0" >>"${chroot_dir}"/etc/fstab
-    done
-}
-
 fetch_repo_tree() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
     debug fetch_repo_tree "tree_type is ${tree_type}"
     if [ "${tree_type}" = "sync" ]; then
         spawn_chroot "emerge --sync" || die "Could not sync portage tree"
@@ -562,6 +591,8 @@ fetch_repo_tree() {
 }
 
 unpack_repo_tree() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
     debug unpack_repo_tree "extracting packages tree"
     if [ "${tree_type}" = "snapshot" ]; then
         local tarball
@@ -579,9 +610,14 @@ unpack_repo_tree() {
             spawn "tar --lzma -xpf ${chroot_dir}/${tarball} --strip 1 -C ${chroot_dir}/var/db/repos/gentoo" || die "Could not untar portage tarball"
         fi
     fi
-
+# ========================================================================================================================================================================
+# ========================================================================================================================================================================
+# ========================================================================================================================================================================
+# ========================================================================================================================================================================
+# ========================================================================================================================================================================
+# FIXME DO_PACKAGES REPLACE ME
     # tarball contains a ./packages/ snapshot from previous installs or binary host builds
-    if [ "${do_packages}" == "yes" ] && [ -n "${portage_packages_uri}" ]; then
+    if [ "${do_packages}" == "yes" ] && [ -n "${portage_packages_uri}" ]; then    # <----------- replace me do_packages
         debug unpack_repo_tree "extracting packages tree"
         notify "Unpacking package repository tree"
         tarball=$(get_filename_from_uri "${portage_packages_uri}")
@@ -600,7 +636,18 @@ unpack_repo_tree() {
     fi
 }
 
+set_profile() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
+    debug set_profile "setting profile with eselect to ${eselect_profile}"
+    if [ -n "${eselect_profile}" ]; then
+        spawn_chroot "eselect profile set ${eselect_profile}" || die "Could not set profile with eselect"
+    fi
+}
+
 copy_kernel() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
     debug copy_kernel "copying kernel binary ${kernel_binary} -> ${chroot_dir}/boot"
     # since genkernel might mount /boot we should do the same when copying to ${chroot_dir}/boot
     #check_chroot_fstab /boot && spawn_chroot "mount /boot"
@@ -610,6 +657,8 @@ copy_kernel() {
 }
 
 copy_initramfs() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
     debug copy_initramfs "copying initramfs binary ${initramfs_binary} -> ${chroot_dir}/boot"
     # user might not be using build_kernel nor copy_kernel
     check_chroot_fstab /boot && spawn_chroot "[ -z \"\$(mount | grep /boot)\" ] && mount /boot"
@@ -617,47 +666,26 @@ copy_initramfs() {
 }
 
 fetch_kernel_tarball() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
     debug fetch_kernel_tarball "fetching kernel tarball ${kernel_uri}"
     if [ -n "${kernel_uri}" ]; then
         fetch "${kernel_uri}" "${chroot_dir}/$(get_filename_from_uri "${kernel_uri}")" || die "Could not fetch kernel tarball"
     fi
 }
 
-unpack_kernel_tarball() {
-    debug unpack_kernel_tarball "unpacking kernel tarball $(get_filename_from_uri "${kernel_uri}")"
-    local kernel_filename
-    kernel_filename=$(get_filename_from_uri "${kernel_uri}")
-    local extension=${kernel_filename##*.}
-
-    #check_chroot_fstab /boot && spawn_chroot "mount /boot"
-    check_chroot_fstab /boot && spawn_chroot "[ -z \"\$(mount | grep /boot)\" ] && mount /boot"
-
-    if [ "$extension" == "bz2" ] || [ "$extension" == "tbz2" ]; then
-        spawn "tar xjpf ${chroot_dir}/${kernel_filename} -C ${chroot_dir}" || die "Could not untar kernel tarball"
-    elif [ "$extension" == "gz" ] || [ "$extension" == "tgz" ]; then
-        spawn "tar xzpf ${chroot_dir}/${kernel_filename} -C ${chroot_dir}" || die "Could not untar kernel tarball"
-    elif [ "$extension" == "xz" ]; then
-        spawn "tar Jxpf ${chroot_dir}/${kernel_filename} -C ${chroot_dir}" || die "Could not untar kernel tarball"
-    elif [ "$extension" == "lzma" ]; then
-        spawn "tar --lzma -xpf ${chroot_dir}/${kernel_filename} -C ${chroot_dir}" || die "Could not untar kernel tarball"
-    fi
-}
-
 install_kernel_builder() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
     debug install_kernel_builder "merging kernel builder: ${kernel_builder}"
     # pkg might already be installed if -a called
     check_emerge_installed_pkg "${kernel_builder}" ||
         spawn_chroot "emerge ${emerge_global_opts} ${kernel_builder}" || die "Could not emerge ${kernel_builder}"
 }
 
-install_initramfs_builder() {
-    debug install_initramfs_builder "merging initramfs builder: ${initramfs_builder}"
-    # initramfs builder might already be installed by install_kernel_builder
-    check_emerge_installed_pkg "${initramfs_builder}" ||
-        spawn_chroot "emerge ${emerge_global_opts} ${initramfs_builder}" || die "Could not emerge ${initramfs_builder}"
-}
-
 build_kernel() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
     debug build_kernel "compiling kernel sources: ${kernel_sources}"
     # pkg might already be installed if -a called
     check_emerge_installed_pkg "${kernel_sources}" ||
@@ -686,7 +714,40 @@ build_kernel() {
     fi
 }
 
+unpack_kernel_tarball() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
+    debug unpack_kernel_tarball "unpacking kernel tarball $(get_filename_from_uri "${kernel_uri}")"
+    local kernel_filename
+    kernel_filename=$(get_filename_from_uri "${kernel_uri}")
+    local extension=${kernel_filename##*.}
+
+    #check_chroot_fstab /boot && spawn_chroot "mount /boot"
+    check_chroot_fstab /boot && spawn_chroot "[ -z \"\$(mount | grep /boot)\" ] && mount /boot"
+
+    if [ "$extension" == "bz2" ] || [ "$extension" == "tbz2" ]; then
+        spawn "tar xjpf ${chroot_dir}/${kernel_filename} -C ${chroot_dir}" || die "Could not untar kernel tarball"
+    elif [ "$extension" == "gz" ] || [ "$extension" == "tgz" ]; then
+        spawn "tar xzpf ${chroot_dir}/${kernel_filename} -C ${chroot_dir}" || die "Could not untar kernel tarball"
+    elif [ "$extension" == "xz" ]; then
+        spawn "tar Jxpf ${chroot_dir}/${kernel_filename} -C ${chroot_dir}" || die "Could not untar kernel tarball"
+    elif [ "$extension" == "lzma" ]; then
+        spawn "tar --lzma -xpf ${chroot_dir}/${kernel_filename} -C ${chroot_dir}" || die "Could not untar kernel tarball"
+    fi
+}
+
+install_initramfs_builder() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
+    debug install_initramfs_builder "merging initramfs builder: ${initramfs_builder}"
+    # initramfs builder might already be installed by install_kernel_builder
+    check_emerge_installed_pkg "${initramfs_builder}" ||
+        spawn_chroot "emerge ${emerge_global_opts} ${initramfs_builder}" || die "Could not emerge ${initramfs_builder}"
+}
+
 build_initramfs() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
     debug build_initramfs "building initramfs binary"
     if [ "${initramfs_builder}" == "genkernel" ]; then
         spawn_chroot "genkernel ${genkernel_initramfs_opts} initramfs" || die "Could not build initramfs"
@@ -700,6 +761,8 @@ build_initramfs() {
 }
 
 setup_network_post() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
     debug setup_network_post "configuring network: ${net_devices}"
     if [ -n "${net_devices}" ]; then
         for net_device in ${net_devices}; do
@@ -724,6 +787,8 @@ setup_network_post() {
 }
 
 setup_root_password() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
     debug setup_root_password "writing root password"
     if [ -n "${root_password_hash}" ]; then
         # chpasswd does not support anymore '-e' option - http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=528610
@@ -739,6 +804,8 @@ setup_root_password() {
 }
 
 setup_timezone() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
     debug setup_timezone "Setting timezone: ${timezone}"
     spawn "sed -i -n -e 's:clock=\".*\":clock=\"${timezone}\":' ${chroot_dir}/etc/conf.d/hwclock" || die "Could not adjust clock config in /etc/conf.d/hwclock"
     spawn "echo \"${timezone}\" > ${chroot_dir}/etc/timezone" || die "Could not set timezone in /etc/timezone"
@@ -746,16 +813,22 @@ setup_timezone() {
 }
 
 setup_keymap() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
     debug setup_keymap "Setting keymap=${keymap} to /etc/conf.d/keymaps"
     spawn "/bin/sed -i 's:keymap=\"us\":keymap=\"${keymap}\":' ${chroot_dir}/etc/conf.d/keymaps" || die "Could not adjust keymap config in /etc/conf.d/keymaps"
 }
 
 setup_host() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
     debug setup_host "Setting hostname=${hostname} to /etc/conf.d/hostname"
     spawn "/bin/sed -i 's:hostname=\"localhost\":hostname=\"${hostname}\":' ${chroot_dir}/etc/conf.d/hostname" || die "Could not adjust hostname config in /etc/conf.d/hostname"
 }
 
 setup_domain() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
     debug setup_domain "Setting domain.name=${domain_name} to /etc/hosts"
     cat >"${chroot_dir}"/etc/hosts <<EOF
 # IPv4 and IPv6 localhost aliases
@@ -766,7 +839,23 @@ setup_domain() {
 EOF
 }
 
+install_extra_packages() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
+    if [ -z "${extra_packages}" ]; then
+        debug install_extra_packages "no extra packages specified"
+    else
+        for o in ${extra_packages}; do
+            # NOTE pkg might already be installed if -a called
+            check_emerge_installed_pkg "${o}" ||
+                spawn_chroot "emerge ${emerge_global_opts} ${o}" || die "Could not emerge extra package '${o}'"
+        done
+    fi
+}
+
 install_bootloader() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
     debug install_bootloader "merging bootloader: ${bootloader}"
     local accept_keywords=""
     local bootloader_ebuild=${bootloader}
@@ -780,6 +869,8 @@ install_bootloader() {
 }
 
 configure_bootloader() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
     debug configure_bootloader "configuring bootloader: ${bootloader}"
     [ "${bootloader}" != "lilo" ]
 
@@ -790,19 +881,9 @@ configure_bootloader() {
     fi
 }
 
-install_extra_packages() {
-    if [ -z "${extra_packages}" ]; then
-        debug install_extra_packages "no extra packages specified"
-    else
-        for o in ${extra_packages}; do
-            # NOTE pkg might already be installed if -a called
-            check_emerge_installed_pkg "${o}" ||
-                spawn_chroot "emerge ${emerge_global_opts} ${o}" || die "Could not emerge extra package '${o}'"
-        done
-    fi
-}
-
 add_and_remove_services() {
+    [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
+
     debug add_and_remove_services "configuring startup services"
     local service runlevel
     if [ -n "${services_add}" ]; then
@@ -913,8 +994,6 @@ finishing_cleanup() {
         spawn "cp ${logfile} ${chroot_dir}/root/$(basename "${logfile}")" || warn "Could not copy install logfile into chroot"
     fi
     cleanup
-    [ "${reboot}" == "yes" ] && notify "Rebooting..." && reboot
-    exit 0
 }
 
 failure_cleanup() {
