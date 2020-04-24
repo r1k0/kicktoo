@@ -856,6 +856,7 @@ install_extra_packages() {
 install_bootloader() {
     [ "$(eval $(echo echo "\${do_${FUNCNAME}}"))" == "yes" ] || return
 
+    [ "${bootloader}" == "" ] && die "bootloader not set, check profile"
     debug install_bootloader "merging bootloader: ${bootloader}"
     local accept_keywords=""
     local bootloader_ebuild=${bootloader}
@@ -994,6 +995,7 @@ finishing_cleanup() {
         spawn "cp ${logfile} ${chroot_dir}/root/$(basename "${logfile}")" || warn "Could not copy install logfile into chroot"
     fi
     cleanup
+    echo
 }
 
 failure_cleanup() {
@@ -1001,9 +1003,11 @@ failure_cleanup() {
         spawn "mv ${logfile} ${logfile}.failed" || warn "Could not move ${logfile} to ${logfile}.failed"
     fi
     cleanup
+    echo
     exit 1
 }
 
 trap_cleanup() {
+    echo
     false
 }

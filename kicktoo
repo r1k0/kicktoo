@@ -225,12 +225,13 @@ for a in bash \
 done
 unset a
 
-# declare this array else configure_bootloader_grub() will fail
-# shellcheck disable=SC2034
-declare -A grub_install
-
 # load default vars
 source ${sourcedir}/defaults
+
+# declare this array else configure_bootloader_grub() will fail
+# shellcheck disable=SC2034
+# FIXME why not declaring this in configure_bootloader_grub?
+declare -A grub_install
 
 # import config file
 if [ "${import_set}" == "yes" ]; then

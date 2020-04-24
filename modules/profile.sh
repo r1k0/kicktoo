@@ -212,6 +212,8 @@ bootloader() {
     do_install_bootloader=yes
     do_configure_bootloader=yes
     local pkg=$1
+    # NOTE default to grub
+    [ -z "$1" ] && pkg=grub
 
     bootloader="${pkg}"
 }

@@ -7,7 +7,6 @@ initramfs_builder="genkernel"
 autoresume_root_dir="/tmp/.kicktoo-autoresume"
 #distfiles_url="http://distfiles.gentoo.org"
 distfiles_url="http://gentoo.mirrors.ovh.net/gentoo-distfiles/"
-
 # all runsteps
 do_partition=no
 do_setup_mdraid=no
